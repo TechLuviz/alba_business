@@ -1,0 +1,1366 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\AboutBanner;
+use App\Models\AboutPrinciple;
+use App\Models\AboutPrincipleSection;
+use App\Models\AboutCta;
+use App\Models\AboutSection;
+use App\Models\ContactBanner;
+use App\Models\ContactMessage;
+use App\Models\ContactSection;
+use App\Models\AboutTeamSection;
+use App\Models\AboutStory;
+use App\Models\AudienceCard;
+use App\Models\AudienceSection;
+use App\Models\HeroBanner;
+use App\Models\HeroSlide;
+use App\Models\HeroVideo;
+use App\Models\HomeTextSection;
+use App\Models\InsightArticle;
+use App\Models\InsightArticleContent;
+use App\Models\InsightArticleSection;
+use App\Models\InsightCard;
+use App\Models\InsightFeatureCard;
+use App\Models\InsightFeatureSection;
+use App\Models\InsightPageBanner;
+use App\Models\InsightSection;
+use App\Models\ProblemSection;
+use App\Models\ProgramCard;
+use App\Models\ProgramSection;
+use App\Models\NewsletterSubscriber;
+use App\Models\ReelCard;
+use App\Models\ReelSection;
+use App\Models\TeamMember;
+use App\Models\TeamSection;
+use App\Support\BannerRules;
+use App\Support\TextRules;
+use App\Support\Uploads;
+use Illuminate\Http\Request;
+
+class HomeController extends Controller
+{
+    public function index()
+    {
+        $hero = HeroBanner::current();
+        $video = HeroVideo::where('is_active', true)->orderBy('sort_order')->orderBy('id')->first();
+        $slides = HeroSlide::where('is_active', true)->orderBy('sort_order')->orderBy('id')->get();
+
+        $textSection = HomeTextSection::current();
+
+        $about = AboutSection::current();
+
+        $audience = AudienceSection::current();
+        $audienceCards = AudienceCard::where('is_active', true)->orderBy('sort_order')->orderBy('id')->get();
+
+        $problem = ProblemSection::current();
+
+        $programSection = ProgramSection::current();
+        $programCards = ProgramCard::where('is_active', true)->orderBy('sort_order')->orderBy('id')->get();
+
+        $teamSection = TeamSection::current();
+        $teamMembers = TeamMember::where('is_active', true)->orderBy('sort_order')->orderBy('id')->get();
+
+        $insightSection = InsightSection::current();
+        $insightCards = InsightCard::where('is_active', true)->orderBy('sort_order')->orderBy('id')->get();
+        // Phones show the real articles from the Insights page instead of the animated stack
+        $insightArticles = InsightArticle::where('is_active', true)->orderBy('sort_order')->orderByDesc('published_on')->orderByDesc('id')->limit(6)->get();
+
+        $reelSection = ReelSection::current();
+        $reelCards = ReelCard::where('is_active', true)->orderBy('sort_order')->orderBy('id')->get();
+
+        return view('home', compact(
+            'problem', 'hero', 'video', 'slides', 'textSection', 'about', 'audience', 'audienceCards',
+            'programSection', 'programCards', 'teamSection', 'teamMembers', 'insightSection', 'insightCards', 'insightArticles',
+            'reelSection', 'reelCards'
+        ));
+    }
+
+    /* ---------- Contact page (public) and its admin settings ---------- */
+
+    public function contactPage()
+    {
+        return view('contact', [
+            'contactBanner' => ContactBanner::current(),
+            'contactInfo' => ContactSection::current(),
+            'courses' => ProgramCard::where('is_active', true)->orderBy('sort_order')->orderBy('id')->pluck('title'),
+        ]);
+    }
+
+    public function contactBannerEdit()
+    {
+        return view('admin.contact-page.banner', ['banner' => ContactBanner::current()]);
+    }
+
+    public function contactBannerUpdate(Request $request)
+    {
+        $c = config('banner.contact_banner');
+        $w = $c['word_max'];
+        $banner = ContactBanner::current();
+
+        $data = $request->validate([
+            'heading_line_1' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $w),
+            'heading_line_2' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $w),
+            'description' => TextRules::line(true, $c['description_min'], $c['description_max'], $w),
+            'image' => BannerRules::image(! $banner->image, 'contact_banner'),
+        ], BannerRules::messages() + TextRules::messages(['heading_line_1', 'heading_line_2', 'description']) + [
+            'image.dimensions' => "The image must be between {$c['min_width']}x{$c['min_height']} and {$c['max_width']}x{$c['max_height']} pixels.",
+            'image.max' => 'The image may not be larger than ' . round($c['max_kb'] / 1024) . ' MB.',
+        ], [
+            'heading_line_1' => 'heading line 1',
+            'heading_line_2' => 'heading line 2',
+            'description' => 'description',
+            'image' => 'banner image',
+        ]);
+
+        unset($data['image']);
+        $data['is_active'] = $request->boolean('is_active');
+
+        if ($request->hasFile('image')) {
+            Uploads::delete($banner->image);
+            $data['image'] = Uploads::store($request->file('image'), 'contact-banner');
+        }
+
+        $banner->fill($data)->save();
+
+        return back()->with('success', 'Contact banner saved.');
+    }
+
+    /* ---------- Insights page (public) and its admin settings ---------- */
+
+    public function insightsPage()
+    {
+        return view('insights', [
+            'insightBanner' => InsightPageBanner::current(),
+            'articleSection' => InsightArticleSection::current(),
+            'articles' => InsightArticle::where('is_active', true)
+                ->orderBy('sort_order')->orderByDesc('published_on')->orderByDesc('id')
+                ->paginate(config('banner.articles.per_page'))->fragment('articles'),
+            'featuredSection' => InsightFeatureSection::current(),
+            'featuredCards' => InsightFeatureCard::where('is_active', true)->orderBy('sort_order')->orderBy('id')->get(),
+        ]);
+    }
+
+    public function insightBannerEdit()
+    {
+        return view('admin.insights-page.banner', ['banner' => InsightPageBanner::current()]);
+    }
+
+    public function insightBannerUpdate(Request $request)
+    {
+        $c = config('banner.insight_banner');
+        $w = $c['word_max'];
+        $banner = InsightPageBanner::current();
+
+        $data = $request->validate([
+            'heading_line_1' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $w),
+            'heading_line_2' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $w),
+            'description' => TextRules::line(true, $c['description_min'], $c['description_max'], $w),
+            'image' => BannerRules::image(! $banner->image, 'insight_banner'),
+        ], BannerRules::messages() + TextRules::messages(['heading_line_1', 'heading_line_2', 'description']) + [
+            'image.dimensions' => "The image must be between {$c['min_width']}x{$c['min_height']} and {$c['max_width']}x{$c['max_height']} pixels.",
+            'image.max' => 'The image may not be larger than ' . round($c['max_kb'] / 1024) . ' MB.',
+        ], [
+            'heading_line_1' => 'heading line 1',
+            'heading_line_2' => 'heading line 2',
+            'description' => 'description',
+            'image' => 'banner image',
+        ]);
+
+        unset($data['image']);
+        $data['is_active'] = $request->boolean('is_active');
+
+        if ($request->hasFile('image')) {
+            Uploads::delete($banner->image);
+            $data['image'] = Uploads::store($request->file('image'), 'insights-banner');
+        }
+
+        $banner->fill($data)->save();
+
+        return back()->with('success', 'Insights banner saved.');
+    }
+
+    /* ---------- Admin: Insights Page > Insight Articles ---------- */
+
+    public function articlesIndex()
+    {
+        return view('admin.insights-page.articles', [
+            'section' => InsightArticleSection::current(),
+            'articles' => InsightArticle::with('sections')->orderBy('sort_order')->orderByDesc('published_on')->orderByDesc('id')->get(),
+        ]);
+    }
+
+    public function articlesSettings(Request $request)
+    {
+        $c = config('banner.articles');
+
+        $data = $request->validate([
+            'eyebrow' => TextRules::line(true, $c['eyebrow_min'], $c['eyebrow_max'], $c['word_max']),
+            'heading' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $c['word_max']),
+        ], TextRules::messages(['eyebrow', 'heading']), ['eyebrow' => 'section label', 'heading' => 'heading']);
+        $data['is_active'] = $request->boolean('is_active');
+
+        InsightArticleSection::current()->fill($data)->save();
+
+        return back()->with('success', 'Insight Articles section saved.');
+    }
+
+    public function articleStore(Request $request)
+    {
+        $data = $this->articleValidated($request, true);
+        $data['image'] = Uploads::store($request->file('image'), 'articles');
+        if ($request->hasFile('banner_image')) {
+            $data['banner_image'] = Uploads::store($request->file('banner_image'), 'articles-banner');
+        }
+        $data['sort_order'] = $data['sort_order'] ?: InsightArticle::count() + 1;
+        $article = InsightArticle::create($data);
+        $this->syncArticleSections($article, $request);
+        InsightArticle::resequence($article->id);
+
+        return redirect()->route('admin.insightpage.articles.index')->with('success', 'Article created.');
+    }
+
+    public function articleUpdate(Request $request, InsightArticle $article)
+    {
+        $data = $this->articleValidated($request, false);
+
+        if ($request->hasFile('image')) {
+            Uploads::delete($article->image);
+            $data['image'] = Uploads::store($request->file('image'), 'articles');
+        }
+        if ($request->hasFile('banner_image')) {
+            Uploads::delete($article->banner_image);
+            $data['banner_image'] = Uploads::store($request->file('banner_image'), 'articles-banner');
+        }
+
+        $data['sort_order'] = $data['sort_order'] ?: $article->sort_order; // blank keeps the current position
+        $movedDown = $data['sort_order'] > $article->sort_order;
+        $article->update($data);
+        $this->syncArticleSections($article, $request);
+        InsightArticle::resequence($article->id, $movedDown);
+
+        return redirect()->route('admin.insightpage.articles.index')->with('success', 'Article updated.');
+    }
+
+    public function articleDestroy(InsightArticle $article)
+    {
+        Uploads::delete($article->image);
+        Uploads::delete($article->banner_image);
+        $article->delete();
+        InsightArticle::resequence();
+
+        return redirect()->route('admin.insightpage.articles.index')->with('success', 'Article deleted.');
+    }
+
+    public function articleToggle(Request $request, InsightArticle $article)
+    {
+        $article->update(['is_active' => $request->boolean('is_active')]);
+
+        return response()->json(['is_active' => $article->is_active]);
+    }
+
+    public function articleToggleAll(Request $request)
+    {
+        InsightArticle::query()->update(['is_active' => $request->boolean('is_active')]);
+
+        return response()->json(['is_active' => $request->boolean('is_active')]);
+    }
+
+    private function articleValidated(Request $request, bool $creating): array
+    {
+        $c = config('banner.article');
+        $i = $c['image'];
+        $w = $c['word_max'];
+
+        $rules = [
+            'category' => TextRules::line(true, $c['category_min'], $c['category_max'], $w),
+            'title' => TextRules::line(true, $c['title_min'], $c['title_max'], $w),
+            'description' => TextRules::line(true, $c['description_min'], $c['description_max'], $c['long_word_max']),
+            'published_on' => ['required', 'date_format:Y-m-d', 'after_or_equal:' . $c['date_min'], 'before_or_equal:' . now()->addYear()->toDateString()],
+            'author' => ['nullable', 'string', 'max:60'],
+            'seo_title' => ['nullable', 'string'],
+            'seo_description' => ['nullable', 'string'],
+            'sections' => ['nullable', 'array', 'max:20'],
+            'sections.*.title' => TextRules::line(true, 3, 80, $w),
+            'sections.*.body' => TextRules::line(true, 10, 600, $c['long_word_max']),
+            'sections.*.read_minutes' => ['nullable', 'integer', 'min:1', 'max:60'],
+            'sort_order' => ['nullable', 'integer', 'min:1', "max:{$c['order_max']}"],
+            'image' => BannerRules::image($creating, 'article.image'),
+            'banner_image' => BannerRules::image(false, 'insight_banner'),
+        ];
+
+        $b = config('banner.insight_banner');
+        $data = $request->validate($rules, BannerRules::messages() + TextRules::messages(['category', 'title', 'description', 'sections.*.title', 'sections.*.body']) + [
+            'banner_image.dimensions' => "The banner image must be between {$b['min_width']}x{$b['min_height']} and {$b['max_width']}x{$b['max_height']} pixels.",
+            'banner_image.max' => 'The banner image may not be larger than ' . round($b['max_kb'] / 1024) . ' MB.',
+            'published_on.date_format' => 'Enter a valid date.',
+            'published_on.after_or_equal' => "The date cannot be before {$c['date_min']}.",
+            'published_on.before_or_equal' => 'The date cannot be more than a year in the future.',
+            'image.dimensions' => "The image must be between {$i['min_width']}x{$i['min_height']} and {$i['max_width']}x{$i['max_height']} pixels.",
+            'image.max' => 'The image may not be larger than ' . round($i['max_kb'] / 1024) . ' MB.',
+        ], [
+            'category' => 'category',
+            'title' => 'title',
+            'description' => 'description',
+            'published_on' => 'date',
+            'sort_order' => 'display order',
+            'image' => 'article image',
+            'banner_image' => 'banner image',
+            'author' => 'author',
+            'seo_title' => 'SEO title',
+            'seo_description' => 'SEO description',
+            'sections.*.title' => 'content title',
+            'sections.*.body' => 'content text',
+            'sections.*.read_minutes' => 'read time',
+        ]);
+
+        unset($data['image'], $data['banner_image'], $data['sections']);
+        $data['author'] = $data['author'] ?? null;
+        $data['seo_title'] = $data['seo_title'] ?? null;
+        $data['seo_description'] = $data['seo_description'] ?? null;
+        $data['show_related'] = $request->boolean('show_related');
+        $data['sort_order'] = $data['sort_order'] ?? 0;
+        $data['is_active'] = $request->boolean('is_active');
+
+        return $data;
+    }
+
+    /** Replace an article's table-of-contents sections with the ones submitted in the form, in the order given. */
+    private function syncArticleSections(InsightArticle $article, Request $request): void
+    {
+        $article->sections()->delete();
+
+        foreach (array_values($request->input('sections', [])) as $i => $row) {
+            InsightArticleContent::create([
+                'insight_article_id' => $article->id,
+                'title' => trim($row['title']),
+                'body' => trim($row['body']),
+                'read_minutes' => $row['read_minutes'] ?: null,
+                'sort_order' => $i + 1,
+            ]);
+        }
+    }
+
+    /* ---------- Admin: Insights Page > Featured Insights ---------- */
+
+    public function featuredIndex()
+    {
+        return view('admin.insights-page.featured', [
+            'section' => InsightFeatureSection::current(),
+            'cards' => InsightFeatureCard::orderBy('sort_order')->orderBy('id')->get(),
+        ]);
+    }
+
+    public function featuredSettings(Request $request)
+    {
+        $c = config('banner.featured');
+
+        $data = $request->validate([
+            'eyebrow' => TextRules::line(true, $c['eyebrow_min'], $c['eyebrow_max'], $c['word_max']),
+        ], TextRules::messages(['eyebrow']), ['eyebrow' => 'section label']);
+        $data['is_active'] = $request->boolean('is_active');
+
+        InsightFeatureSection::current()->fill($data)->save();
+
+        return back()->with('success', 'Featured Insights section saved.');
+    }
+
+    public function featuredStore(Request $request)
+    {
+        $data = $this->featuredValidated($request, true);
+        $data['image'] = Uploads::store($request->file('image'), 'featured');
+        InsightFeatureCard::create($data);
+
+        return redirect()->route('admin.insightpage.featured.index')->with('success', 'Insight card created.');
+    }
+
+    public function featuredUpdate(Request $request, InsightFeatureCard $card)
+    {
+        $data = $this->featuredValidated($request, false);
+
+        if ($request->hasFile('image')) {
+            Uploads::delete($card->image);
+            $data['image'] = Uploads::store($request->file('image'), 'featured');
+        }
+
+        $card->update($data);
+
+        return redirect()->route('admin.insightpage.featured.index')->with('success', 'Insight card updated.');
+    }
+
+    public function featuredDestroy(InsightFeatureCard $card)
+    {
+        Uploads::delete($card->image);
+        $card->delete();
+
+        return redirect()->route('admin.insightpage.featured.index')->with('success', 'Insight card deleted.');
+    }
+
+    public function featuredToggle(Request $request, InsightFeatureCard $card)
+    {
+        $card->update(['is_active' => $request->boolean('is_active')]);
+
+        return response()->json(['is_active' => $card->is_active]);
+    }
+
+    public function featuredToggleAll(Request $request)
+    {
+        InsightFeatureCard::query()->update(['is_active' => $request->boolean('is_active')]);
+
+        return response()->json(['is_active' => $request->boolean('is_active')]);
+    }
+
+    private function featuredValidated(Request $request, bool $creating): array
+    {
+        $c = config('banner.featured_card');
+        $i = $c['image'];
+        $w = $c['word_max'];
+
+        $rules = [
+            'category' => TextRules::line(true, $c['category_min'], $c['category_max'], $w),
+            'title' => TextRules::line(true, $c['title_min'], $c['title_max'], $w),
+            'published_on' => ['required', 'date_format:Y-m-d', 'after_or_equal:' . $c['date_min'], 'before_or_equal:' . now()->addYear()->toDateString()],
+            'sort_order' => ['nullable', 'integer', 'min:0', "max:{$c['order_max']}"],
+            'image' => BannerRules::image($creating, 'featured_card.image'),
+        ];
+
+        $data = $request->validate($rules, BannerRules::messages() + TextRules::messages(['category', 'title']) + [
+            'published_on.date_format' => 'Enter a valid date.',
+            'published_on.after_or_equal' => "The date cannot be before {$c['date_min']}.",
+            'published_on.before_or_equal' => 'The date cannot be more than a year in the future.',
+            'image.dimensions' => "The image must be between {$i['min_width']}x{$i['min_height']} and {$i['max_width']}x{$i['max_height']} pixels.",
+            'image.max' => 'The image may not be larger than ' . round($i['max_kb'] / 1024) . ' MB.',
+        ], [
+            'category' => 'category',
+            'title' => 'title',
+            'published_on' => 'date',
+            'sort_order' => 'display order',
+            'image' => 'card image',
+        ]);
+
+        unset($data['image']);
+        $data['sort_order'] = $data['sort_order'] ?? 0;
+        $data['is_active'] = $request->boolean('is_active');
+
+        return $data;
+    }
+
+    /* ---------- Contact page: public form + admin (contact details, enquiries) ---------- */
+
+    public function contactSubmit(Request $request)
+    {
+        // Hidden honeypot: real visitors leave it empty, so bots get a silent "success".
+        if (filled($request->input('website'))) {
+            return response()->json(['message' => 'Thank you! We will be in touch soon.']);
+        }
+
+        $f = config('banner.contact_form');
+        $courses = ProgramCard::where('is_active', true)->pluck('title')->all();
+        $courses[] = $f['other_course'];
+
+        $request->merge([
+            'name' => trim(preg_replace('/\s+/u', ' ', (string) $request->input('name'))),
+            'email' => mb_strtolower(trim((string) $request->input('email'))),
+            'phone' => trim((string) $request->input('phone')),
+            'message' => trim(str_replace("\r\n", "\n", (string) $request->input('message'))),
+        ]);
+
+        $plain = [];
+        foreach (['name', 'email', 'phone', 'course', 'message'] as $field) {
+            if (preg_match('/[^\x20-\x7E\n]/', (string) $request->input($field))) {
+                $plain[$field] = 'Emojis, special unicode characters and symbols are not allowed.';
+            }
+        }
+        if ($plain) {
+            throw \Illuminate\Validation\ValidationException::withMessages($plain);
+        }
+
+        $data = $request->validate([
+            'name' => ['required', 'string', "min:{$f['name_min']}", "max:{$f['name_max']}", "regex:/^[A-Za-z][A-Za-z .'-]*$/"],
+            'email' => ['required', 'string', "max:{$f['email_max']}", 'email:rfc', 'regex:/^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/'],
+            'phone' => ['required', 'string', "max:{$f['phone_max']}", 'regex:/^\+?[0-9][0-9 ()-]*[0-9]$/', function (string $attr, mixed $value, \Closure $fail) {
+                $digits = strlen(preg_replace('/\D/', '', $value));
+                if ($digits < 7 || $digits > 15) {
+                    $fail('A phone number has 7 to 15 digits.');
+                }
+            }],
+            'course' => ['required', 'string', \Illuminate\Validation\Rule::in($courses)],
+            'message' => ['required', 'string', "min:{$f['message_min']}", "max:{$f['message_max']}", "regex:/^[\\x20-\\x7E\\n]+$/", function (string $attr, mixed $value, \Closure $fail) {
+                foreach (preg_split('/\s+/', $value) as $word) {
+                    if (mb_strlen($word) > 40) {
+                        $fail('A single word in the message is too long (40 characters maximum).');
+
+                        return;
+                    }
+                }
+            }],
+        ], [
+            'name.regex' => 'The name may contain only letters, spaces and . \' - (no numbers, emojis or symbols).',
+            'email.email' => 'Enter a valid email address, like name@example.com.',
+            'email.regex' => 'Enter a valid email address, like name@example.com.',
+            'phone.regex' => 'Use digits only, with an optional leading + and spaces, dashes or brackets.',
+            'course.in' => 'Please choose a course from the list.',
+            'message.regex' => 'The message may contain only plain text (no emojis or special symbols).',
+        ], [
+            'name' => 'name',
+            'email' => 'email',
+            'phone' => 'phone number',
+            'course' => 'course',
+            'message' => 'message',
+        ]);
+
+        ContactMessage::create($data + ['ip' => $request->ip()]);
+
+        return response()->json(['message' => 'Thank you! Your message has been sent and we will be in touch soon.']);
+    }
+
+    public function contactInfoEdit()
+    {
+        return view('admin.contact-page.info', ['info' => ContactSection::current()]);
+    }
+
+    public function contactInfoUpdate(Request $request)
+    {
+        $c = config('banner.contact_info');
+        $w = $c['word_max'];
+
+        $data = $request->validate([
+            'heading' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $w),
+            'heading_accent' => TextRules::line(true, $c['accent_min'], $c['accent_max'], $w),
+            'description' => TextRules::line(true, $c['description_min'], $c['description_max'], $c['long_word_max']),
+            'email' => ['required', 'string', "max:{$c['email_max']}", 'email:rfc', 'regex:/^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/'],
+            'phone' => ['required', 'string', "max:{$c['phone_max']}", 'regex:/^\+?[0-9][0-9 ()-]*[0-9]$/', function (string $attr, mixed $value, \Closure $fail) {
+                $digits = strlen(preg_replace('/\D/', '', $value));
+                if ($digits < 7 || $digits > 15) {
+                    $fail('A phone number has 7 to 15 digits.');
+                }
+            }],
+            'address' => ['required', 'string', "min:{$c['address_min']}", "max:{$c['address_max']}", "regex:/^(?! )(?!.*  )[A-Za-z0-9 .,'&#\/-]+$/"],
+        ], TextRules::messages(['heading', 'heading_accent', 'description']) + [
+            'email.email' => 'Enter a valid email address, like name@example.com.',
+            'email.regex' => 'Enter a valid email address, like name@example.com.',
+            'phone.regex' => 'Use digits only, with an optional leading + and spaces, dashes or brackets.',
+            'address.regex' => "The address may contain only letters, numbers, spaces and . , ' & # / - (no emojis, leading or repeated spaces).",
+        ], [
+            'heading' => 'heading',
+            'heading_accent' => 'heading accent',
+            'description' => 'description',
+            'email' => 'email',
+            'phone' => 'phone number',
+            'address' => 'address',
+        ]);
+        $data['is_active'] = $request->boolean('is_active');
+
+        ContactSection::current()->fill($data)->save();
+
+        return back()->with('success', 'Contact details saved.');
+    }
+
+    public function contactMessagesIndex()
+    {
+        return view('admin.contact-page.messages', ['messages' => ContactMessage::latest('id')->get()]);
+    }
+
+    public function contactMessageDestroy(ContactMessage $message)
+    {
+        $message->delete();
+
+        return back()->with('success', 'Enquiry deleted.');
+    }
+
+    public function contactMessagesExport()
+    {
+        $rows = ContactMessage::orderBy('id')->get();
+
+        return response()->streamDownload(function () use ($rows) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['name', 'email', 'phone', 'course', 'message', 'received_at']);
+            foreach ($rows as $r) {
+                // prefix risky leading characters so spreadsheets never treat a cell as a formula
+                $safe = fn ($v) => preg_match('/^[=+\-@]/', (string) $v) ? "'" . $v : $v;
+                fputcsv($out, [$safe($r->name), $safe($r->email), $safe($r->phone), $safe($r->course), $safe($r->message), $r->created_at]);
+            }
+            fclose($out);
+        }, 'enquiries.csv', ['Content-Type' => 'text/csv']);
+    }
+
+    /* ---------- About page (public) and its admin settings ---------- */
+
+    public function aboutPage()
+    {
+        return view('about', ['aboutBanner' => AboutBanner::current(), 'aboutStory' => AboutStory::current(),
+            'aboutTeam' => AboutTeamSection::current(),
+            'aboutCta' => AboutCta::current(),
+            'teamMembers' => TeamMember::where('is_active', true)->orderBy('sort_order')->orderBy('id')->get(),
+            'principleSection' => AboutPrincipleSection::current(),
+            'principles' => AboutPrinciple::orderBy('sort_order')->orderBy('id')->take(2)->get(),
+        ]);
+    }
+
+    public function aboutBannerEdit()
+    {
+        return view('admin.about-page.banner', ['banner' => AboutBanner::current()]);
+    }
+
+    public function aboutBannerUpdate(Request $request)
+    {
+        $c = config('banner.about_banner');
+        $w = $c['word_max'];
+        $banner = AboutBanner::current();
+
+        $data = $request->validate([
+            'heading_line_1' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $w),
+            'heading_line_2' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $w),
+            'description' => TextRules::line(true, $c['description_min'], $c['description_max'], $w),
+            'image' => BannerRules::image(! $banner->image, 'about_banner'),
+        ], BannerRules::messages() + TextRules::messages(['heading_line_1', 'heading_line_2', 'description']) + [
+            'image.dimensions' => "The image must be between {$c['min_width']}x{$c['min_height']} and {$c['max_width']}x{$c['max_height']} pixels.",
+            'image.max' => 'The image may not be larger than ' . round($c['max_kb'] / 1024) . ' MB.',
+        ], [
+            'heading_line_1' => 'heading line 1',
+            'heading_line_2' => 'heading line 2',
+            'description' => 'description',
+            'image' => 'banner image',
+        ]);
+
+        unset($data['image']);
+        $data['is_active'] = $request->boolean('is_active');
+
+        if ($request->hasFile('image')) {
+            Uploads::delete($banner->image);
+            $data['image'] = Uploads::store($request->file('image'), 'about-banner');
+        }
+
+        $banner->fill($data)->save();
+
+        return back()->with('success', 'About banner saved.');
+    }
+
+    public function aboutStoryEdit()
+    {
+        return view('admin.about-page.story', ['story' => AboutStory::current()]);
+    }
+
+    public function aboutStoryUpdate(Request $request)
+    {
+        $c = config('banner.about_story');
+        $w = $c['word_max'];
+        $lw = $c['long_word_max'];
+        $story = AboutStory::current();
+        $i = $c['image'];
+
+        $fields = ['eyebrow', 'heading', 'heading_accent', 'paragraph_1', 'paragraph_2', 'quote', 'person_name', 'person_role'];
+        $data = $request->validate([
+            'eyebrow' => TextRules::line(true, $c['eyebrow_min'], $c['eyebrow_max'], $w),
+            'heading' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $w),
+            'heading_accent' => TextRules::line(true, $c['accent_min'], $c['accent_max'], $w),
+            'paragraph_1' => TextRules::line(true, $c['para1_min'], $c['para1_max'], $lw),
+            'paragraph_2' => TextRules::line(true, $c['para2_min'], $c['para2_max'], $lw),
+            'quote' => TextRules::line(true, $c['quote_min'], $c['quote_max'], $lw),
+            'person_name' => TextRules::line(true, $c['name_min'], $c['name_max'], $w),
+            'person_role' => TextRules::line(true, $c['role_min'], $c['role_max'], $w),
+            'image' => BannerRules::image(! $story->image, 'about_story.image'),
+        ], BannerRules::messages() + TextRules::messages($fields) + [
+            'image.dimensions' => "The photo must be between {$i['min_width']}x{$i['min_height']} and {$i['max_width']}x{$i['max_height']} pixels.",
+            'image.max' => 'The photo may not be larger than ' . round($i['max_kb'] / 1024) . ' MB.',
+        ], [
+            'eyebrow' => 'section label',
+            'heading' => 'heading',
+            'heading_accent' => 'heading accent',
+            'paragraph_1' => 'first paragraph',
+            'paragraph_2' => 'second paragraph',
+            'quote' => 'quote',
+            'person_name' => 'person name',
+            'person_role' => 'person role',
+            'image' => 'photo',
+        ]);
+
+        unset($data['image']);
+        $data['is_active'] = $request->boolean('is_active');
+
+        if ($request->hasFile('image')) {
+            Uploads::delete($story->image);
+            $data['image'] = Uploads::store($request->file('image'), 'about-story');
+        }
+
+        $story->fill($data)->save();
+
+        return back()->with('success', 'Our Story section saved.');
+    }
+
+    /* ---------- Admin: About Page > Get In Touch (closing call-to-action) ---------- */
+
+    public function aboutCtaEdit()
+    {
+        return view('admin.about-page.cta', ['cta' => AboutCta::current()]);
+    }
+
+    public function aboutCtaUpdate(Request $request)
+    {
+        $c = config('banner.about_cta');
+        $w = $c['word_max'];
+        $i = $c['image'];
+        $cta = AboutCta::current();
+        $max = round($i['max_kb'] / 1024);
+
+        $rules = [
+            'eyebrow' => TextRules::line(true, $c['eyebrow_min'], $c['eyebrow_max'], $w),
+            'heading_line_1' => TextRules::line(true, $c['line_min'], $c['line_max'], $w),
+            'heading_line_2' => TextRules::line(true, $c['line_min'], $c['line_max'], $w),
+            'heading_accent' => TextRules::line(true, $c['accent_min'], $c['accent_max'], $w),
+            'description' => TextRules::line(true, $c['description_min'], $c['description_max'], $c['long_word_max']),
+            'image_caption' => TextRules::line(true, $c['caption_min'], $c['caption_max'], $w),
+            'image_main' => BannerRules::image(! $cta->image_main, 'about_cta.image'),
+            'image_small' => BannerRules::image(! $cta->image_small, 'about_cta.image'),
+        ];
+
+        $data = $request->validate($rules, BannerRules::messages() + TextRules::messages(['eyebrow', 'heading_line_1', 'heading_line_2', 'heading_accent', 'description', 'image_caption']) + [
+            'image_main.dimensions' => "The large image must be between {$i['min_width']}x{$i['min_height']} and {$i['max_width']}x{$i['max_height']} pixels.",
+            'image_small.dimensions' => "The small image must be between {$i['min_width']}x{$i['min_height']} and {$i['max_width']}x{$i['max_height']} pixels.",
+            'image_main.max' => "The large image may not be larger than {$max} MB.",
+            'image_small.max' => "The small image may not be larger than {$max} MB.",
+        ], [
+            'eyebrow' => 'section label',
+            'heading_line_1' => 'heading line 1',
+            'heading_line_2' => 'heading line 2',
+            'heading_accent' => 'heading accent',
+            'description' => 'description',
+            'image_caption' => 'small image caption',
+            'image_main' => 'large image',
+            'image_small' => 'small image',
+        ]);
+
+        foreach (['image_main', 'image_small'] as $field) {
+            unset($data[$field]);
+            if ($request->hasFile($field)) {
+                Uploads::delete($cta->{$field});
+                $data[$field] = Uploads::store($request->file($field), 'about-cta');
+            }
+        }
+        $data['is_active'] = $request->boolean('is_active');
+
+        $cta->fill($data)->save();
+
+        return back()->with('success', 'Get In Touch section saved.');
+    }
+
+    /* ---------- Admin: About Page > Our Team (heading only; the members are the home page Team Section members) ---------- */
+
+    public function aboutTeamEdit()
+    {
+        return view('admin.about-page.team', [
+            'team' => AboutTeamSection::current(),
+            'memberCount' => TeamMember::where('is_active', true)->count(),
+        ]);
+    }
+
+    public function aboutTeamUpdate(Request $request)
+    {
+        $c = config('banner.about_team');
+        $w = $c['word_max'];
+
+        $data = $request->validate([
+            'eyebrow' => TextRules::line(true, $c['eyebrow_min'], $c['eyebrow_max'], $w),
+            'heading' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $w),
+            'heading_accent' => TextRules::line(true, $c['accent_min'], $c['accent_max'], $w),
+        ], TextRules::messages(['eyebrow', 'heading', 'heading_accent']), [
+            'eyebrow' => 'section label',
+            'heading' => 'heading',
+            'heading_accent' => 'heading accent',
+        ]);
+        $data['is_active'] = $request->boolean('is_active');
+
+        AboutTeamSection::current()->fill($data)->save();
+
+        return back()->with('success', 'Our Team section saved.');
+    }
+
+    /* ---------- Admin: About Page > Guiding Principles ---------- */
+
+    public function principlesIndex()
+    {
+        return view('admin.about-page.principles', [
+            'section' => AboutPrincipleSection::current(),
+            'items' => AboutPrinciple::orderBy('sort_order')->orderBy('id')->take(2)->get(),
+        ]);
+    }
+
+    public function principlesSettings(Request $request)
+    {
+        $c = config('banner.principles');
+        $i = $c['image'];
+        $section = AboutPrincipleSection::current();
+
+        $data = $request->validate([
+            'eyebrow' => TextRules::line(true, $c['eyebrow_min'], $c['eyebrow_max'], $c['word_max']),
+            'image' => BannerRules::image(! $section->image, 'principles.image'),
+        ], BannerRules::messages() + TextRules::messages(['eyebrow']) + [
+            'image.dimensions' => "The image must be between {$i['min_width']}x{$i['min_height']} and {$i['max_width']}x{$i['max_height']} pixels.",
+            'image.max' => 'The image may not be larger than ' . round($i['max_kb'] / 1024) . ' MB.',
+        ], ['eyebrow' => 'section label', 'image' => 'section image']);
+
+        unset($data['image']);
+        $data['is_active'] = $request->boolean('is_active');
+
+        if ($request->hasFile('image')) {
+            Uploads::delete($section->image);
+            $data['image'] = Uploads::store($request->file('image'), 'principles');
+        }
+
+        $section->fill($data)->save();
+
+        return back()->with('success', 'Guiding Principles section saved.');
+    }
+
+    /** The section always has two fixed principles (Mission, Vision): they can be edited but not added, removed or switched off. */
+    public function principleUpdate(Request $request, AboutPrinciple $item)
+    {
+        $c = config('banner.principle');
+        $w = $c['word_max'];
+
+        $data = $request->validate([
+            'label' => TextRules::line(true, $c['label_min'], $c['label_max'], $w),
+            'heading' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $w),
+            'heading_accent' => TextRules::line(true, $c['accent_min'], $c['accent_max'], $w),
+            'description' => TextRules::line(true, $c['description_min'], $c['description_max'], $c['long_word_max']),
+        ], TextRules::messages(['label', 'heading', 'heading_accent', 'description']), [
+            'label' => 'label',
+            'heading' => 'heading',
+            'heading_accent' => 'heading accent',
+            'description' => 'description',
+        ]);
+
+        $item->update($data);
+
+        return redirect()->route('admin.aboutpage.principles.index')->with('success', 'Principle updated.');
+    }
+
+    /* ---------- Footer newsletter (public) and admin subscriber list ---------- */
+
+    public function subscribe(Request $request)
+    {
+        // Hidden honeypot: real visitors leave it empty, so bots get a silent "success".
+        if (filled($request->input('website'))) {
+            return response()->json(['message' => 'Thank you for subscribing!']);
+        }
+
+        $request->merge(['email' => mb_strtolower(trim((string) $request->input('email')))]);
+
+        $data = $request->validate([
+            'email' => ['required', 'string', 'max:254', 'email:rfc', 'regex:/^[A-Za-z0-9.!#$%&\'*+\/=?^_`{|}~@-]+\.[A-Za-z]{2,}$/'],
+        ], [
+            'email.required' => 'Please enter your email address.',
+            'email.email' => 'Enter a valid email address, like name@example.com.',
+            'email.regex' => 'Enter a valid email address, like name@example.com (no spaces, emojis or special characters).',
+            'email.max' => 'The email address is too long.',
+        ]);
+
+        if (NewsletterSubscriber::where('email', $data['email'])->exists()) {
+            return response()->json(['message' => 'You are already subscribed. Thank you!']);
+        }
+
+        NewsletterSubscriber::create(['email' => $data['email'], 'ip' => $request->ip()]);
+
+        return response()->json(['message' => 'Thank you for subscribing!']);
+    }
+
+    public function newsletterIndex()
+    {
+        return view('admin.newsletter.index', ['subscribers' => NewsletterSubscriber::latest('id')->get()]);
+    }
+
+    public function newsletterDestroy(NewsletterSubscriber $subscriber)
+    {
+        $subscriber->delete();
+
+        return back()->with('success', 'Subscriber removed.');
+    }
+
+    public function newsletterExport()
+    {
+        $rows = NewsletterSubscriber::orderBy('id')->get(['email', 'created_at']);
+
+        return response()->streamDownload(function () use ($rows) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['email', 'subscribed_at']);
+            foreach ($rows as $r) {
+                // prefix risky leading characters so spreadsheets never treat a cell as a formula
+                $email = preg_match('/^[=+\-@]/', $r->email) ? "'" . $r->email : $r->email;
+                fputcsv($out, [$email, $r->created_at]);
+            }
+            fclose($out);
+        }, 'newsletter-subscribers.csv', ['Content-Type' => 'text/csv']);
+    }
+
+
+    /* ---------- Admin: Page Settings > Home Page > Video Section (Insights in Motion) ---------- */
+
+    public function reelIndex()
+    {
+        return view('admin.reel.index', [
+            'reel' => ReelSection::current(),
+            'cards' => ReelCard::orderBy('sort_order')->orderBy('id')->get(),
+        ]);
+    }
+
+    public function reelSettings(Request $request)
+    {
+        $c = config('banner.reel');
+        $w = $c['word_max'];
+
+        $data = $request->validate([
+            'eyebrow' => TextRules::line(true, $c['eyebrow_min'], $c['eyebrow_max'], $w),
+            'heading' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $w),
+            'heading_accent' => TextRules::line(true, $c['accent_min'], $c['accent_max'], $w),
+            'description' => TextRules::line(true, $c['description_min'], $c['description_max'], $w),
+        ], TextRules::messages(['eyebrow', 'heading', 'heading_accent', 'description']), [
+            'eyebrow' => 'section label',
+            'heading' => 'heading',
+            'heading_accent' => 'heading accent',
+            'description' => 'description',
+        ]);
+        $data['is_active'] = $request->boolean('is_active');
+
+        ReelSection::current()->fill($data)->save();
+
+        return back()->with('success', 'Video section saved.');
+    }
+
+    public function reelStore(Request $request)
+    {
+        $data = $this->reelValidated($request, true);
+        ReelCard::create($data);
+
+        return redirect()->route('admin.reel.index')->with('success', 'Video card created.');
+    }
+
+    public function reelUpdate(Request $request, ReelCard $card)
+    {
+        $data = $this->reelValidated($request, false);
+
+        $card->update($data);
+
+        return redirect()->route('admin.reel.index')->with('success', 'Video card updated.');
+    }
+
+    public function reelDestroy(ReelCard $card)
+    {
+        Uploads::delete($card->video); // removes a clip uploaded before clips were dropped
+        $card->delete();
+
+        return redirect()->route('admin.reel.index')->with('success', 'Video card deleted.');
+    }
+
+    public function reelToggle(Request $request, ReelCard $card)
+    {
+        $card->update(['is_active' => $request->boolean('is_active')]);
+
+        return response()->json(['is_active' => $card->is_active]);
+    }
+
+    public function reelToggleAll(Request $request)
+    {
+        ReelCard::query()->update(['is_active' => $request->boolean('is_active')]);
+
+        return response()->json(['is_active' => $request->boolean('is_active')]);
+    }
+
+    private function reelValidated(Request $request, bool $creating): array
+    {
+        $c = config('banner.reel_card');
+        $w = $c['word_max'];
+        $names = implode(', ', array_unique(array_values(ReelCard::PLATFORMS)));
+
+        $rules = [
+            'tag' => TextRules::line(true, $c['tag_min'], $c['tag_max'], $w),
+            'title' => TextRules::line(true, $c['title_min'], $c['title_max'], $w),
+            'url' => ['required', 'string', "max:{$c['url_max']}", 'regex:/^https:\/\/[^\s]+$/', function (string $attribute, mixed $value, \Closure $fail) use ($names) {
+                if (ReelCard::platformFor($value) === null) {
+                    $fail("The video link must be a https link from one of: {$names}.");
+                }
+            }],
+            'sort_order' => ['nullable', 'integer', 'min:0', "max:{$c['order_max']}"],
+        ];
+
+        $messages = TextRules::messages(['tag', 'title']) + [
+            'url.regex' => 'The video link must start with https:// and contain no spaces.',
+        ];
+
+        $data = $request->validate($rules, $messages, [
+            'tag' => 'category label',
+            'title' => 'card title',
+            'url' => 'video link',
+            'sort_order' => 'display order',
+        ]);
+
+        $data['sort_order'] = $data['sort_order'] ?? 0;
+        $data['is_active'] = $request->boolean('is_active');
+
+        return $data;
+    }
+
+    /* ---------- Admin: Page Settings > Home Page > Insights Section ---------- */
+
+    public function insightIndex()
+    {
+        return view('admin.insight.index', [
+            'insight' => InsightSection::current(),
+            'cards' => InsightCard::orderBy('sort_order')->orderBy('id')->get(),
+        ]);
+    }
+
+    public function insightSettings(Request $request)
+    {
+        $c = config('banner.insight');
+        $w = $c['word_max'];
+
+        $data = $request->validate([
+            'eyebrow' => TextRules::line(true, $c['eyebrow_min'], $c['eyebrow_max'], $w),
+            'heading' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $w),
+            'heading_accent' => TextRules::line(true, $c['accent_min'], $c['accent_max'], $w),
+            'description' => TextRules::line(true, $c['description_min'], $c['description_max'], $w),
+        ], TextRules::messages(['eyebrow', 'heading', 'heading_accent', 'description']), [
+            'eyebrow' => 'section label',
+            'heading' => 'heading',
+            'heading_accent' => 'heading accent',
+            'description' => 'description',
+        ]);
+        $data['is_active'] = $request->boolean('is_active');
+
+        InsightSection::current()->fill($data)->save();
+
+        return back()->with('success', 'Insights section saved.');
+    }
+
+    public function insightStore(Request $request)
+    {
+        $data = $this->insightValidated($request, true);
+        $data['image'] = Uploads::store($request->file('image'), 'insight');
+        InsightCard::create($data);
+
+        return redirect()->route('admin.insight.index')->with('success', 'Insight card created.');
+    }
+
+    public function insightUpdate(Request $request, InsightCard $card)
+    {
+        $data = $this->insightValidated($request, false);
+
+        if ($request->hasFile('image')) {
+            Uploads::delete($card->image);
+            $data['image'] = Uploads::store($request->file('image'), 'insight');
+        }
+
+        $card->update($data);
+
+        return redirect()->route('admin.insight.index')->with('success', 'Insight card updated.');
+    }
+
+    public function insightDestroy(InsightCard $card)
+    {
+        Uploads::delete($card->image);
+        $card->delete();
+
+        return redirect()->route('admin.insight.index')->with('success', 'Insight card deleted.');
+    }
+
+    public function insightToggle(Request $request, InsightCard $card)
+    {
+        $card->update(['is_active' => $request->boolean('is_active')]);
+
+        return response()->json(['is_active' => $card->is_active]);
+    }
+
+    public function insightToggleAll(Request $request)
+    {
+        InsightCard::query()->update(['is_active' => $request->boolean('is_active')]);
+
+        return response()->json(['is_active' => $request->boolean('is_active')]);
+    }
+
+    private function insightValidated(Request $request, bool $creating): array
+    {
+        $c = config('banner.insight_card');
+        $i = $c['image'];
+        $w = $c['word_max'];
+
+        $rules = [
+            'title' => TextRules::line(true, $c['title_min'], $c['title_max'], $w),
+            'description' => TextRules::line(true, $c['description_min'], $c['description_max'], $w),
+            'sort_order' => ['nullable', 'integer', 'min:0', "max:{$c['order_max']}"],
+            'image' => BannerRules::image($creating, 'insight_card.image'),
+        ];
+
+        $messages = BannerRules::messages() + TextRules::messages(['title', 'description']) + [
+            'image.dimensions' => "The image must be between {$i['min_width']}x{$i['min_height']} and {$i['max_width']}x{$i['max_height']} pixels.",
+            'image.max' => 'The image may not be larger than ' . round($i['max_kb'] / 1024) . ' MB.',
+        ];
+
+        $data = $request->validate($rules, $messages, [
+            'title' => 'card title',
+            'description' => 'card description',
+            'sort_order' => 'display order',
+            'image' => 'card image',
+        ]);
+
+        unset($data['image']);
+        $data['sort_order'] = $data['sort_order'] ?? 0;
+        $data['is_active'] = $request->boolean('is_active');
+
+        return $data;
+    }
+
+    /* ---------- Admin: Page Settings > Home Page > Team Section ---------- */
+
+    public function teamIndex()
+    {
+        return view('admin.team.index', [
+            'team' => TeamSection::current(),
+            'members' => TeamMember::orderBy('sort_order')->orderBy('id')->get(),
+        ]);
+    }
+
+    public function teamSettings(Request $request)
+    {
+        $c = config('banner.team');
+        $w = $c['word_max'];
+
+        $data = $request->validate([
+            'eyebrow' => TextRules::line(true, $c['eyebrow_min'], $c['eyebrow_max'], $w),
+            'heading' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $w),
+            'heading_accent' => TextRules::line(true, $c['accent_min'], $c['accent_max'], $w),
+            'description' => TextRules::line(true, $c['description_min'], $c['description_max'], $w),
+        ], TextRules::messages(['eyebrow', 'heading', 'heading_accent', 'description']), [
+            'eyebrow' => 'section label',
+            'heading' => 'heading',
+            'heading_accent' => 'highlighted heading word',
+            'description' => 'description',
+        ]);
+        $data['is_active'] = $request->boolean('is_active');
+
+        TeamSection::current()->fill($data)->save();
+
+        return back()->with('success', 'Team section saved.');
+    }
+
+    public function teamStore(Request $request)
+    {
+        $data = $this->teamValidated($request, true);
+        $data['image'] = Uploads::store($request->file('image'), 'team');
+        TeamMember::create($data);
+
+        return redirect()->route('admin.team.index')->with('success', 'Team member added.');
+    }
+
+    public function teamUpdate(Request $request, TeamMember $member)
+    {
+        $data = $this->teamValidated($request, false);
+
+        if ($request->hasFile('image')) {
+            Uploads::delete($member->image);
+            $data['image'] = Uploads::store($request->file('image'), 'team');
+        }
+
+        $member->update($data);
+
+        return redirect()->route('admin.team.index')->with('success', 'Team member updated.');
+    }
+
+    public function teamDestroy(TeamMember $member)
+    {
+        Uploads::delete($member->image);
+        $member->delete();
+
+        return redirect()->route('admin.team.index')->with('success', 'Team member deleted.');
+    }
+
+    public function teamToggle(Request $request, TeamMember $member)
+    {
+        $member->update(['is_active' => $request->boolean('is_active')]);
+
+        return response()->json(['is_active' => $member->is_active]);
+    }
+
+    public function teamToggleAll(Request $request)
+    {
+        TeamMember::query()->update(['is_active' => $request->boolean('is_active')]);
+
+        return response()->json(['is_active' => $request->boolean('is_active')]);
+    }
+
+    private function teamValidated(Request $request, bool $creating): array
+    {
+        $c = config('banner.team_member');
+        $i = $c['image'];
+        $w = $c['word_max'];
+
+        $rules = [
+            'name' => TextRules::line(true, $c['name_min'], $c['name_max'], $w),
+            'designation' => TextRules::line(true, $c['designation_min'], $c['designation_max'], $w),
+            'sort_order' => ['nullable', 'integer', 'min:0', "max:{$c['order_max']}"],
+            'image' => BannerRules::image($creating, 'team_member.image'),
+        ];
+
+        $messages = BannerRules::messages() + TextRules::messages(['name', 'designation']) + [
+            'image.dimensions' => "The image must be between {$i['min_width']}x{$i['min_height']} and {$i['max_width']}x{$i['max_height']} pixels.",
+            'image.max' => 'The image may not be larger than ' . round($i['max_kb'] / 1024) . ' MB.',
+        ];
+
+        $data = $request->validate($rules, $messages, [
+            'name' => 'member name',
+            'designation' => 'designation',
+            'sort_order' => 'display order',
+            'image' => 'member photo',
+        ]);
+
+        unset($data['image']);
+        $data['sort_order'] = $data['sort_order'] ?? 0;
+        $data['is_active'] = $request->boolean('is_active');
+
+        return $data;
+    }
+
+    /* ---------- Admin: Page Settings > Home Page > Programs Section ---------- */
+
+    public function programIndex()
+    {
+        return view('admin.program.index', [
+            'program' => ProgramSection::current(),
+            'cards' => ProgramCard::orderBy('sort_order')->orderBy('id')->get(),
+        ]);
+    }
+
+    public function programSettings(Request $request)
+    {
+        $c = config('banner.program');
+        $w = $c['word_max'];
+
+        $data = $request->validate([
+            'eyebrow' => TextRules::line(true, $c['eyebrow_min'], $c['eyebrow_max'], $w),
+            'heading_accent' => TextRules::line(true, $c['accent_min'], $c['accent_max'], $w),
+            'heading' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $w),
+            'description' => TextRules::line(true, $c['description_min'], $c['description_max'], $w),
+        ], TextRules::messages(['eyebrow', 'heading_accent', 'heading', 'description']), [
+            'eyebrow' => 'section label',
+            'heading_accent' => 'highlighted heading line',
+            'heading' => 'heading',
+            'description' => 'description',
+        ]);
+        $data['is_active'] = $request->boolean('is_active');
+
+        ProgramSection::current()->fill($data)->save();
+
+        return back()->with('success', 'Programs section saved.');
+    }
+
+    public function programStore(Request $request)
+    {
+        $data = $this->programValidated($request, true);
+        $data['image'] = Uploads::store($request->file('image'), 'program');
+        ProgramCard::create($data);
+
+        return redirect()->route('admin.program.index')->with('success', 'Program card created.');
+    }
+
+    public function programUpdate(Request $request, ProgramCard $card)
+    {
+        $data = $this->programValidated($request, false);
+
+        if ($request->hasFile('image')) {
+            Uploads::delete($card->image);
+            $data['image'] = Uploads::store($request->file('image'), 'program');
+        }
+
+        $card->update($data);
+
+        return redirect()->route('admin.program.index')->with('success', 'Program card updated.');
+    }
+
+    public function programDestroy(ProgramCard $card)
+    {
+        Uploads::delete($card->image);
+        $card->delete();
+
+        return redirect()->route('admin.program.index')->with('success', 'Program card deleted.');
+    }
+
+    public function programToggle(Request $request, ProgramCard $card)
+    {
+        $card->update(['is_active' => $request->boolean('is_active')]);
+
+        return response()->json(['is_active' => $card->is_active]);
+    }
+
+    public function programToggleAll(Request $request)
+    {
+        ProgramCard::query()->update(['is_active' => $request->boolean('is_active')]);
+
+        return response()->json(['is_active' => $request->boolean('is_active')]);
+    }
+
+    private function programValidated(Request $request, bool $creating): array
+    {
+        $c = config('banner.program_card');
+        $i = $c['image'];
+        $w = $c['word_max'];
+
+        $rules = [
+            'title' => TextRules::line(true, $c['title_min'], $c['title_max'], $w),
+            'features' => ['required', 'string', function (string $attribute, mixed $value, \Closure $fail) use ($c) {
+                $lines = ProgramCard::featuresFromHtml($value);
+                if ($lines === []) {
+                    return $fail('Add at least one feature.');
+                }
+                if (count($lines) > $c['features_max_items']) {
+                    return $fail("Add at most {$c['features_max_items']} features.");
+                }
+                foreach ($lines as $n => $line) {
+                    $pos = $n + 1;
+                    $len = mb_strlen($line);
+                    if (! preg_match("/^[A-Za-z0-9 .,'&!?-]+$/", $line)) {
+                        return $fail("Feature {$pos} may only contain letters, numbers, spaces and . , ' - & ! ? (no emojis or special characters).");
+                    }
+                    if (preg_match('/ {2,}/', $line)) {
+                        return $fail("Feature {$pos} may not contain repeated spaces.");
+                    }
+                    if ($len < $c['feature_min'] || $len > $c['feature_max']) {
+                        return $fail("Feature {$pos} must be between {$c['feature_min']} and {$c['feature_max']} characters.");
+                    }
+                    foreach (preg_split('/\s+/', $line) as $word) {
+                        if (mb_strlen($word) > $c['word_max']) {
+                            return $fail("Feature {$pos} has a word longer than {$c['word_max']} characters.");
+                        }
+                    }
+                }
+            }],
+            'duration' => TextRules::line(true, $c['duration_min'], $c['duration_max'], $w),
+            'mode' => TextRules::line(true, $c['mode_min'], $c['mode_max'], $w),
+            'sort_order' => ['nullable', 'integer', 'min:0', "max:{$c['order_max']}"],
+            'image' => BannerRules::image($creating, 'program_card.image'),
+        ];
+
+        $messages = BannerRules::messages()
+            + TextRules::messages(['title', 'duration', 'mode'])
+            + [
+                'image.dimensions' => "The image must be between {$i['min_width']}x{$i['min_height']} and {$i['max_width']}x{$i['max_height']} pixels.",
+                'image.max' => 'The image may not be larger than ' . round($i['max_kb'] / 1024) . ' MB.',
+            ];
+
+        $data = $request->validate($rules, $messages, [
+            'title' => 'program title',
+            'features' => 'features',
+            'duration' => 'duration',
+            'mode' => 'study mode',
+            'sort_order' => 'display order',
+            'image' => 'program image',
+        ]);
+
+        unset($data['image']);
+        $data['features'] = implode("\n", ProgramCard::featuresFromHtml($data['features']));
+        $data['sort_order'] = $data['sort_order'] ?? 0;
+        $data['is_featured'] = $request->boolean('is_featured');
+        $data['is_active'] = $request->boolean('is_active');
+
+        return $data;
+    }
+}
