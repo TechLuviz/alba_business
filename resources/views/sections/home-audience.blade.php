@@ -68,14 +68,14 @@
                     @if($audienceCards->count() > 1)
                         <div class="audience-nav" aria-label="Carousel navigation">
                             <button type="button" class="audience-nav-btn btn-prev" id="audiencePrev" aria-label="Previous audience card"
-                                    style="border-color: {{ $audience->highlight_color ?: '#C8914A' }}; color: {{ $audience->highlight_color ?: '#C8914A' }};">
+                                    style="--nav-color: {{ $audience->highlight_color ?: '#C8914A' }};">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M19 12H5M12 19l-7-7 7-7"/>
                                 </svg>
                             </button>
 
                             <button type="button" class="audience-nav-btn btn-next" id="audienceNext" aria-label="Next audience card"
-                                    style="background-color: {{ $audience->highlight_color ?: '#C8914A' }}; border-color: {{ $audience->highlight_color ?: '#C8914A' }};">
+                                    style="--nav-color: {{ $audience->highlight_color ?: '#C8914A' }};">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M5 12h14M12 5l7 7-7 7"/>
                                 </svg>

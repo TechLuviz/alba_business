@@ -31,7 +31,7 @@
                             @endforeach
                         </ul>
                         <div class="program-foot">
-                            <div class="program-meta"><strong>{{ $card->duration }}</strong><span>{{ $card->mode }}</span></div>
+                            <div class="program-meta"><strong>{{ is_numeric($card->duration) ? $card->duration . ' ' . Str::plural('Month', (int) $card->duration) : $card->duration }}</strong><span>{{ $card->mode }}</span></div>
                             {{-- Static button: change the text / link here in the code --}}
                             <button type="button" class="program-btn" data-enroll="{{ $card->title }}">Enroll Now &rarr;</button>
                         </div>

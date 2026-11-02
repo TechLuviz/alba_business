@@ -19,7 +19,30 @@
                 <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'is-current' : '' }}">Home</a>
             @endunless
             @foreach($navItems as $item)
-                <a href="{{ str_starts_with($item->url, '#') ? route('home') . $item->url : (str_starts_with($item->url, '/') ? url($item->url) : $item->url) }}">{{ $item->label }}</a>
+<?php
+                    $href = str_starts_with($item->url, '#') ? route('home') . $item->url : (str_starts_with($item->url, '/') ? url($item->url) : $item->url);
+                    // Highlight the item whose page we are on (same path, or a sub-page such as /insights/{slug}).
+                    $itemPath = trim((string) parse_url($href, PHP_URL_PATH), '/');
+                    $itemHost = parse_url($href, PHP_URL_HOST);
+                    if (str_starts_with($item->url, '#')) {
+                        // Section-anchor items (e.g. #programs) belong to the page that section lives on.
+                        $isCurrent = match (strtolower(ltrim($item->url, '#'))) {
+                            'programs', 'program' => request()->routeIs('programs.show'),
+                            'about' => request()->routeIs('about'),
+                            'contact' => request()->routeIs('contact'),
+                            'insight', 'insights' => request()->routeIs('insights', 'insights.show'),
+                            default => false,
+                        };
+                    } else {
+                        // Compare full URLs so it also works when the site lives in a sub-folder (e.g. localhost/Alba_business).
+                        $currentUrl = rtrim(request()->url(), '/');
+                        $targetUrl = rtrim((string) strtok($href, '?#'), '/');
+                        $isCurrent = $targetUrl === rtrim(url('/'), '/')
+                            ? $currentUrl === $targetUrl
+                            : ($currentUrl === $targetUrl || str_starts_with($currentUrl, $targetUrl . '/'));
+                    }
+                ?>
+                <a href="{{ $href }}" class="{{ $isCurrent ? 'is-current' : '' }}" @if($isCurrent) aria-current="page" @endif>{{ $item->label }}</a>
             @endforeach
         </nav>
     </div>

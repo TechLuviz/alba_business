@@ -1440,7 +1440,7 @@ class HomeController extends Controller
                     }
                 }
             }],
-            'duration' => TextRules::line(true, $c['duration_min'], $c['duration_max'], $w),
+            'duration' => ['required', 'integer', 'min:1', 'max:99'],
             'mode' => TextRules::line(true, $c['mode_min'], $c['mode_max'], $w),
             'sort_order' => ['nullable', 'integer', 'min:0', "max:{$c['order_max']}"],
             'image' => BannerRules::image($creating, 'program_card.image'),

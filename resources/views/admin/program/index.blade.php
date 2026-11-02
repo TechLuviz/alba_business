@@ -124,7 +124,7 @@
                     </td>
                     <td>
                         <strong class="strong ellipsis" style="display:block;">{{ $card->title }} @if($card->is_featured)<span class="tag">Featured</span>@endif</strong>
-                        <small class="ellipsis" style="color: var(--muted); display:block; max-width: 260px;">{{ $card->duration }} &middot; {{ $card->mode }}</small>
+                        <small class="ellipsis" style="color: var(--muted); display:block; max-width: 260px;">{{ is_numeric($card->duration) ? $card->duration . ' mo' : $card->duration }} &middot; {{ $card->mode }}</small>
                     </td>
                     <td><span class="badge-gold">#{{ $card->sort_order }}</span></td>
                     <td>

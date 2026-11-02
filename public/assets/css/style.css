@@ -4,6 +4,8 @@
     --gold-dark: #b07d3a;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
+/* Images can't be dragged out of the page or show a ghost copy under the cursor. */
+img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; }
 body { font-family: 'Plus Jakarta Sans', Arial, sans-serif; color: #fff; background: var(--navy); line-height: 1.6; }
 a { text-decoration: none; color: inherit; }
 .container { width: 100%; max-width: 1240px; margin: 0 auto; padding: 0 48px; }
@@ -57,6 +59,8 @@ a { text-decoration: none; color: inherit; }
 @keyframes heroRise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 .btn-gold { white-space: nowrap; max-width: 100%; display: inline-flex; align-items: center; gap: 14px; background: var(--gold); color: #fff; padding: 18px 32px; border-radius: 10px; font-weight: 600; transition: background .2s; }
 .btn-gold:hover { background: var(--gold-dark); }
+/* Double-clicking the hero image must not highlight the button label (or other hero text). */
+.hero-slide, .btn-gold { -webkit-user-select: none; user-select: none; }
 
 .hero-dots { position: absolute; left: 0; right: 0; bottom: 32px; z-index: 5; display: flex; justify-content: center; gap: 10px; }
 .hero-dots button { width: 10px; height: 10px; border-radius: 50%; border: 0; background: rgba(255,255,255,.4); cursor: pointer; padding: 0; transition: all .3s; }
@@ -109,6 +113,9 @@ a { text-decoration: none; color: inherit; }
 .about-media::before { content: ''; position: absolute; left: -6%; top: -3%; width: 80%; aspect-ratio: 1; border: 1px solid #ecdcc6; border-radius: 50%; }
 .home-about.is-reversed .about-media::before { left: auto; right: -6%; }
 .about-img { position: absolute; object-fit: cover; border-radius: 28px; background: #e9e6e0; box-shadow: 0 24px 50px rgba(20,20,20,.16); }
+/* Clicking/dragging around the images must never paint them with the blue selection highlight. */
+.about-media, .about-img { -webkit-user-select: none; user-select: none; -webkit-user-drag: none; }
+.about-media ::selection, .about-img::selection { background: transparent; }
 .about-img-1 { left: 0; top: 8%; width: 72%; height: 56%; }
 .about-img-2 { right: 0; bottom: 0; width: 59%; height: 68%; border: 3px solid #fff; border-radius: 30px; }
 /* only one image uploaded: show it large instead of leaving a gap */
@@ -390,28 +397,24 @@ a { text-decoration: none; color: inherit; }
     justify-content: center;
     cursor: pointer;
     transition: all 0.25s ease;
-    border: 1.5px solid #c8914a;
+    /* --nav-color is the section's highlight colour, set inline from the admin setting. */
+    border: 1.5px solid var(--nav-color, #c8914a);
     background: #ffffff;
-    color: #c8914a;
+    color: var(--nav-color, #c8914a);
     padding: 0;
 }
 
-.audience-nav-btn.btn-prev:hover {
-    background: #c8914a;
-    color: #ffffff;
-    transform: translateX(-3px);
-}
-
-.audience-nav-btn.btn-next {
-    background: #c8914a;
+/* Both buttons share the same outline style by default and fill with the highlight colour on hover/keyboard focus. */
+.audience-nav-btn.btn-prev:hover,
+.audience-nav-btn.btn-prev:focus-visible,
+.audience-nav-btn.btn-next:hover,
+.audience-nav-btn.btn-next:focus-visible {
+    background: var(--nav-color, #c8914a);
     color: #ffffff;
 }
 
-.audience-nav-btn.btn-next:hover {
-    background: #b07d3a;
-    border-color: #b07d3a;
-    transform: translateX(3px);
-}
+.audience-nav-btn.btn-prev:hover { transform: translateX(-3px); }
+.audience-nav-btn.btn-next:hover { transform: translateX(3px); }
 
 .audience-nav-btn:active {
     transform: scale(0.94);
@@ -548,9 +551,7 @@ a { text-decoration: none; color: inherit; }
     opacity: 0; transform: translateY(46px) scale(.97); transition: opacity .8s ease, transform .8s cubic-bezier(.22, 1, .36, 1), box-shadow .4s ease, border-color .4s ease; transition-delay: calc(var(--i) * 120ms), calc(var(--i) * 120ms), 0s, 0s; }
 .program-card.in { opacity: 1; transform: none; transition-delay: calc(var(--i) * 120ms), calc(var(--i) * 120ms), 0s, 0s; }
 .program-card.in:hover { transform: translateY(-10px); transition-delay: 0s; box-shadow: 0 26px 56px rgba(200, 145, 74, .22); border-color: rgba(200, 145, 74, .5); }
-.program-card.is-featured { border: 1.5px solid var(--gold); box-shadow: 0 22px 50px rgba(200, 145, 74, .2); }
-.program-card.is-featured.in { animation: programFloat 5s ease-in-out 1.2s infinite; }
-.program-card.is-featured.in:hover { animation-play-state: paused; }
+/* No permanent "featured" look: the gold border, shadow and filled button appear only on hover. */
 @keyframes programFloat { 0%, 100% { transform: translateY(-8px); } 50% { transform: translateY(0); } }
 .program-level { display: flex; align-items: center; gap: 14px; font-size: .72rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--gold-dark); margin-bottom: 18px; }
 .program-level i { flex: 1; height: 1px; background: rgba(10, 22, 40, .1); }
@@ -567,7 +568,7 @@ a { text-decoration: none; color: inherit; }
 .program-meta strong { color: #0a1628; font-size: .88rem; }
 .program-btn { white-space: nowrap; padding: 10px 20px; border-radius: 999px; font-size: .85rem; font-weight: 600; color: var(--gold-dark); border: 1px solid var(--gold); transition: background .25s, color .25s, transform .25s; }
 .program-btn:hover { background: var(--gold); color: #fff; transform: translateX(3px); }
-.program-card.is-featured .program-btn { background: var(--gold); color: #fff; }
+.program-card:hover .program-btn { background: var(--gold); color: #fff; }
 @media (prefers-reduced-motion: reduce) {
     .program-card, .program-card.in { opacity: 1; transform: none; transition: none; animation: none !important; }
 }
@@ -1467,7 +1468,6 @@ a.insight-arrow:hover, a.insight-arrow:focus-visible { background: var(--gold); 
 .program-card h3 a.program-link { color: inherit; }
 .program-card h3 a.program-link::after { content: ''; position: absolute; inset: 0; border-radius: inherit; z-index: 1; }
 .program-card .program-btn { position: relative; z-index: 2; cursor: pointer; background: transparent; font-family: inherit; }
-.program-card.is-featured .program-btn { background: var(--gold); }
 .enroll-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(5, 10, 20, .72); overflow-y: auto; }
 .enroll-modal[hidden] { display: none; }
 .enroll-box { position: relative; width: 100%; max-width: 520px; margin: auto; }

@@ -43,8 +43,8 @@
             <small class="hint">Each bullet: {{ $c['feature_min'] }}-{{ $c['feature_max'] }} characters, letters, numbers, spaces and . , ' - &amp; ! ? only.</small>
         </div>
         <div class="grid2">
-            <label>Duration *
-                <input type="text" name="duration" data-live="line" required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['duration_min'] }}" maxlength="{{ $c['duration_max'] }}" placeholder="e.g. 12 Months">
+            <label>Duration (months) *
+                <input type="number" name="duration" required min="1" max="99" step="1" inputmode="numeric" placeholder="e.g. 12">
             </label>
             <label>Study mode *
                 <input type="text" name="mode" data-live="line" required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['mode_min'] }}" maxlength="{{ $c['mode_max'] }}" placeholder="e.g. Full-time">

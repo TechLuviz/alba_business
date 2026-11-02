@@ -99,7 +99,7 @@
                         @endforeach
                     </div>
                 @endif
-                <p class="program-detail-meta"><strong>{{ $card->duration }}</strong> &middot; {{ $card->mode }}</p>
+                <p class="program-detail-meta"><strong>{{ is_numeric($card->duration) ? $card->duration . ' ' . Str::plural('Month', (int) $card->duration) : $card->duration }}</strong> &middot; {{ $card->mode }}</p>
             </div>
 
             @if($hasHelp)
