@@ -97,7 +97,7 @@
             function restart() {
                 clearInterval(timer);
                 if (n < 2 || paused) return;
-                timer = setInterval(() => { if (!hovered && !document.hidden) go(active + 1); }, DELAY);
+                timer = setInterval(() => { if (!document.hidden) go(active + 1); }, DELAY);
             }
             function setPaused(p) {
                 paused = p;
@@ -109,8 +109,6 @@
             document.getElementById('reelsPrev')?.addEventListener('click', () => { go(active - 1); restart(); });
             document.getElementById('reelsNext')?.addEventListener('click', () => { go(active + 1); restart(); });
             cards.forEach(c => c.querySelector('.reel-pause').addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); setPaused(!paused); }));
-            stage.addEventListener('mouseenter', () => { hovered = true; stage.classList.add('is-hover'); });
-            stage.addEventListener('mouseleave', () => { hovered = false; stage.classList.remove('is-hover'); });
             document.addEventListener('visibilitychange', () => { if (document.hidden) clearInterval(timer); else restart(); });
             window.addEventListener('pagehide', () => clearInterval(timer));
 

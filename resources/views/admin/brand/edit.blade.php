@@ -29,6 +29,22 @@
             <label class="check"><input type="checkbox" name="remove_logo" value="1"> Remove current logo (show text instead)</label>
         @endif
 
+        <div class="spec">
+            <strong>Favicon requirements</strong>
+            <ul>
+                <li>Recommended: {{ config('banner.favicon.recommended') }}</li>
+                <li>PNG, ICO, JPG or WEBP &middot; max {{ config('banner.favicon.max_kb') }} KB</li>
+            </ul>
+        </div>
+        <label>Favicon
+            <input type="file" name="brand_favicon" accept="image/png,image/x-icon,image/vnd.microsoft.icon,image/jpeg,image/webp,.ico" id="faviconInput">
+        </label>
+        <div class="preview logo-preview">
+            <img id="faviconPreview" src="{{ $brand->brand_favicon ? asset($brand->brand_favicon) : '' }}" alt="" style="max-width:64px;max-height:64px;@if(!$brand->brand_favicon)display:none @endif">
+        </div>
+        @if($brand->brand_favicon)
+            <label class="check"><input type="checkbox" name="remove_favicon" value="1"> Remove current favicon</label>
+        @endif
 
         <button type="submit" class="btn">Save changes</button>
     </form>
@@ -38,6 +54,10 @@
 <script>
     document.getElementById('logoInput').addEventListener('change', e => {
         const f = e.target.files[0], img = document.getElementById('logoPreview');
+        if (f) { img.src = URL.createObjectURL(f); img.style.display = 'block'; }
+    });
+    document.getElementById('faviconInput').addEventListener('change', e => {
+        const f = e.target.files[0], img = document.getElementById('faviconPreview');
         if (f) { img.src = URL.createObjectURL(f); img.style.display = 'block'; }
     });
 </script>

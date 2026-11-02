@@ -20,7 +20,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('about', [HomeController::class, 'aboutPage'])->name('about');
 Route::get('contact', [HomeController::class, 'contactPage'])->name('contact');
-Route::get('insights', [HomeController::class, 'insightsPage'])->name('insights');
+Route::get('programs/{card:slug}', [HomeController::class, 'programShow'])->name('programs.show');
+Route::get('insights',[HomeController::class, 'insightsPage'])->name('insights');
 Route::get('insights/{article}', [InsightDetailController::class, 'show'])->name('insights.show');
 Route::post('contact', [HomeController::class, 'contactSubmit'])->middleware('throttle:5,10')->name('contact.submit');
 Route::post('newsletter', [HomeController::class, 'subscribe'])->middleware('throttle:5,1')->name('newsletter.subscribe');
@@ -80,6 +81,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('programs-section')->name('program.')->group(function () {
             Route::get('/', [HomeController::class, 'programIndex'])->name('index');
             Route::put('settings', [HomeController::class, 'programSettings'])->name('settings.update');
+            Route::put('contact-card', [HomeController::class, 'programHelpSettings'])->name('help.update');
 
             Route::patch('cards/toggle-all', [HomeController::class, 'programToggleAll'])->name('cards.toggle-all');
             Route::post('cards', [HomeController::class, 'programStore'])->name('cards.store');

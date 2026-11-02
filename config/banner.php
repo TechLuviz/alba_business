@@ -28,6 +28,11 @@ return [
         'max_kb' => 1024, // 1 MB
     ],
 
+    'favicon' => [
+        'recommended' => '64 x 64 px (square), PNG or ICO',
+        'max_kb' => 512, // 512 KB
+    ],
+
     // Heading lines never wrap on the home page, so their length is capped to always fit.
     'text' => [
         'heading_min' => 2,
@@ -130,6 +135,84 @@ return [
             'max_height' => 4000,
             'max_kb' => 5120, // 5 MB
         ],
+    ],
+
+    // Program "Tools & Digital Topics" and "Learning Format" (detail page)
+    'program_extras' => [
+        'tool_min' => 2,
+        'tool_max' => 40,
+        'tools_max' => 12,
+        'format_max' => 6,
+        'format_title_min' => 3,
+        'format_title_max' => 40,
+        'format_desc_min' => 10,
+        'format_desc_max' => 120,
+        'word_max' => 24,
+        'icon' => [
+            'recommended' => '128 x 128 px (square), PNG, JPG or WEBP, transparent PNG works best',
+            'min_width' => 32,
+            'min_height' => 32,
+            'max_width' => 1000,
+            'max_height' => 1000,
+            'max_kb' => 1024, // 1 MB
+        ],
+    ],
+
+    // Program curriculum levels (detail page)
+    'program_levels' => [
+        'max_levels' => 10,
+        'title_min' => 3,
+        'title_max' => 50,
+        'period_max' => 30,
+        'point_min' => 5,
+        'point_max' => 80,
+        'points_max' => 12,
+        'word_max' => 24,
+    ],
+
+    // Program detail page banner (text: letters, digits, spaces and . , ' - & ! ?)
+    'program_banner' => [
+        'title_min' => 5,
+        'title_max' => 60,
+        'description_min' => 10,
+        'description_max' => 160,
+        'levels_min' => 2,
+        'levels_max' => 30,
+        'timeline_min' => 2,
+        'timeline_max' => 50,
+        'word_max' => 24,
+        'image' => [
+            'recommended' => '1920 x 600 px (wide landscape), JPG, PNG or WEBP',
+            'min_width' => 1280,
+            'min_height' => 400,
+            'max_width' => 4000,
+            'max_height' => 3000,
+            'max_kb' => 5120, // 5 MB
+        ],
+    ],
+
+    // Program detail page "Have any questions?" side card (the Contact Us button is static)
+    'program_help' => [
+        'heading_min' => 5,
+        'heading_max' => 40,
+        'description_min' => 10,
+        'description_max' => 120,
+        'word_max' => 24,
+        'image' => [
+            'recommended' => '1000 x 600 px (landscape), JPG, PNG or WEBP',
+            'min_width' => 600,
+            'min_height' => 300,
+            'max_width' => 4000,
+            'max_height' => 3000,
+            'max_kb' => 5120, // 5 MB
+        ],
+    ],
+
+    // Program detail page "About This Program" text
+    'program_about' => [
+        'min' => 20,
+        'max' => 400,
+        'word_max' => 30,
     ],
 
     // Homepage "Meet Our Team" section (text: letters, digits, spaces and . , ' - & ! ?)

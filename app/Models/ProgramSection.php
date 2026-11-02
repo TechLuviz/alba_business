@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProgramSection extends Model
 {
-    protected $fillable = ['eyebrow', 'heading', 'heading_accent', 'description', 'is_active'];
+    protected $fillable = ['eyebrow', 'heading', 'heading_accent', 'description', 'is_active', 'help_image', 'help_heading', 'help_description', 'help_active'];
 
-    protected $casts = ['is_active' => 'boolean'];
+    protected $casts = ['is_active' => 'boolean', 'help_active' => 'boolean'];
 
     public static function current(): self
     {

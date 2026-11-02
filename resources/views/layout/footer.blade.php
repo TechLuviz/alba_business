@@ -27,8 +27,8 @@
             <nav class="footer-col" aria-label="Programs">
                 <h4>Programs</h4>
                 <ul>
-                    @foreach($footerPrograms as $title)
-                        <li><a href="{{ route('home') }}#programs">{{ $title }}</a></li>
+                    @foreach($footerPrograms as $slug => $title)
+                        <li><a href="{{ route('programs.show', $slug) }}">{{ $title }}</a></li>
                     @endforeach
                 </ul>
             </nav>

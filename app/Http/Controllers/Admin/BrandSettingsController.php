@@ -19,10 +19,19 @@ class BrandSettingsController extends Controller
     {
         $data = $request->validate([
             'brand_logo' => BannerRules::image(false, 'logo'),
+            'brand_favicon' => BannerRules::favicon(),
         ], BannerRules::messages(), BannerRules::attributes());
 
         $brand = $this->brand();
-        unset($data['brand_logo']);
+        unset($data['brand_logo'], $data['brand_favicon']);
+
+        if ($request->hasFile('brand_favicon')) {
+            Uploads::delete($brand->brand_favicon);
+            $data['brand_favicon'] = Uploads::store($request->file('brand_favicon'), 'favicon');
+        } elseif ($request->boolean('remove_favicon')) {
+            Uploads::delete($brand->brand_favicon);
+            $data['brand_favicon'] = null;
+        }
 
         if ($request->hasFile('brand_logo')) {
             Uploads::delete($brand->brand_logo);

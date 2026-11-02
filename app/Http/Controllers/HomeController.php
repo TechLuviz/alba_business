@@ -1220,6 +1220,15 @@ class HomeController extends Controller
         return $data;
     }
 
+    /* ---------- Public: program detail page ---------- */
+
+    public function programShow(ProgramCard $card)
+    {
+        abort_unless($card->is_active, 404);
+
+        return view('program-detail', ['card' => $card, 'help' => ProgramSection::current()]);
+    }
+
     /* ---------- Admin: Page Settings > Home Page > Programs Section ---------- */
 
     public function programIndex()
@@ -1253,10 +1262,47 @@ class HomeController extends Controller
         return back()->with('success', 'Programs section saved.');
     }
 
+    public function programHelpSettings(Request $request)
+    {
+        $h = config('banner.program_help');
+
+        $data = $request->validate([
+            'help_image' => BannerRules::image(false, 'program_help.image'),
+            'help_heading' => TextRules::line(false, $h['heading_min'], $h['heading_max'], $h['word_max']),
+            'help_description' => TextRules::line(false, $h['description_min'], $h['description_max'], $h['word_max']),
+        ], TextRules::messages(['help_heading', 'help_description']) + [
+            'help_image.dimensions' => "The card image must be between {$h['image']['min_width']}x{$h['image']['min_height']} and {$h['image']['max_width']}x{$h['image']['max_height']} pixels.",
+            'help_image.max' => 'The card image may not be larger than ' . round($h['image']['max_kb'] / 1024) . ' MB.',
+        ], [
+            'help_image' => 'card image',
+            'help_heading' => 'card heading',
+            'help_description' => 'card description',
+        ]);
+        unset($data['help_image']);
+        $data['help_active'] = $request->boolean('help_active');
+
+        $section = ProgramSection::current();
+        if ($request->boolean('remove_help_image') && ! $request->hasFile('help_image')) {
+            Uploads::delete($section->help_image);
+            $data['help_image'] = null;
+        }
+        if ($request->hasFile('help_image')) {
+            Uploads::delete($section->help_image);
+            $data['help_image'] = Uploads::store($request->file('help_image'), 'program-help');
+        }
+        $section->fill($data)->save();
+
+        return back()->with('success', 'Contact card saved.');
+    }
+
     public function programStore(Request $request)
     {
         $data = $this->programValidated($request, true);
         $data['image'] = Uploads::store($request->file('image'), 'program');
+        if ($request->hasFile('banner_image')) {
+            $data['banner_image'] = Uploads::store($request->file('banner_image'), 'program-banner');
+        }
+        $this->programApplyIcons($request, $data, null);
         ProgramCard::create($data);
 
         return redirect()->route('admin.program.index')->with('success', 'Program card created.');
@@ -1270,6 +1316,12 @@ class HomeController extends Controller
             Uploads::delete($card->image);
             $data['image'] = Uploads::store($request->file('image'), 'program');
         }
+        if ($request->hasFile('banner_image')) {
+            Uploads::delete($card->banner_image);
+            $data['banner_image'] = Uploads::store($request->file('banner_image'), 'program-banner');
+        }
+
+        $this->programApplyIcons($request, $data, $card);
 
         $card->update($data);
 
@@ -1279,6 +1331,10 @@ class HomeController extends Controller
     public function programDestroy(ProgramCard $card)
     {
         Uploads::delete($card->image);
+        Uploads::delete($card->banner_image);
+        foreach ($this->programIconPaths($card) as $path) {
+            Uploads::delete($path);
+        }
         $card->delete();
 
         return redirect()->route('admin.program.index')->with('success', 'Program card deleted.');
@@ -1298,11 +1354,62 @@ class HomeController extends Controller
         return response()->json(['is_active' => $request->boolean('is_active')]);
     }
 
+    /** Every icon file currently stored on a card (tools + learning formats). */
+    private function programIconPaths(?ProgramCard $card): array
+    {
+        return collect($card?->tool_items ?? [])->pluck('icon')
+            ->merge(collect($card?->formats ?? [])->pluck('icon'))
+            ->filter()->values()->all();
+    }
+
+    /** Turn the submitted tool / format rows into stored items with icons; clean up icon files that are no longer used. */
+    private function programApplyIcons(Request $request, array &$data, ?ProgramCard $card): void
+    {
+        $existing = $this->programIconPaths($card);
+        $icon = function (string $path) use ($request, $existing): ?string {
+            if ($request->hasFile("{$path}.icon")) {
+                return Uploads::store($request->file("{$path}.icon"), 'program-icons');
+            }
+            $old = (string) $request->input("{$path}.icon_old");
+
+            return in_array($old, $existing, true) ? $old : null; // only keep paths that already belong to this card
+        };
+
+        $data['tool_items'] = collect($data['tool_items'] ?? [])
+            ->map(fn ($row, $k) => ['name' => $row['name'], 'icon' => $icon("tool_items.{$k}")])
+            ->values()->all();
+        $data['formats'] = collect($data['formats'] ?? [])
+            ->map(fn ($row, $k) => ['title' => $row['title'], 'description' => $row['description'] ?? '', 'icon' => $icon("formats.{$k}")])
+            ->values()->all();
+
+        $used = collect($data['tool_items'])->pluck('icon')->merge(collect($data['formats'])->pluck('icon'))->filter()->all();
+        foreach (array_diff($existing, $used) as $path) {
+            Uploads::delete($path);
+        }
+    }
+
     private function programValidated(Request $request, bool $creating): array
     {
+        $lv = config('banner.program_levels');
+        $ex = config('banner.program_extras');
+        // drop tool / format rows left blank (keys are kept so uploaded icons stay matched to their row)
+        $keepRow = fn (string $key, array $fields) => collect($request->input($key, []))
+            ->filter(fn ($r, $k) => is_array($r)
+                && (trim(implode('', array_map(fn ($f) => (string) ($r[$f] ?? ''), $fields))) !== ''
+                    || $request->hasFile("{$key}.{$k}.icon") || ! empty($r['icon_old'])))
+            ->all();
+        $request->merge([
+            'tool_items' => $keepRow('tool_items', ['name']),
+            'formats' => $keepRow('formats', ['title', 'description']),
+        ]);
+        // drop level rows the admin left completely blank
+        $request->merge(['levels' => collect($request->input('levels', []))
+            ->filter(fn ($l) => is_array($l) && trim(($l['title'] ?? '') . ($l['period'] ?? '') . ($l['points'] ?? '')) !== '')
+            ->values()->all()]);
         $c = config('banner.program_card');
         $i = $c['image'];
         $w = $c['word_max'];
+        $b = config('banner.program_banner');
 
         $rules = [
             'title' => TextRules::line(true, $c['title_min'], $c['title_max'], $w),
@@ -1337,11 +1444,86 @@ class HomeController extends Controller
             'mode' => TextRules::line(true, $c['mode_min'], $c['mode_max'], $w),
             'sort_order' => ['nullable', 'integer', 'min:0', "max:{$c['order_max']}"],
             'image' => BannerRules::image($creating, 'program_card.image'),
+            'about_text' => TextRules::line(false, config('banner.program_about.min'), config('banner.program_about.max'), config('banner.program_about.word_max')),
+            // detail-page banner (all optional)
+            'banner_image' => BannerRules::image(false, 'program_banner.image'),
+            'banner_title' => TextRules::line(false, $b['title_min'], $b['title_max'], $b['word_max']),
+            'banner_description' => TextRules::line(false, $b['description_min'], $b['description_max'], $b['word_max']),
+            'banner_levels' => ['nullable', 'integer', 'min:1', 'max:99'],
+            'banner_timeline' => TextRules::line(false, $b['timeline_min'], $b['timeline_max'], $b['word_max']),
+            // tools & digital topics (optional): a name and an optional icon each
+            'tool_items' => ['nullable', 'array', "max:{$ex['tools_max']}"],
+            'tool_items.*.name' => TextRules::line(true, $ex['tool_min'], $ex['tool_max'], $ex['word_max']),
+            'tool_items.*.icon' => BannerRules::image(false, 'program_extras.icon'),
+            'formats.*.icon' => BannerRules::image(false, 'program_extras.icon'),
+            // learning format cards (optional)
+            'formats' => ['nullable', 'array', "max:{$ex['format_max']}"],
+            'formats.*.title' => TextRules::line(true, $ex['format_title_min'], $ex['format_title_max'], $ex['word_max']),
+            'formats.*.description' => TextRules::line(false, $ex['format_desc_min'], $ex['format_desc_max'], $ex['word_max']),
+            // curriculum points for programs without levels (optional)
+            'curriculum_points' => ['nullable', 'string', function (string $attribute, mixed $value, \Closure $fail) use ($lv) {
+                $lines = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $value)), 'strlen'));
+                if (count($lines) > $lv['points_max']) {
+                    return $fail("Add at most {$lv['points_max']} curriculum points.");
+                }
+                foreach ($lines as $k => $line) {
+                    $p = $k + 1;
+                    $len = mb_strlen($line);
+                    if (! preg_match("/^[A-Za-z0-9 .,'&!?-]+$/", $line)) {
+                        return $fail("Curriculum point {$p}: only letters, numbers, spaces and . , ' - & ! ? are allowed.");
+                    }
+                    if (preg_match('/ {2,}/', $line)) {
+                        return $fail("Curriculum point {$p}: repeated spaces are not allowed.");
+                    }
+                    if ($len < $lv['point_min'] || $len > $lv['point_max']) {
+                        return $fail("Curriculum point {$p}: must be {$lv['point_min']}-{$lv['point_max']} characters (currently {$len}).");
+                    }
+                    foreach (preg_split('/\s+/', $line) as $word) {
+                        if (mb_strlen($word) > $lv['word_max']) {
+                            return $fail("Curriculum point {$p}: a word is longer than {$lv['word_max']} characters.");
+                        }
+                    }
+                }
+            }],
+            // curriculum levels (all optional)
+            'levels' => ['nullable', 'array', "max:{$lv['max_levels']}"],
+            'levels.*.title' => TextRules::line(false, $lv['title_min'], $lv['title_max'], $lv['word_max']),
+            'levels.*.period' => ['nullable', 'integer', 'min:1', 'max:99'],
+            'levels.*.points' => ['required', 'string', function (string $attribute, mixed $value, \Closure $fail) use ($lv) {
+                $lines = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $value)), 'strlen'));
+                $n = (int) explode('.', $attribute)[1] + 1;
+                if ($lines === []) {
+                    return $fail("Level {$n}: add at least one point.");
+                }
+                if (count($lines) > $lv['points_max']) {
+                    return $fail("Level {$n}: add at most {$lv['points_max']} points.");
+                }
+                foreach ($lines as $k => $line) {
+                    $p = $k + 1;
+                    $len = mb_strlen($line);
+                    if (! preg_match("/^[A-Za-z0-9 .,'&!?-]+$/", $line)) {
+                        return $fail("Level {$n}, point {$p}: only letters, numbers, spaces and . , ' - & ! ? are allowed.");
+                    }
+                    if (preg_match('/ {2,}/', $line)) {
+                        return $fail("Level {$n}, point {$p}: repeated spaces are not allowed.");
+                    }
+                    if ($len < $lv['point_min'] || $len > $lv['point_max']) {
+                        return $fail("Level {$n}, point {$p}: must be {$lv['point_min']}-{$lv['point_max']} characters (currently {$len}).");
+                    }
+                    foreach (preg_split('/\s+/', $line) as $word) {
+                        if (mb_strlen($word) > $lv['word_max']) {
+                            return $fail("Level {$n}, point {$p}: a word is longer than {$lv['word_max']} characters.");
+                        }
+                    }
+                }
+            }],
         ];
 
         $messages = BannerRules::messages()
-            + TextRules::messages(['title', 'duration', 'mode'])
+            + TextRules::messages(['title', 'duration', 'mode', 'about_text', 'banner_title', 'banner_description', 'banner_timeline', 'levels.*.title', 'tool_items.*.name', 'formats.*.title', 'formats.*.description'])
             + [
+                'banner_image.dimensions' => "The banner image must be between {$b['image']['min_width']}x{$b['image']['min_height']} and {$b['image']['max_width']}x{$b['image']['max_height']} pixels.",
+                'banner_image.max' => 'The banner image may not be larger than ' . round($b['image']['max_kb'] / 1024) . ' MB.',
                 'image.dimensions' => "The image must be between {$i['min_width']}x{$i['min_height']} and {$i['max_width']}x{$i['max_height']} pixels.",
                 'image.max' => 'The image may not be larger than ' . round($i['max_kb'] / 1024) . ' MB.',
             ];
@@ -1353,9 +1535,30 @@ class HomeController extends Controller
             'mode' => 'study mode',
             'sort_order' => 'display order',
             'image' => 'program image',
+            'banner_image' => 'banner image',
+            'about_text' => 'about this program text',
+            'banner_title' => 'banner title',
+            'banner_description' => 'banner description',
+            'banner_levels' => 'banner levels text',
+            'banner_timeline' => 'banner timeline text',
+            'curriculum_points' => 'curriculum points',
+            'tool_items.*.name' => 'tool name',
+            'tool_items.*.icon' => 'tool icon',
+            'formats.*.icon' => 'format icon',
+            'formats.*.title' => 'format title',
+            'formats.*.description' => 'format description',
+            'levels.*.title' => 'level title',
+            'levels.*.period' => 'level period',
+            'levels.*.points' => 'level points',
         ]);
 
-        unset($data['image']);
+        unset($data['image'], $data['banner_image']);
+        $data['curriculum_points'] = implode("\n", array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (string) ($data['curriculum_points'] ?? ''))), 'strlen')));
+        $data['levels'] = collect($data['levels'] ?? [])->map(fn ($l) => [
+            'title' => $l['title'] ?? '',
+            'period' => isset($l['period']) ? (string) (int) $l['period'] : '',
+            'points' => array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $l['points'])), 'strlen')),
+        ])->values()->all();
         $data['features'] = implode("\n", ProgramCard::featuresFromHtml($data['features']));
         $data['sort_order'] = $data['sort_order'] ?? 0;
         $data['is_featured'] = $request->boolean('is_featured');

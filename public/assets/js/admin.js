@@ -281,6 +281,26 @@ const Admin = (() => {
             if (v.length > el.maxLength) return `Must be at most ${el.maxLength} characters.`;
             return '';
         }
+        if (kind === 'points') { // one point per line
+            const lines = v.split(/\r\n|\r|\n/).map(x => x.trim()).filter(Boolean);
+            if (!lines.length) {
+                const row = el.closest('.lv-row');
+                const used = row && [...row.querySelectorAll('input')].some(x => x.value.trim() !== '');
+                return used ? 'Add at least one point (one per line).' : '';
+            }
+            const max = +el.dataset.maxItems, wmax = +el.dataset.wordMax, noun = el.dataset.noun || 'Point';
+            if (max && lines.length > max) return 'Add at most ' + max + ' ' + noun.toLowerCase() + 's.';
+            for (let n = 0; n < lines.length; n++) {
+                const l = lines[n], p = noun + ' ' + (n + 1) + ': ';
+                if (!LIVE_RE.test(l)) return p + "only letters, numbers, spaces and . , ' - & ! ? are allowed (no emojis, symbols or special characters).";
+                if (/ {2,}/.test(l)) return p + 'multiple spaces in a row are not allowed.';
+                if (+el.dataset.min && (l.length < +el.dataset.min || l.length > +el.dataset.max)) return p + 'must be ' + el.dataset.min + '-' + el.dataset.max + ' characters (currently ' + l.length + ').';
+                const long = wmax && l.split(/\s+/).find(w => w.length > wmax);
+                if (long) return p + '"' + long.slice(0, 12) + (long.length > 12 ? '...' : '') + '" is too long - words may be at most ' + wmax + ' characters.';
+            }
+            if (/(^|\n)[ \t]+\S/.test(v)) return 'Leading spaces are not allowed.';
+            return '';
+        }
         if (!LIVE_RE.test(v)) return "Only letters, numbers, spaces and . , ' - & ! ? are allowed (no emojis, symbols or special characters).";
         if (/^ /.test(v)) return 'Leading spaces are not allowed.';
         if (/ {2,}/.test(v)) return 'Multiple spaces in a row are not allowed.';

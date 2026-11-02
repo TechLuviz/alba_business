@@ -2,7 +2,14 @@
 
 <section class="home-hero" id="heroCarousel" data-interval="{{ ($hero->autoplay_interval ?: 6) * 1000 }}">
     @if($useVideo)
-        <video class="hero-video" src="{{ asset($video->video) }}" autoplay muted loop playsinline></video>
+        <video class="hero-video" src="{{ asset($video->video) }}" autoplay muted loop playsinline preload="auto"></video>
+        <script>
+            (function () {
+                const v = document.currentScript.previousElementSibling;
+                const show = () => v.classList.add('is-ready');
+                if (v.readyState >= 3) show(); else { v.addEventListener('canplay', show, { once: true }); v.addEventListener('loadeddata', show, { once: true }); setTimeout(show, 4000); }
+            })();
+        </script>
         <div class="hero-slide active hero-overlay">
             @include('sections.hero-content', ['item' => $video])
         </div>

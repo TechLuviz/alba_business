@@ -22,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
             $view->with([
                 'brand' => HeroBanner::current(),
                 'navItems' => NavItem::where('is_active', true)->orderBy('sort_order')->get(),
-                'footerPrograms' => ProgramCard::where('is_active', true)->orderBy('sort_order')->orderBy('id')->pluck('title'),
+                'footerPrograms' => ProgramCard::where('is_active', true)->orderBy('sort_order')->orderBy('id')->pluck('title', 'slug'),
             ]);
         });
 

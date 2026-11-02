@@ -36,6 +36,16 @@ class BannerRules
         ];
     }
 
+    public static function favicon(): array
+    {
+        return [
+            'nullable',
+            'file',
+            'mimes:png,ico,jpg,jpeg,webp',
+            'max:' . config('banner.favicon.max_kb'),
+        ];
+    }
+
     public static function video(bool $required): array
     {
         return [
@@ -68,6 +78,7 @@ class BannerRules
             'brand_name' => 'brand name',
             'brand_tagline' => 'brand tagline',
             'brand_logo' => 'logo',
+            'brand_favicon' => 'favicon',
         ];
     }
 

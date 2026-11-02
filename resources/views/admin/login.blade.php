@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Admin Login | Albatech HUB</title>
+    @include('layout.favicon')
     <link rel="stylesheet" href="{{ asset('assets/css/admin.css') }}">
 </head>
 <body class="login-body">

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class HeroBanner extends Model
 {
     protected $fillable = [
-        'brand_name', 'brand_tagline', 'brand_logo',
+        'brand_name', 'brand_tagline', 'brand_logo', 'brand_favicon',
         'heading_line_1', 'heading_line_2', 'heading_accent',
         'description', 'button_text', 'button_url',
         'autoplay_interval', 'is_active',
