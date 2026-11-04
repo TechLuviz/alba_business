@@ -5,7 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Admin Login | Albatech HUB</title>
     @include('layout.favicon')
-    <link rel="stylesheet" href="{{ asset('assets/css/admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/admin.css') }}?v={{ @filemtime(public_path('assets/css/admin.css')) }}">
+    <style>
+        .login-card .pw-wrap { position: relative; display: block; width: 100%; line-height: 0; }
+        .login-card .pw-wrap input { display: block; width: 100%; box-sizing: border-box; padding-right: 48px; line-height: normal; }
+        .login-card .pw-wrap input::-ms-reveal, .login-card .pw-wrap input::-ms-clear { display: none; }
+        .login-card .pw-toggle { position: absolute; top: 0; bottom: 0; right: 0; width: 44px; height: auto; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; background: transparent; border: 0; border-radius: 0 6px 6px 0; color: #5b6676; cursor: pointer; line-height: 0; z-index: 1; }
+        .login-card .pw-toggle:hover, .login-card .pw-toggle:focus-visible { color: #e5321b; outline: none; }
+        .login-card .pw-toggle svg { display: block; width: 20px; height: 20px; flex: none; pointer-events: none; }
+    </style>
 </head>
 <body class="login-body">
     <form method="POST" action="{{ route('admin.login.submit') }}" class="login-card">
