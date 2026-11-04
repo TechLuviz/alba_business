@@ -205,7 +205,7 @@ const Admin = (() => {
 
     /* ---- inline validation for banner canvas forms (while typing, on blur and before submit) ---- */
     const FIELDS = '.canvas-body input[name], .canvas-body textarea[name]';
-    const TEXT = '[name^=heading_], [name=description]';
+    const TEXT = '[name^=heading_], [name=description], [data-clean-text]';
     function fieldMsg(el) {
         if (el.type === 'hidden' || el.type === 'checkbox') return '';
         if (el.type === 'file') return el.files[0] ? '' : (el.dataset.err || (el.required ? 'Please choose a file.' : ''));
@@ -218,6 +218,9 @@ const Admin = (() => {
         if (!el.matches(TEXT)) return '';
         if (v !== '' && t === '') return `${label} cannot be blank spaces only.`;
         if (/[^\x20-\x7E\r\n]/.test(v) || (el.tagName !== 'TEXTAREA' && /[\r\n]/.test(v))) return 'Emojis, special unicode and control characters are not allowed.';
+        if (!/^[A-Za-z .,'&!?\r\n-]*$/.test(v)) return "Only letters, spaces and . , ' - & ! ? are allowed (no numbers, emojis, symbols or special characters).";
+        if (/^ /.test(v)) return 'Leading spaces are not allowed.';
+        if (/ {2,}/.test(v)) return 'Multiple spaces in a row are not allowed.';
         if (t === '') return el.required ? `${label} is required.` : '';
         if (el.minLength > 0 && t.length < el.minLength) return `Must be at least ${el.minLength} characters.`;
         if (el.maxLength > 0 && t.length > el.maxLength) return `Must be at most ${el.maxLength} characters.`;
@@ -303,6 +306,7 @@ const Admin = (() => {
             if (max && lines.length > max) return 'Add at most ' + max + ' ' + noun.toLowerCase() + 's.';
             for (let n = 0; n < lines.length; n++) {
                 const l = lines[n], p = noun + ' ' + (n + 1) + ': ';
+                if (el.hasAttribute('data-no-digits') && !/^[A-Za-z .,'&!?-]+$/.test(l)) return p + "only letters, spaces and . , ' - & ! ? are allowed (no numbers, emojis, symbols or special characters).";
                 if (!LIVE_RE.test(l)) return p + "only letters, numbers, spaces and . , ' - & ! ? are allowed (no emojis, symbols or special characters).";
                 if (/ {2,}/.test(l)) return p + 'multiple spaces in a row are not allowed.';
                 if (+el.dataset.min && (l.length < +el.dataset.min || l.length > +el.dataset.max)) return p + 'must be ' + el.dataset.min + '-' + el.dataset.max + ' characters (currently ' + l.length + ').';
@@ -312,6 +316,7 @@ const Admin = (() => {
             if (/(^|\n)[ \t]+\S/.test(v)) return 'Leading spaces are not allowed.';
             return '';
         }
+        if (el.hasAttribute('data-no-digits') && !/^[A-Za-z .,'&!?-]*$/.test(v)) return "Only letters, spaces and . , ' - & ! ? are allowed (no numbers, emojis, symbols or special characters).";
         if (!LIVE_RE.test(v)) return "Only letters, numbers, spaces and . , ' - & ! ? are allowed (no emojis, symbols or special characters).";
         if (/^ /.test(v)) return 'Leading spaces are not allowed.';
         if (/ {2,}/.test(v)) return 'Multiple spaces in a row are not allowed.';
@@ -442,3 +447,21 @@ document.addEventListener('DOMContentLoaded', () => {
         start();
     });
 });
+
+/* Single-paragraph textareas: Enter inserts nothing and pasted line breaks become spaces,
+   so text can never stack vertically. */
+(function () {
+  function flat(t) { return t.value.replace(/[\r\n]+/g, ' '); }
+  document.addEventListener('keydown', function (e) {
+    var t = e.target;
+    if (t && t.matches && t.matches('textarea[data-single-line],textarea[data-live="line"]') && e.key === 'Enter') e.preventDefault();
+  }, true);
+  document.addEventListener('input', function (e) {
+    var t = e.target;
+    if (t && t.matches && t.matches('textarea[data-single-line],textarea[data-live="line"]') && /[\r\n]/.test(t.value)) {
+      var pos = t.selectionStart;
+      t.value = flat(t);
+      try { t.setSelectionRange(pos, pos); } catch (x) {}
+    }
+  }, true);
+})();

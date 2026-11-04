@@ -10,9 +10,9 @@
 @endsection
 
 @section('content')
-    <p class="hint">Manage the Target Audience section appearance, typography, colors, autoplay behavior, and dynamic audience cards shown on the public homepage.</p>
+    <p class="hint">Manage the Target Audience section text, autoplay behavior, and dynamic audience cards shown on the public homepage.</p>
 
-    <div class="split" style="grid-template-columns: 1.15fr 1fr; align-items: start;">
+    <div class="split" style="grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: start;">
 
         {{-- ==================== 1. Main Section Settings ==================== --}}
         <section class="card form-card" style="max-width: 100%;">
@@ -20,9 +20,9 @@
                 @csrf
                 @method('PUT')
 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px;">
                     <h2 style="font-size: 1.15rem; font-weight: 700;">Section Settings &amp; Appearance</h2>
-                    <div class="check">
+                    <div class="check" style="white-space: nowrap;">
                         <span style="font-weight: 600; font-size: .85rem;">Section Active</span>
                         <label class="switch">
                             <input type="checkbox" name="is_active" value="1" @checked(old('is_active', $audience->is_active))>
@@ -31,10 +31,10 @@
                     </div>
                 </div>
 
-                <h3 style="font-size: .95rem; color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: 6px; margin: 10px 0 14px;">Typography &amp; Content</h3>
+                <h3 style="font-size: .95rem; color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: 6px; margin: 6px 0 10px;">Typography &amp; Content</h3>
 
-                <div class="spec" style="margin-bottom: 14px;">
-                    <strong>Text requirements:</strong> English letters, numbers, spaces and standard punctuation (<code>&amp; , . ' " - ? ! ( ) : ; /</code>) only &mdash; emojis, unicode and special symbols are strictly prevented.
+                <div class="spec" style="margin-bottom: 10px; padding: 8px 12px; font-size: .78rem;">
+                    <strong>Text:</strong> letters, spaces and <code>. , ' - &amp; ! ?</code> only &mdash; no numbers, emojis or symbols.
                 </div>
 
                 <label>Section Eyebrow Text
@@ -47,75 +47,16 @@
 
                 <label>Highlighted Heading Text (Optional)
                     <input type="text" name="highlight_text" value="{{ old('highlight_text', $audience->highlight_text) }}" maxlength="{{ config('banner.audience.highlight_max') }}" placeholder="e.g. Alba Business School" data-clean-text>
-                    <small style="color: var(--muted); font-weight: 400; font-size: .75rem;">Text matching this phrase inside the main heading will be styled in italic accent font.</small>
+                    <small style="color: var(--muted); font-weight: 400; font-size: .72rem;">Shown in italic accent font where it appears in the main heading.</small>
                 </label>
 
                 <label>Supporting Description
-                    <textarea name="description" rows="3" minlength="{{ config('banner.audience.description_min') }}" maxlength="{{ config('banner.audience.description_max') }}" placeholder="Built for ambitious minds ready to learn, build, lead, and create meaningful impact." data-clean-text>{{ old('description', $audience->description) }}</textarea>
+                    <textarea name="description" rows="2" minlength="{{ config('banner.audience.description_min') }}" maxlength="{{ config('banner.audience.description_max') }}" placeholder="Built for ambitious minds ready to learn, build, lead, and create meaningful impact." data-clean-text>{{ old('description', $audience->description) }}</textarea>
                 </label>
 
-                <div class="grid2">
-                    <label>Heading Alignment
-                        <select name="heading_align" style="padding: 10px 12px; border: 1px solid #cbd3df; border-radius: 6px; font: inherit;">
-                            @foreach(['left' => 'Left Aligned (Recommended)', 'center' => 'Center Aligned', 'right' => 'Right Aligned'] as $val => $txt)
-                                <option value="{{ $val }}" @selected(old('heading_align', $audience->heading_align) === $val)>{{ $txt }}</option>
-                            @endforeach
-                        </select>
-                    </label>
+                <h3 style="font-size: .95rem; color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: 6px; margin: 10px 0 8px;">Carousel Behavior</h3>
 
-                    <label>Accent Line Color
-                        <div class="color-input-wrap">
-                            <input type="color" class="color-swatch" value="{{ old('accent_line_color', $audience->accent_line_color ?? '#C8914A') }}" data-sync-hex="accent_line_color">
-                            <input type="text" name="accent_line_color" id="accent_line_color" value="{{ old('accent_line_color', $audience->accent_line_color ?? '#C8914A') }}" pattern="^#([A-Fa-f0-9]{3,8})$" required>
-                        </div>
-                    </label>
-                </div>
-
-                <h3 style="font-size: .95rem; color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: 6px; margin: 18px 0 14px;">Color Theme</h3>
-
-                <div class="grid2">
-                    <label>Background Color
-                        <div class="color-input-wrap">
-                            <input type="color" class="color-swatch" value="{{ old('bg_color', $audience->bg_color ?? '#FBF9F5') }}" data-sync-hex="bg_color">
-                            <input type="text" name="bg_color" id="bg_color" value="{{ old('bg_color', $audience->bg_color ?? '#FBF9F5') }}" pattern="^#([A-Fa-f0-9]{3,8})$" required>
-                        </div>
-                    </label>
-
-                    <label>Heading Color
-                        <div class="color-input-wrap">
-                            <input type="color" class="color-swatch" value="{{ old('heading_color', $audience->heading_color ?? '#0A1628') }}" data-sync-hex="heading_color">
-                            <input type="text" name="heading_color" id="heading_color" value="{{ old('heading_color', $audience->heading_color ?? '#0A1628') }}" pattern="^#([A-Fa-f0-9]{3,8})$" required>
-                        </div>
-                    </label>
-
-                    <label>Highlight Accent Color
-                        <div class="color-input-wrap">
-                            <input type="color" class="color-swatch" value="{{ old('highlight_color', $audience->highlight_color ?? '#C8914A') }}" data-sync-hex="highlight_color">
-                            <input type="text" name="highlight_color" id="highlight_color" value="{{ old('highlight_color', $audience->highlight_color ?? '#C8914A') }}" pattern="^#([A-Fa-f0-9]{3,8})$" required>
-                        </div>
-                    </label>
-
-                    <label>Description Text Color
-                        <div class="color-input-wrap">
-                            <input type="color" class="color-swatch" value="{{ old('description_color', $audience->description_color ?? '#525866') }}" data-sync-hex="description_color">
-                            <input type="text" name="description_color" id="description_color" value="{{ old('description_color', $audience->description_color ?? '#525866') }}" pattern="^#([A-Fa-f0-9]{3,8})$" required>
-                        </div>
-                    </label>
-                </div>
-
-                <h3 style="font-size: .95rem; color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: 6px; margin: 18px 0 14px;">Spacing &amp; Carousel Behavior</h3>
-
-                <div class="grid2">
-                    <label>Top Spacing (px)
-                        <input type="number" name="padding_top" min="0" max="240" value="{{ old('padding_top', $audience->padding_top ?? 90) }}" required>
-                    </label>
-
-                    <label>Bottom Spacing (px)
-                        <input type="number" name="padding_bottom" min="0" max="240" value="{{ old('padding_bottom', $audience->padding_bottom ?? 90) }}" required>
-                    </label>
-                </div>
-
-                <div class="grid2" style="margin-top: 10px;">
+                <div class="grid2" style="margin-top: 0; align-items: end;">
                     <div class="check end">
                         <span>Autoplay Carousel</span>
                         <label class="switch">
@@ -129,14 +70,14 @@
                     </label>
                 </div>
 
-                <div style="margin-top: 20px;">
+                <div style="margin-top: 12px;">
                     <button type="submit" class="btn red">Save Section Settings</button>
                 </div>
             </form>
         </section>
 
         {{-- ==================== 2. Dynamic Audience Cards ==================== --}}
-        <section class="card panel">
+        <section class="card panel" style="min-width: 0; overflow: hidden;">
             <div class="panel-head">
                 <h2>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e5321b" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h10M7 12h10M7 17h6"/></svg>
@@ -153,7 +94,8 @@
                 </div>
             </div>
 
-            <table class="tbl">
+            <div style="overflow-x: auto; max-width: 100%;">
+            <table class="tbl" style="min-width: 560px;">
                 <thead>
                     <tr>
                         <th>S.N.</th>
@@ -209,6 +151,7 @@
                 @endforelse
                 </tbody>
             </table>
+            </div>
         </section>
     </div>
 
@@ -229,20 +172,6 @@
 @push('scripts')
 <script>
     (function () {
-        // Two-way synchronization between HTML5 color inputs and hex text inputs
-        document.querySelectorAll('[data-sync-hex]').forEach(colorInput => {
-            const targetId = colorInput.dataset.syncHex;
-            const textInput = document.getElementById(targetId);
-            if (!textInput) return;
-
-            colorInput.addEventListener('input', () => { textInput.value = colorInput.value.toUpperCase(); });
-            textInput.addEventListener('input', () => {
-                if (/^#[0-9A-Fa-f]{6}$/.test(textInput.value)) {
-                    colorInput.value = textInput.value;
-                }
-            });
-        });
-
         // Next sort order calculation
         const nextOrder = {{ ($cards->max('sort_order') ?? 0) + 1 }};
 
@@ -340,13 +269,15 @@
         }
 
         // Real-time emoji, unicode, and special character prevention
-        const disallowedPattern = /[^A-Za-z0-9\s&,.'"\-?!():;\/]/g;
+        // letters, spaces and . , ' - & ! ? only: numbers, symbols, emojis and line breaks are removed as typed or pasted
+        const disallowedPattern = /[^A-Za-z .,'&!?-]/g;
 
         function sanitizeCleanFields(scope = document) {
             scope.querySelectorAll('[data-clean-text]').forEach(el => {
                 const clean = () => {
-                    if (disallowedPattern.test(el.value)) {
-                        el.value = el.value.replace(disallowedPattern, '');
+                    const cleaned = el.value.replace(disallowedPattern, '').replace(/^ +/, '').replace(/ {2,}/g, ' ');
+                    if (cleaned !== el.value) {
+                        el.value = cleaned;
                         if (typeof el.counterUpdate === 'function') el.counterUpdate();
                     }
                 };
@@ -362,6 +293,13 @@
         }
 
         sanitizeCleanFields(document);
+
+        // saved values may still contain old padding spaces: tidy them as soon as the page loads
+        document.querySelectorAll('[data-clean-text]').forEach(el => {
+            const cleaned = el.value.replace(disallowedPattern, '').replace(/^ +/, '').replace(/ {2,}/g, ' ');
+            if (cleaned !== el.value) el.value = cleaned;
+            if (typeof el.counterUpdate === 'function') el.counterUpdate();
+        });
     })();
 </script>
 @endpush

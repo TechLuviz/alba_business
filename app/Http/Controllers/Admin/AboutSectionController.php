@@ -23,10 +23,9 @@ class AboutSectionController extends Controller
         $c = config('banner.about');
         $about = AboutSection::current();
 
-        // Printable ASCII only (no emojis / unicode / control chars), no leading or repeated spaces.
-        $line = '/^(?! )(?!.*  )[ -~]+$/';
-        $paragraph = '/^(?! )(?!.*  )[ -~
-]+$/';
+        // Letters, spaces and . , ' - & ! ? only: no numbers, symbols, emojis or control chars; no leading or repeated spaces.
+        $line = "/^(?! )(?!.*  )[A-Za-z .,'&!?-]+$/";
+        $paragraph = $line;
 
         $data = $request->validate([
             'eyebrow' => ['nullable', 'string', "max:{$c['eyebrow_max']}", "regex:$line"],
@@ -36,14 +35,16 @@ class AboutSectionController extends Controller
             'secondary_image' => BannerRules::image(false, 'about_image'),
             'image_position' => ['required', Rule::in(['left', 'right'])],
         ], BannerRules::messages() + [
-            'eyebrow.regex' => 'The section label may not contain emojis, special unicode, leading spaces or repeated spaces.',
-            'heading.regex' => 'The main heading may not contain emojis, special unicode, leading spaces or repeated spaces.',
-            'description.regex' => 'The description may not contain emojis, special unicode, leading spaces or repeated spaces.',
+            'eyebrow.regex' => BannerRules::TEXT_MESSAGE,
+            'heading.regex' => BannerRules::TEXT_MESSAGE,
+            'description.regex' => BannerRules::TEXT_MESSAGE,
             'primary_image.dimensions' => $this->dimensionMessage(),
             'secondary_image.dimensions' => $this->dimensionMessage(),
             'primary_image.max' => 'The primary image may not be larger than ' . round(config('banner.about_image.max_kb') / 1024) . ' MB.',
             'secondary_image.max' => 'The secondary image may not be larger than ' . round(config('banner.about_image.max_kb') / 1024) . ' MB.',
         ], [
+            'eyebrow' => 'section label',
+            'heading' => 'main heading',
             'primary_image' => 'primary image',
             'secondary_image' => 'secondary image',
             'image_position' => 'image position',

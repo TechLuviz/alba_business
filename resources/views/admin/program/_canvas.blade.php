@@ -33,7 +33,7 @@
         <div class="media-current"></div>
 
         <label>Program title *
-            <input type="text" name="title" data-live="line" required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['title_min'] }}" maxlength="{{ $c['title_max'] }}" placeholder="{{ $hint }}">
+            <input type="text" name="title" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['title_min'] }}" maxlength="{{ $c['title_max'] }}" placeholder="{{ $hint }}">
         </label>
         <div class="rich-field">
             <span class="rich-label">Features * <em>(one bullet per feature, up to {{ $c['features_max_items'] }})</em></span>
@@ -47,7 +47,7 @@
                 <input type="number" name="duration" required min="1" max="99" step="1" inputmode="numeric" placeholder="e.g. 12">
             </label>
             <label>Study mode *
-                <input type="text" name="mode" data-live="line" required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['mode_min'] }}" maxlength="{{ $c['mode_max'] }}" placeholder="e.g. Full-time">
+                <input type="text" name="mode" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['mode_min'] }}" maxlength="{{ $c['mode_max'] }}" placeholder="e.g. Full-time">
             </label>
         </div>
         @php($b = config('banner.program_banner'))
@@ -66,10 +66,10 @@
         </label>
         <div class="media-current-banner"></div>
         <label>Banner title
-            <input type="text" name="banner_title" data-live="line" data-word-max="{{ $b['word_max'] }}" minlength="{{ $b['title_min'] }}" maxlength="{{ $b['title_max'] }}" placeholder="Leave blank to use the program title">
+            <input type="text" name="banner_title" data-live="line" data-no-digits data-word-max="{{ $b['word_max'] }}" minlength="{{ $b['title_min'] }}" maxlength="{{ $b['title_max'] }}" placeholder="Leave blank to use the program title">
         </label>
         <label>Banner description
-            <textarea name="banner_description" rows="3" data-live="line" data-word-max="{{ $b['word_max'] }}" minlength="{{ $b['description_min'] }}" maxlength="{{ $b['description_max'] }}" placeholder="{{ $hint }}"></textarea>
+            <textarea name="banner_description" rows="3" data-live="line" data-no-digits data-word-max="{{ $b['word_max'] }}" minlength="{{ $b['description_min'] }}" maxlength="{{ $b['description_max'] }}" placeholder="{{ $hint }}"></textarea>
         </label>
         <div class="grid2">
             <label>Levels text
@@ -82,13 +82,13 @@
 
         @php($ab = config('banner.program_about'))
         <label>About this program (detail page)
-            <textarea name="about_text" rows="8" data-live="line" data-word-max="{{ $ab['word_max'] }}" data-max-words="{{ $ab['max_words'] }}" minlength="{{ $ab['min'] }}" placeholder="{{ $hint }} - up to {{ $ab['max_words'] }} words"></textarea>
+            <textarea name="about_text" rows="8" data-live="line" data-no-digits data-word-max="{{ $ab['word_max'] }}" data-max-words="{{ $ab['max_words'] }}" minlength="{{ $ab['min'] }}" placeholder="{{ $hint }} - up to {{ $ab['max_words'] }} words"></textarea>
         </label>
 
         @php($lvc = config('banner.program_levels'))
         <h4 style="margin: 18px 0 6px;">Program curriculum <small style="font-weight:400;color:#7a8594">(optional, up to {{ $lvc['max_levels'] }} levels)</small></h4>
         <label>Curriculum points (for programs without levels)
-            <textarea name="curriculum_points" data-live="points" rows="4" data-min="{{ $lvc['point_min'] }}" data-max="{{ $lvc['point_max'] }}" data-max-items="{{ $lvc['points_max'] }}" data-word-max="{{ $lvc['word_max'] }}" placeholder="One point per line - shown as a plain list, not as levels"></textarea>
+            <textarea name="curriculum_points" data-live="points" data-no-digits rows="4" data-min="{{ $lvc['point_min'] }}" data-max="{{ $lvc['point_max'] }}" data-max-items="{{ $lvc['points_max'] }}" data-word-max="{{ $lvc['word_max'] }}" placeholder="One point per line - shown as a plain list, not as levels"></textarea>
         </label>
         <p class="hint">Add levels only if this program has them. Each level has an optional title, an optional period (month number, e.g. 1) and its points &mdash; one point per line, {{ $lvc['point_min'] }}-{{ $lvc['point_max'] }} characters each.</p>
         <div id="levelsList" data-max="{{ $lvc['max_levels'] }}" data-title-min="{{ $lvc['title_min'] }}" data-title-max="{{ $lvc['title_max'] }}" data-word-max="{{ $lvc['word_max'] }}" data-point-min="{{ $lvc['point_min'] }}" data-point-max="{{ $lvc['point_max'] }}" data-points-max="{{ $lvc['points_max'] }}"></div>

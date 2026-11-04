@@ -58,7 +58,7 @@
             <input type="text" name="heading_accent" value="{{ $o('heading_accent') }}" minlength="{{ $t['accent_min'] }}" maxlength="{{ $t['accent_max'] }}">
         </label>
         <label>Description ({{ $t['description_min'] }}-{{ $t['description_max'] }} characters)
-            <textarea name="description" rows="4" minlength="{{ $t['description_min'] }}" maxlength="{{ $t['description_max'] }}">{{ $o('description') }}</textarea>
+            <textarea name="description" data-single-line rows="4" minlength="{{ $t['description_min'] }}" maxlength="{{ $t['description_max'] }}">{{ $o('description') }}</textarea>
         </label>
         <div class="grid2">
             <label>Display order (0-{{ $t['order_max'] }})

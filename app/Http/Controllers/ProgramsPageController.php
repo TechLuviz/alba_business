@@ -37,10 +37,10 @@ class ProgramsPageController extends Controller
         $banner = ProgramPageBanner::current();
 
         $data = $request->validate([
-            'title' => TextRules::line(true, $c['title_min'], $c['title_max'], $c['word_max']),
-            'description' => TextRules::line(true, $c['description_min'], $c['description_max'], $c['word_max']),
+            'title' => TextRules::lineNoDigits(true, $c['title_min'], $c['title_max'], $c['word_max']),
+            'description' => TextRules::lineNoDigits(true, $c['description_min'], $c['description_max'], $c['word_max']),
             'image' => BannerRules::image(! $banner->image, 'program_page_banner'),
-        ], BannerRules::messages() + TextRules::messages(['title', 'description']) + [
+        ], BannerRules::messages() + TextRules::messagesNoDigits(['title', 'description']) + [
             'image.dimensions' => "The image must be between {$c['min_width']}x{$c['min_height']} and {$c['max_width']}x{$c['max_height']} pixels.",
             'image.max' => 'The image may not be larger than ' . round($c['max_kb'] / 1024) . ' MB.',
         ], ['title' => 'title', 'description' => 'description', 'image' => 'banner image']);
@@ -122,11 +122,11 @@ class ProgramsPageController extends Controller
         $c = config('banner.program_point');
 
         $data = $request->validate([
-            'title' => TextRules::line(true, $c['title_min'], $c['title_max'], $c['word_max']),
-            'description' => TextRules::line(false, $c['description_min'], $c['description_max'], $c['word_max']),
+            'title' => TextRules::lineNoDigits(true, $c['title_min'], $c['title_max'], $c['word_max']),
+            'description' => TextRules::lineNoDigits(false, $c['description_min'], $c['description_max'], $c['word_max']),
             'sort_order' => ['nullable', 'integer', 'min:0', "max:{$c['order_max']}"],
             'icon' => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp,svg', 'max:' . $c['icon_max_kb']],
-        ], TextRules::messages(['title', 'description']) + [
+        ], TextRules::messagesNoDigits(['title', 'description']) + [
             'icon.mimes' => 'The icon must be a PNG, SVG, WEBP or JPG file.',
             'icon.max' => 'The icon may not be larger than ' . $c['icon_max_kb'] . ' KB.',
         ], ['title' => 'title', 'description' => 'description', 'sort_order' => 'display order', 'icon' => 'icon']);

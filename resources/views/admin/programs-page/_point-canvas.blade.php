@@ -30,10 +30,10 @@
         <div class="media-current"></div>
 
         <label>Title *
-            <input type="text" name="title" data-live="line" required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['title_min'] }}" maxlength="{{ $c['title_max'] }}" placeholder="{{ $hint }}">
+            <input type="text" name="title" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['title_min'] }}" maxlength="{{ $c['title_max'] }}" placeholder="{{ $hint }}">
         </label>
         <label>Short description
-            <input type="text" name="description" data-live="line" data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['description_min'] }}" maxlength="{{ $c['description_max'] }}" placeholder="{{ $hint }}">
+            <input type="text" name="description" data-live="line" data-no-digits data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['description_min'] }}" maxlength="{{ $c['description_max'] }}" placeholder="{{ $hint }}">
         </label>
         <div class="grid2">
             <label>Display order (0-{{ $c['order_max'] }})

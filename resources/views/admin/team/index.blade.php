@@ -15,19 +15,19 @@
             @method('PUT')
             <h3>Section content</h3>
             <label>Section label (eyebrow) *
-                <input type="text" name="eyebrow" value="{{ old('eyebrow', $team->eyebrow) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+                <input type="text" name="eyebrow" value="{{ old('eyebrow', $team->eyebrow) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                        minlength="{{ $c['eyebrow_min'] }}" maxlength="{{ $c['eyebrow_max'] }}" placeholder="{{ $hint }}">
             </label>
             <label>Heading (white part) *
-                <input type="text" name="heading" value="{{ old('heading', $team->heading) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+                <input type="text" name="heading" value="{{ old('heading', $team->heading) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                        minlength="{{ $c['heading_min'] }}" maxlength="{{ $c['heading_max'] }}" placeholder="{{ $hint }}">
             </label>
             <label>Heading accent (gold part) *
-                <input type="text" name="heading_accent" value="{{ old('heading_accent', $team->heading_accent) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+                <input type="text" name="heading_accent" value="{{ old('heading_accent', $team->heading_accent) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                        minlength="{{ $c['accent_min'] }}" maxlength="{{ $c['accent_max'] }}" placeholder="{{ $hint }}">
             </label>
             <label>Description *
-                <textarea name="description" rows="3" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+                <textarea name="description" rows="3" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                           minlength="{{ $c['description_min'] }}" maxlength="{{ $c['description_max'] }}" placeholder="{{ $hint }}">{{ old('description', $team->description) }}</textarea>
             </label>
             <div class="check end" style="margin: 8px 0 16px;">

@@ -20,7 +20,7 @@
         <div class="spec">
             <strong>Card Requirements</strong>
             <ul>
-                <li>English letters, numbers, spaces and <code>&amp; , . ' " - ? ! ( ) : ; /</code> only &mdash; no emojis, unicode, or special characters.</li>
+                <li>Letters, spaces and <code>. , ' - &amp; ! ?</code> only &mdash; no numbers, emojis, unicode or special characters.</li>
                 <li>Recommended: {{ $img['recommended'] }}</li>
                 <li>Dimensions: Min {{ $img['min_width'] }} x {{ $img['min_height'] }} px &middot; Max {{ $img['max_width'] }} x {{ $img['max_height'] }} px</li>
                 <li>Formats: JPG, JPEG, PNG, or WEBP &middot; Max {{ round($img['max_kb'] / 1024) }} MB</li>

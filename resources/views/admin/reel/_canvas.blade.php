@@ -29,10 +29,10 @@
             <input type="text" name="url" data-live="url" required maxlength="{{ $c['url_max'] }}" data-hosts="{{ $hosts }}" data-names="{{ $names }}" placeholder="https://www.youtube.com/watch?v=...">
         </label>
         <label>Category label *
-            <input type="text" name="tag" data-live="line" required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['tag_min'] }}" maxlength="{{ $c['tag_max'] }}" placeholder="e.g. Founders">
+            <input type="text" name="tag" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['tag_min'] }}" maxlength="{{ $c['tag_max'] }}" placeholder="e.g. Founders">
         </label>
         <label>Card title *
-            <input type="text" name="title" data-live="line" required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['title_min'] }}" maxlength="{{ $c['title_max'] }}" placeholder="{{ $hint }}">
+            <input type="text" name="title" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['title_min'] }}" maxlength="{{ $c['title_max'] }}" placeholder="{{ $hint }}">
         </label>
         <div class="grid2">
             <label>Display order (0-{{ $c['order_max'] }})

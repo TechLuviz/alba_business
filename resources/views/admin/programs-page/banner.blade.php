@@ -31,11 +31,11 @@
 
         <h3>Banner text</h3>
         <label>Title *
-            <input type="text" name="title" value="{{ old('title', $banner->title) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+            <input type="text" name="title" value="{{ old('title', $banner->title) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                    minlength="{{ $c['title_min'] }}" maxlength="{{ $c['title_max'] }}" placeholder="{{ $hint }}">
         </label>
         <label>Description *
-            <textarea name="description" rows="3" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+            <textarea name="description" rows="3" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                       minlength="{{ $c['description_min'] }}" maxlength="{{ $c['description_max'] }}" placeholder="{{ $hint }}">{{ old('description', $banner->description) }}</textarea>
         </label>
 

@@ -33,10 +33,10 @@
         <div class="media-current"></div>
 
         <label>Member name *
-            <input type="text" name="name" data-live="line" required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['name_min'] }}" maxlength="{{ $c['name_max'] }}" placeholder="{{ $hint }}">
+            <input type="text" name="name" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['name_min'] }}" maxlength="{{ $c['name_max'] }}" placeholder="{{ $hint }}">
         </label>
         <label>Designation *
-            <input type="text" name="designation" data-live="line" required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['designation_min'] }}" maxlength="{{ $c['designation_max'] }}" placeholder="{{ $hint }}">
+            <input type="text" name="designation" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['designation_min'] }}" maxlength="{{ $c['designation_max'] }}" placeholder="{{ $hint }}">
         </label>
         <div class="grid2">
             <label>Display order (0-{{ $c['order_max'] }})

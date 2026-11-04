@@ -16,7 +16,7 @@
             @method('PUT')
             <h3>Section</h3>
             <label>Section label (eyebrow) *
-                <input type="text" name="eyebrow" value="{{ old('eyebrow', $section->eyebrow) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+                <input type="text" name="eyebrow" value="{{ old('eyebrow', $section->eyebrow) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                        minlength="{{ $c['eyebrow_min'] }}" maxlength="{{ $c['eyebrow_max'] }}" placeholder="{{ $hint }}">
             </label>
             <div class="spec">

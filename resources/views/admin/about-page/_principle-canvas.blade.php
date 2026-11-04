@@ -23,16 +23,16 @@
         </div>
 
         <label>Label *
-            <input type="text" name="label" data-live="line" required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['label_min'] }}" maxlength="{{ $c['label_max'] }}" placeholder="e.g. Our Mission">
+            <input type="text" name="label" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['label_min'] }}" maxlength="{{ $c['label_max'] }}" placeholder="e.g. Our Mission">
         </label>
         <label>Heading (dark line) *
-            <input type="text" name="heading" data-live="line" required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['heading_min'] }}" maxlength="{{ $c['heading_max'] }}" placeholder="{{ $hint }}">
+            <input type="text" name="heading" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['heading_min'] }}" maxlength="{{ $c['heading_max'] }}" placeholder="{{ $hint }}">
         </label>
         <label>Heading accent (gold italic line) *
-            <input type="text" name="heading_accent" data-live="line" required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['accent_min'] }}" maxlength="{{ $c['accent_max'] }}" placeholder="{{ $hint }}">
+            <input type="text" name="heading_accent" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['accent_min'] }}" maxlength="{{ $c['accent_max'] }}" placeholder="{{ $hint }}">
         </label>
         <label>Description *
-            <textarea name="description" rows="4" data-live="line" required data-word-max="{{ $c['long_word_max'] }}" minlength="{{ $c['description_min'] }}" maxlength="{{ $c['description_max'] }}" placeholder="{{ $hint }}"></textarea>
+            <textarea name="description" rows="4" data-live="line" data-no-digits required data-word-max="{{ $c['long_word_max'] }}" minlength="{{ $c['description_min'] }}" maxlength="{{ $c['description_max'] }}" placeholder="{{ $hint }}"></textarea>
         </label>
 
         <div class="canvas-foot">

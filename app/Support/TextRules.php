@@ -30,6 +30,28 @@ class TextRules
         ];
     }
 
+    public const MESSAGE_NO_DIGITS = "The :attribute may only contain letters, spaces and . , ' - & ! ? (no numbers, emojis, special characters, leading or repeated spaces).";
+
+    /** Same as line() but numbers are not allowed either: letters, spaces and . , ' - & ! ? only. */
+    public static function lineNoDigits(bool $required, int $min, int $max, int $wordMax): array
+    {
+        $rules = self::line($required, $min, $max, $wordMax);
+        $rules[4] = "regex:/^(?! )(?!.*  )[A-Za-z .,'&!?-]+$/";
+
+        return $rules;
+    }
+
+    /** Messages for lineNoDigits() fields. */
+    public static function messagesNoDigits(array $fields): array
+    {
+        $out = [];
+        foreach ($fields as $field) {
+            $out["{$field}.regex"] = self::MESSAGE_NO_DIGITS;
+        }
+
+        return $out;
+    }
+
     /** The shared regex message for each field. */
     public static function messages(array $fields): array
     {

@@ -14,29 +14,29 @@
 
         <h3>Heading</h3>
         <label>Section label (eyebrow) *
-            <input type="text" name="eyebrow" value="{{ old('eyebrow', $story->eyebrow) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+            <input type="text" name="eyebrow" value="{{ old('eyebrow', $story->eyebrow) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                    minlength="{{ $c['eyebrow_min'] }}" maxlength="{{ $c['eyebrow_max'] }}" placeholder="{{ $hint }}">
         </label>
         <label>Heading (dark part) *
-            <input type="text" name="heading" value="{{ old('heading', $story->heading) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+            <input type="text" name="heading" value="{{ old('heading', $story->heading) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                    minlength="{{ $c['heading_min'] }}" maxlength="{{ $c['heading_max'] }}" placeholder="{{ $hint }}">
         </label>
         <label>Heading accent (gold italic part) *
-            <input type="text" name="heading_accent" value="{{ old('heading_accent', $story->heading_accent) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+            <input type="text" name="heading_accent" value="{{ old('heading_accent', $story->heading_accent) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                    minlength="{{ $c['accent_min'] }}" maxlength="{{ $c['accent_max'] }}" placeholder="{{ $hint }}">
         </label>
 
         <h3>Story text</h3>
         <label>First paragraph *
-            <textarea name="paragraph_1" rows="5" data-live="line" required data-word-max="{{ $c['long_word_max'] }}"
+            <textarea name="paragraph_1" rows="5" data-live="line" data-no-digits required data-word-max="{{ $c['long_word_max'] }}"
                       minlength="{{ $c['para1_min'] }}" maxlength="{{ $c['para1_max'] }}" placeholder="{{ $hint }}">{{ old('paragraph_1', $story->paragraph_1) }}</textarea>
         </label>
         <label>Second paragraph *
-            <textarea name="paragraph_2" rows="4" data-live="line" required data-word-max="{{ $c['long_word_max'] }}"
+            <textarea name="paragraph_2" rows="4" data-live="line" data-no-digits required data-word-max="{{ $c['long_word_max'] }}"
                       minlength="{{ $c['para2_min'] }}" maxlength="{{ $c['para2_max'] }}" placeholder="{{ $hint }}">{{ old('paragraph_2', $story->paragraph_2) }}</textarea>
         </label>
         <label>Quote *
-            <textarea name="quote" rows="3" data-live="line" required data-word-max="{{ $c['long_word_max'] }}"
+            <textarea name="quote" rows="3" data-live="line" data-no-digits required data-word-max="{{ $c['long_word_max'] }}"
                       minlength="{{ $c['quote_min'] }}" maxlength="{{ $c['quote_max'] }}" placeholder="{{ $hint }}">{{ old('quote', $story->quote) }}</textarea>
         </label>
 
@@ -59,11 +59,11 @@
         </div>
         <div class="grid2">
             <label>Name *
-                <input type="text" name="person_name" value="{{ old('person_name', $story->person_name) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+                <input type="text" name="person_name" value="{{ old('person_name', $story->person_name) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                        minlength="{{ $c['name_min'] }}" maxlength="{{ $c['name_max'] }}" placeholder="{{ $hint }}">
             </label>
             <label>Role / designation *
-                <input type="text" name="person_role" value="{{ old('person_role', $story->person_role) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+                <input type="text" name="person_role" value="{{ old('person_role', $story->person_role) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                        minlength="{{ $c['role_min'] }}" maxlength="{{ $c['role_max'] }}" placeholder="{{ $hint }}">
             </label>
         </div>

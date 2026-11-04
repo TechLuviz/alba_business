@@ -15,19 +15,19 @@
             @method('PUT')
             <h3>Section content</h3>
             <label>Section label (eyebrow) *
-                <input type="text" name="eyebrow" value="{{ old('eyebrow', $program->eyebrow) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+                <input type="text" name="eyebrow" value="{{ old('eyebrow', $program->eyebrow) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                        minlength="{{ $c['eyebrow_min'] }}" maxlength="{{ $c['eyebrow_max'] }}" placeholder="{{ $hint }}">
             </label>
             <label>Highlighted heading line (gold) *
-                <input type="text" name="heading_accent" value="{{ old('heading_accent', $program->heading_accent) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+                <input type="text" name="heading_accent" value="{{ old('heading_accent', $program->heading_accent) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                        minlength="{{ $c['accent_min'] }}" maxlength="{{ $c['accent_max'] }}" placeholder="{{ $hint }}">
             </label>
             <label>Heading (second line) *
-                <input type="text" name="heading" value="{{ old('heading', $program->heading) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+                <input type="text" name="heading" value="{{ old('heading', $program->heading) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                        minlength="{{ $c['heading_min'] }}" maxlength="{{ $c['heading_max'] }}" placeholder="{{ $hint }}">
             </label>
             <label>Description *
-                <textarea name="description" rows="3" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+                <textarea name="description" rows="3" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                           minlength="{{ $c['description_min'] }}" maxlength="{{ $c['description_max'] }}" placeholder="{{ $hint }}">{{ old('description', $program->description) }}</textarea>
             </label>
 
@@ -75,11 +75,11 @@
                 <p class="hint" id="helpImgNote" style="display:none;color:#c0392b">Image will be removed when you click Save contact card.</p>
             @endif
             <label>Card heading
-                <input type="text" name="help_heading" value="{{ old('help_heading', $program->help_heading) }}" data-live="line" data-word-max="{{ $hp['word_max'] }}"
+                <input type="text" name="help_heading" value="{{ old('help_heading', $program->help_heading) }}" data-live="line" data-no-digits data-word-max="{{ $hp['word_max'] }}"
                        minlength="{{ $hp['heading_min'] }}" maxlength="{{ $hp['heading_max'] }}" placeholder="e.g. Have Any Questions?">
             </label>
             <label>Card description
-                <textarea name="help_description" rows="3" data-live="line" data-word-max="{{ $hp['word_max'] }}"
+                <textarea name="help_description" rows="3" data-live="line" data-no-digits data-word-max="{{ $hp['word_max'] }}"
                           minlength="{{ $hp['description_min'] }}" maxlength="{{ $hp['description_max'] }}" placeholder="{{ $hint }}">{{ old('help_description', $program->help_description) }}</textarea>
             </label>
             <div class="check end" style="margin: 8px 0 16px;">
@@ -166,7 +166,7 @@
     (function () {
         // ---- features editor: a single bullet list, one bullet per feature ----
         const $f = $('#programFeatures'), fErr = document.getElementById('featuresError');
-        const FRE = /^[A-Za-z0-9 .,'&!?-]+$/;
+        const FRE = /^[A-Za-z .,'&!?-]+$/;
         $f.summernote({
             height: 170, placeholder: 'Click the bullet-list button, then type one feature per bullet',
             toolbar: [['para', ['ul']]], disableDragAndDrop: true, shortcuts: false,
@@ -190,7 +190,7 @@
             else if (lines.length > +d.maxItems) msg = 'Add at most ' + d.maxItems + ' features.';
             else lines.some((l, i) => {
                 const n = i + 1;
-                if (!FRE.test(l)) return msg = 'Feature ' + n + ": only letters, numbers, spaces and . , ' - & ! ? are allowed (no emojis or special characters).";
+                if (!FRE.test(l)) return msg = 'Feature ' + n + ": only letters, spaces and . , ' - & ! ? are allowed (no numbers, emojis or special characters).";
                 if (/ {2,}/.test(l)) return msg = 'Feature ' + n + ': repeated spaces are not allowed.';
                 if (l.length < +d.min || l.length > +d.max) return msg = 'Feature ' + n + ': must be ' + d.min + '-' + d.max + ' characters (currently ' + l.length + ').';
                 const w = l.split(/\s+/).find(x => x.length > +d.wordMax);
@@ -249,7 +249,7 @@
             row.className = 'tl-row'; row.style.cssText = rowStyle;
             row.innerHTML = '<strong class="tl-num"></strong>'
                 + '<button type="button" class="tl-del" title="Remove" aria-label="Remove tool" style="' + delStyle + '">&times;</button>'
-                + '<label>Tool name<input type="text" data-f="name" data-live="line" data-word-max="' + d.wordMax + '" minlength="' + d.nameMin + '" maxlength="' + d.nameMax + '" value="' + escA(t.name) + '" placeholder="e.g. CRM"></label>'
+                + '<label>Tool name<input type="text" data-f="name" data-live="line" data-no-digits data-word-max="' + d.wordMax + '" minlength="' + d.nameMin + '" maxlength="' + d.nameMax + '" value="' + escA(t.name) + '" placeholder="e.g. CRM"></label>'
                 + iconHtml(t);
             bindIcon(row);
             row.querySelector('.tl-del').onclick = () => { row.remove(); renumberTl(); };
@@ -272,8 +272,8 @@
             row.className = 'fm-row'; row.style.cssText = rowStyle;
             row.innerHTML = '<strong class="fm-num"></strong>'
                 + '<button type="button" class="fm-del" title="Remove" aria-label="Remove format" style="' + delStyle + '">&times;</button>'
-                + '<label>Format title<input type="text" data-f="title" data-live="line" data-word-max="' + d.wordMax + '" minlength="' + d.titleMin + '" maxlength="' + d.titleMax + '" value="' + escA(f.title) + '" placeholder="e.g. 5 Days per Week"></label>'
-                + '<label>Format description<input type="text" data-f="description" data-live="line" data-word-max="' + d.wordMax + '" minlength="' + d.descMin + '" maxlength="' + d.descMax + '" value="' + escA(f.description) + '" placeholder="Letters, numbers, spaces and . , \' - &amp; ! ? only"></label>'
+                + '<label>Format title<input type="text" data-f="title" data-live="line" data-no-digits data-word-max="' + d.wordMax + '" minlength="' + d.titleMin + '" maxlength="' + d.titleMax + '" value="' + escA(f.title) + '" placeholder="e.g. 5 Days per Week"></label>'
+                + '<label>Format description<input type="text" data-f="description" data-live="line" data-no-digits data-word-max="' + d.wordMax + '" minlength="' + d.descMin + '" maxlength="' + d.descMax + '" value="' + escA(f.description) + '" placeholder="Letters, numbers, spaces and . , \' - &amp; ! ? only"></label>'
                 + iconHtml(f);
             bindIcon(row);
             const t = row.querySelector('[data-f=title]'), ds = row.querySelector('[data-f=description]');
@@ -299,9 +299,9 @@
             row.style.cssText = 'border:1px solid #d5dbe5;border-radius:8px;padding:12px;margin-bottom:10px;position:relative';
             row.innerHTML = '<strong class="lv-num"></strong>'
                 + '<button type="button" class="lv-del" title="Remove level" aria-label="Remove level" style="position:absolute;top:8px;right:8px;width:24px;height:24px;border:0;border-radius:50%;background:#c0392b;color:#fff;cursor:pointer;padding:0">&times;</button>'
-                + '<label>Level title<input type="text" data-f="title" data-live="line" data-word-max="' + lvList.dataset.wordMax + '" minlength="' + lvList.dataset.titleMin + '" maxlength="' + lvList.dataset.titleMax + '" value="' + esc(l.title) + '" placeholder="e.g. Business Foundations"></label>'
+                + '<label>Level title<input type="text" data-f="title" data-live="line" data-no-digits data-word-max="' + lvList.dataset.wordMax + '" minlength="' + lvList.dataset.titleMin + '" maxlength="' + lvList.dataset.titleMax + '" value="' + esc(l.title) + '" placeholder="e.g. Business Foundations"></label>'
                 + '<label>Period (month number)<input type="number" data-f="period" min="1" max="99" step="1" inputmode="numeric" value="' + esc((String(l.period || '').match(/\d+/) || [''])[0]) + '" placeholder="e.g. 1"></label>'
-                + '<label>Points * (one per line)<textarea data-f="points" data-live="points" rows="4" data-min="' + lvList.dataset.pointMin + '" data-max="' + lvList.dataset.pointMax + '" data-max-items="' + lvList.dataset.pointsMax + '" data-word-max="' + lvList.dataset.wordMax + '" placeholder="One point per line">' + esc((l.points || []).join('\n')) + '</textarea></label>';
+                + '<label>Points * (one per line)<textarea data-f="points" data-live="points" data-no-digits rows="4" data-min="' + lvList.dataset.pointMin + '" data-max="' + lvList.dataset.pointMax + '" data-max-items="' + lvList.dataset.pointsMax + '" data-word-max="' + lvList.dataset.wordMax + '" placeholder="One point per line">' + esc((l.points || []).join('\n')) + '</textarea></label>';
             row.querySelector('.lv-del').onclick = () => { row.remove(); renumber(); };
             lvList.appendChild(row); renumber();
         }

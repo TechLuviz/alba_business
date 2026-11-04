@@ -14,19 +14,19 @@
 
         <h3>Section content</h3>
         <label>Section label (eyebrow) *
-            <input type="text" name="eyebrow" value="{{ old('eyebrow', $problem->eyebrow) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+            <input type="text" name="eyebrow" value="{{ old('eyebrow', $problem->eyebrow) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                    minlength="{{ $c['eyebrow_min'] }}" maxlength="{{ $c['eyebrow_max'] }}" placeholder="{{ $hint }}">
         </label>
         <label>Heading *
-            <input type="text" name="heading" value="{{ old('heading', $problem->heading) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+            <input type="text" name="heading" value="{{ old('heading', $problem->heading) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                    minlength="{{ $c['heading_min'] }}" maxlength="{{ $c['heading_max'] }}" placeholder="{{ $hint }}">
         </label>
         <label>Highlighted heading line (gold) *
-            <input type="text" name="heading_accent" value="{{ old('heading_accent', $problem->heading_accent) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+            <input type="text" name="heading_accent" value="{{ old('heading_accent', $problem->heading_accent) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                    minlength="{{ $c['accent_min'] }}" maxlength="{{ $c['accent_max'] }}" placeholder="{{ $hint }}">
         </label>
         <label>Description *
-            <textarea name="description" rows="4" data-live="line" required data-word-max="{{ $c['description_word_max'] }}"
+            <textarea name="description" rows="4" data-live="line" data-no-digits required data-word-max="{{ $c['description_word_max'] }}"
                       minlength="{{ $c['description_min'] }}" maxlength="{{ $c['description_max'] }}" placeholder="{{ $hint }}">{{ old('description', $problem->description) }}</textarea>
         </label>
 
@@ -53,7 +53,7 @@
                         <img id="card{{ $n }}Preview" src="{{ $path ? asset($path) : '' }}" alt="" @if(!$path) style="display:none" @endif>
                     </div>
                     <label>Card {{ $n }} caption *
-                        <input type="text" name="card{{ $n }}_title" value="{{ old("card{$n}_title", $problem->{"card{$n}_title"}) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+                        <input type="text" name="card{{ $n }}_title" value="{{ old("card{$n}_title", $problem->{"card{$n}_title"}) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                                minlength="{{ $c['caption_min'] }}" maxlength="{{ $c['caption_max'] }}" placeholder="{{ $hint }}">
                     </label>
                 </div>

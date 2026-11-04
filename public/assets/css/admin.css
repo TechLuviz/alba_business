@@ -191,3 +191,13 @@ input:focus, textarea:focus { outline: 2px solid rgba(229,50,27,.25); border-col
 .toc-row { display: flex; flex-direction: column; gap: 8px; padding: 10px; background: #fff; border: 1px solid #e3e7ee; border-radius: 6px; }
 .toc-row .toc-remove { align-self: flex-end; padding: 6px 12px; }
 .toc-editor > .btn { align-self: flex-start; }
+
+/* Textareas: vertical resize only, with a readable minimum and a sane maximum */
+textarea { resize: none; min-height: 96px; max-height: 320px; overflow-y: auto; line-height: 1.5; overflow-wrap: anywhere; white-space: pre-wrap; box-sizing: border-box; }
+
+/* Login: show/hide password */
+.pw-wrap { position: relative; display: block; }
+.pw-wrap input { padding-right: 46px; }
+.pw-wrap input::-ms-reveal, .pw-wrap input::-ms-clear { display: none; }
+.pw-toggle { position: absolute; top: 0; right: 0; height: 100%; width: 44px; display: flex; align-items: center; justify-content: center; background: none; border: 0; color: #5b6676; cursor: pointer; padding: 0; }
+.pw-toggle:hover, .pw-toggle:focus-visible { color: var(--red); outline: none; }

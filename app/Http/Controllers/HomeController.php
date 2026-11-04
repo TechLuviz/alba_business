@@ -614,11 +614,11 @@ class HomeController extends Controller
         $banner = AboutBanner::current();
 
         $data = $request->validate([
-            'heading_line_1' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $w),
-            'heading_line_2' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $w),
-            'description' => TextRules::line(true, $c['description_min'], $c['description_max'], $w),
+            'heading_line_1' => TextRules::lineNoDigits(true, $c['heading_min'], $c['heading_max'], $w),
+            'heading_line_2' => TextRules::lineNoDigits(true, $c['heading_min'], $c['heading_max'], $w),
+            'description' => TextRules::lineNoDigits(true, $c['description_min'], $c['description_max'], $w),
             'image' => BannerRules::image(! $banner->image, 'about_banner'),
-        ], BannerRules::messages() + TextRules::messages(['heading_line_1', 'heading_line_2', 'description']) + [
+        ], BannerRules::messages() + TextRules::messagesNoDigits(['heading_line_1', 'heading_line_2', 'description']) + [
             'image.dimensions' => "The image must be between {$c['min_width']}x{$c['min_height']} and {$c['max_width']}x{$c['max_height']} pixels.",
             'image.max' => 'The image may not be larger than ' . round($c['max_kb'] / 1024) . ' MB.',
         ], [
@@ -656,16 +656,16 @@ class HomeController extends Controller
 
         $fields = ['eyebrow', 'heading', 'heading_accent', 'paragraph_1', 'paragraph_2', 'quote', 'person_name', 'person_role'];
         $data = $request->validate([
-            'eyebrow' => TextRules::line(true, $c['eyebrow_min'], $c['eyebrow_max'], $w),
-            'heading' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $w),
-            'heading_accent' => TextRules::line(true, $c['accent_min'], $c['accent_max'], $w),
-            'paragraph_1' => TextRules::line(true, $c['para1_min'], $c['para1_max'], $lw),
-            'paragraph_2' => TextRules::line(true, $c['para2_min'], $c['para2_max'], $lw),
-            'quote' => TextRules::line(true, $c['quote_min'], $c['quote_max'], $lw),
-            'person_name' => TextRules::line(true, $c['name_min'], $c['name_max'], $w),
-            'person_role' => TextRules::line(true, $c['role_min'], $c['role_max'], $w),
+            'eyebrow' => TextRules::lineNoDigits(true, $c['eyebrow_min'], $c['eyebrow_max'], $w),
+            'heading' => TextRules::lineNoDigits(true, $c['heading_min'], $c['heading_max'], $w),
+            'heading_accent' => TextRules::lineNoDigits(true, $c['accent_min'], $c['accent_max'], $w),
+            'paragraph_1' => TextRules::lineNoDigits(true, $c['para1_min'], $c['para1_max'], $lw),
+            'paragraph_2' => TextRules::lineNoDigits(true, $c['para2_min'], $c['para2_max'], $lw),
+            'quote' => TextRules::lineNoDigits(true, $c['quote_min'], $c['quote_max'], $lw),
+            'person_name' => TextRules::lineNoDigits(true, $c['name_min'], $c['name_max'], $w),
+            'person_role' => TextRules::lineNoDigits(true, $c['role_min'], $c['role_max'], $w),
             'image' => BannerRules::image(! $story->image, 'about_story.image'),
-        ], BannerRules::messages() + TextRules::messages($fields) + [
+        ], BannerRules::messages() + TextRules::messagesNoDigits($fields) + [
             'image.dimensions' => "The photo must be between {$i['min_width']}x{$i['min_height']} and {$i['max_width']}x{$i['max_height']} pixels.",
             'image.max' => 'The photo may not be larger than ' . round($i['max_kb'] / 1024) . ' MB.',
         ], [
@@ -709,17 +709,17 @@ class HomeController extends Controller
         $max = round($i['max_kb'] / 1024);
 
         $rules = [
-            'eyebrow' => TextRules::line(true, $c['eyebrow_min'], $c['eyebrow_max'], $w),
-            'heading_line_1' => TextRules::line(true, $c['line_min'], $c['line_max'], $w),
-            'heading_line_2' => TextRules::line(true, $c['line_min'], $c['line_max'], $w),
-            'heading_accent' => TextRules::line(true, $c['accent_min'], $c['accent_max'], $w),
-            'description' => TextRules::line(true, $c['description_min'], $c['description_max'], $c['long_word_max']),
-            'image_caption' => TextRules::line(true, $c['caption_min'], $c['caption_max'], $w),
+            'eyebrow' => TextRules::lineNoDigits(true, $c['eyebrow_min'], $c['eyebrow_max'], $w),
+            'heading_line_1' => TextRules::lineNoDigits(true, $c['line_min'], $c['line_max'], $w),
+            'heading_line_2' => TextRules::lineNoDigits(true, $c['line_min'], $c['line_max'], $w),
+            'heading_accent' => TextRules::lineNoDigits(true, $c['accent_min'], $c['accent_max'], $w),
+            'description' => TextRules::lineNoDigits(true, $c['description_min'], $c['description_max'], $c['long_word_max']),
+            'image_caption' => TextRules::lineNoDigits(true, $c['caption_min'], $c['caption_max'], $w),
             'image_main' => BannerRules::image(! $cta->image_main, 'about_cta.image'),
             'image_small' => BannerRules::image(! $cta->image_small, 'about_cta.image'),
         ];
 
-        $data = $request->validate($rules, BannerRules::messages() + TextRules::messages(['eyebrow', 'heading_line_1', 'heading_line_2', 'heading_accent', 'description', 'image_caption']) + [
+        $data = $request->validate($rules, BannerRules::messages() + TextRules::messagesNoDigits(['eyebrow', 'heading_line_1', 'heading_line_2', 'heading_accent', 'description', 'image_caption']) + [
             'image_main.dimensions' => "The large image must be between {$i['min_width']}x{$i['min_height']} and {$i['max_width']}x{$i['max_height']} pixels.",
             'image_small.dimensions' => "The small image must be between {$i['min_width']}x{$i['min_height']} and {$i['max_width']}x{$i['max_height']} pixels.",
             'image_main.max' => "The large image may not be larger than {$max} MB.",
@@ -765,10 +765,10 @@ class HomeController extends Controller
         $w = $c['word_max'];
 
         $data = $request->validate([
-            'eyebrow' => TextRules::line(true, $c['eyebrow_min'], $c['eyebrow_max'], $w),
-            'heading' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $w),
-            'heading_accent' => TextRules::line(true, $c['accent_min'], $c['accent_max'], $w),
-        ], TextRules::messages(['eyebrow', 'heading', 'heading_accent']), [
+            'eyebrow' => TextRules::lineNoDigits(true, $c['eyebrow_min'], $c['eyebrow_max'], $w),
+            'heading' => TextRules::lineNoDigits(true, $c['heading_min'], $c['heading_max'], $w),
+            'heading_accent' => TextRules::lineNoDigits(true, $c['accent_min'], $c['accent_max'], $w),
+        ], TextRules::messagesNoDigits(['eyebrow', 'heading', 'heading_accent']), [
             'eyebrow' => 'section label',
             'heading' => 'heading',
             'heading_accent' => 'heading accent',
@@ -797,9 +797,9 @@ class HomeController extends Controller
         $section = AboutPrincipleSection::current();
 
         $data = $request->validate([
-            'eyebrow' => TextRules::line(true, $c['eyebrow_min'], $c['eyebrow_max'], $c['word_max']),
+            'eyebrow' => TextRules::lineNoDigits(true, $c['eyebrow_min'], $c['eyebrow_max'], $c['word_max']),
             'image' => BannerRules::image(! $section->image, 'principles.image'),
-        ], BannerRules::messages() + TextRules::messages(['eyebrow']) + [
+        ], BannerRules::messages() + TextRules::messagesNoDigits(['eyebrow']) + [
             'image.dimensions' => "The image must be between {$i['min_width']}x{$i['min_height']} and {$i['max_width']}x{$i['max_height']} pixels.",
             'image.max' => 'The image may not be larger than ' . round($i['max_kb'] / 1024) . ' MB.',
         ], ['eyebrow' => 'section label', 'image' => 'section image']);
@@ -824,11 +824,11 @@ class HomeController extends Controller
         $w = $c['word_max'];
 
         $data = $request->validate([
-            'label' => TextRules::line(true, $c['label_min'], $c['label_max'], $w),
-            'heading' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $w),
-            'heading_accent' => TextRules::line(true, $c['accent_min'], $c['accent_max'], $w),
-            'description' => TextRules::line(true, $c['description_min'], $c['description_max'], $c['long_word_max']),
-        ], TextRules::messages(['label', 'heading', 'heading_accent', 'description']), [
+            'label' => TextRules::lineNoDigits(true, $c['label_min'], $c['label_max'], $w),
+            'heading' => TextRules::lineNoDigits(true, $c['heading_min'], $c['heading_max'], $w),
+            'heading_accent' => TextRules::lineNoDigits(true, $c['accent_min'], $c['accent_max'], $w),
+            'description' => TextRules::lineNoDigits(true, $c['description_min'], $c['description_max'], $c['long_word_max']),
+        ], TextRules::messagesNoDigits(['label', 'heading', 'heading_accent', 'description']), [
             'label' => 'label',
             'heading' => 'heading',
             'heading_accent' => 'heading accent',
@@ -914,11 +914,11 @@ class HomeController extends Controller
         $w = $c['word_max'];
 
         $data = $request->validate([
-            'eyebrow' => TextRules::line(true, $c['eyebrow_min'], $c['eyebrow_max'], $w),
-            'heading' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $w),
-            'heading_accent' => TextRules::line(true, $c['accent_min'], $c['accent_max'], $w),
-            'description' => TextRules::line(true, $c['description_min'], $c['description_max'], $w),
-        ], TextRules::messages(['eyebrow', 'heading', 'heading_accent', 'description']), [
+            'eyebrow' => TextRules::lineNoDigits(true, $c['eyebrow_min'], $c['eyebrow_max'], $w),
+            'heading' => TextRules::lineNoDigits(true, $c['heading_min'], $c['heading_max'], $w),
+            'heading_accent' => TextRules::lineNoDigits(true, $c['accent_min'], $c['accent_max'], $w),
+            'description' => TextRules::lineNoDigits(true, $c['description_min'], $c['description_max'], $w),
+        ], TextRules::messagesNoDigits(['eyebrow', 'heading', 'heading_accent', 'description']), [
             'eyebrow' => 'section label',
             'heading' => 'heading',
             'heading_accent' => 'heading accent',
@@ -977,8 +977,8 @@ class HomeController extends Controller
         $names = implode(', ', array_unique(array_values(ReelCard::PLATFORMS)));
 
         $rules = [
-            'tag' => TextRules::line(true, $c['tag_min'], $c['tag_max'], $w),
-            'title' => TextRules::line(true, $c['title_min'], $c['title_max'], $w),
+            'tag' => TextRules::lineNoDigits(true, $c['tag_min'], $c['tag_max'], $w),
+            'title' => TextRules::lineNoDigits(true, $c['title_min'], $c['title_max'], $w),
             'url' => ['required', 'string', "max:{$c['url_max']}", 'regex:/^https:\/\/[^\s]+$/', function (string $attribute, mixed $value, \Closure $fail) use ($names) {
                 if (ReelCard::platformFor($value) === null) {
                     $fail("The video link must be a https link from one of: {$names}.");
@@ -987,7 +987,7 @@ class HomeController extends Controller
             'sort_order' => ['nullable', 'integer', 'min:0', "max:{$c['order_max']}"],
         ];
 
-        $messages = TextRules::messages(['tag', 'title']) + [
+        $messages = TextRules::messagesNoDigits(['tag', 'title']) + [
             'url.regex' => 'The video link must start with https:// and contain no spaces.',
         ];
 
@@ -1199,13 +1199,13 @@ class HomeController extends Controller
         $w = $c['word_max'];
 
         $rules = [
-            'name' => TextRules::line(true, $c['name_min'], $c['name_max'], $w),
-            'designation' => TextRules::line(true, $c['designation_min'], $c['designation_max'], $w),
+            'name' => TextRules::lineNoDigits(true, $c['name_min'], $c['name_max'], $w),
+            'designation' => TextRules::lineNoDigits(true, $c['designation_min'], $c['designation_max'], $w),
             'sort_order' => ['nullable', 'integer', 'min:0', "max:{$c['order_max']}"],
             'image' => BannerRules::image($creating, 'team_member.image'),
         ];
 
-        $messages = BannerRules::messages() + TextRules::messages(['name', 'designation']) + [
+        $messages = BannerRules::messages() + TextRules::messagesNoDigits(['name', 'designation']) + [
             'image.dimensions' => "The image must be between {$i['min_width']}x{$i['min_height']} and {$i['max_width']}x{$i['max_height']} pixels.",
             'image.max' => 'The image may not be larger than ' . round($i['max_kb'] / 1024) . ' MB.',
         ];
@@ -1249,11 +1249,11 @@ class HomeController extends Controller
         $w = $c['word_max'];
 
         $data = $request->validate([
-            'eyebrow' => TextRules::line(true, $c['eyebrow_min'], $c['eyebrow_max'], $w),
-            'heading_accent' => TextRules::line(true, $c['accent_min'], $c['accent_max'], $w),
-            'heading' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $w),
-            'description' => TextRules::line(true, $c['description_min'], $c['description_max'], $w),
-        ], TextRules::messages(['eyebrow', 'heading_accent', 'heading', 'description']), [
+            'eyebrow' => TextRules::lineNoDigits(true, $c['eyebrow_min'], $c['eyebrow_max'], $w),
+            'heading_accent' => TextRules::lineNoDigits(true, $c['accent_min'], $c['accent_max'], $w),
+            'heading' => TextRules::lineNoDigits(true, $c['heading_min'], $c['heading_max'], $w),
+            'description' => TextRules::lineNoDigits(true, $c['description_min'], $c['description_max'], $w),
+        ], TextRules::messagesNoDigits(['eyebrow', 'heading_accent', 'heading', 'description']), [
             'eyebrow' => 'section label',
             'heading_accent' => 'highlighted heading line',
             'heading' => 'heading',
@@ -1272,9 +1272,9 @@ class HomeController extends Controller
 
         $data = $request->validate([
             'help_image' => BannerRules::image(false, 'program_help.image'),
-            'help_heading' => TextRules::line(false, $h['heading_min'], $h['heading_max'], $h['word_max']),
-            'help_description' => TextRules::line(false, $h['description_min'], $h['description_max'], $h['word_max']),
-        ], TextRules::messages(['help_heading', 'help_description']) + [
+            'help_heading' => TextRules::lineNoDigits(false, $h['heading_min'], $h['heading_max'], $h['word_max']),
+            'help_description' => TextRules::lineNoDigits(false, $h['description_min'], $h['description_max'], $h['word_max']),
+        ], TextRules::messagesNoDigits(['help_heading', 'help_description']) + [
             'help_image.dimensions' => "The card image must be between {$h['image']['min_width']}x{$h['image']['min_height']} and {$h['image']['max_width']}x{$h['image']['max_height']} pixels.",
             'help_image.max' => 'The card image may not be larger than ' . round($h['image']['max_kb'] / 1024) . ' MB.',
         ], [
@@ -1416,7 +1416,7 @@ class HomeController extends Controller
         $b = config('banner.program_banner');
 
         $rules = [
-            'title' => TextRules::line(true, $c['title_min'], $c['title_max'], $w),
+            'title' => TextRules::lineNoDigits(true, $c['title_min'], $c['title_max'], $w),
             'features' => ['required', 'string', function (string $attribute, mixed $value, \Closure $fail) use ($c) {
                 $lines = ProgramCard::featuresFromHtml($value);
                 if ($lines === []) {
@@ -1428,8 +1428,8 @@ class HomeController extends Controller
                 foreach ($lines as $n => $line) {
                     $pos = $n + 1;
                     $len = mb_strlen($line);
-                    if (! preg_match("/^[A-Za-z0-9 .,'&!?-]+$/", $line)) {
-                        return $fail("Feature {$pos} may only contain letters, numbers, spaces and . , ' - & ! ? (no emojis or special characters).");
+                    if (! preg_match("/^[A-Za-z .,'&!?-]+$/", $line)) {
+                        return $fail("Feature {$pos} may only contain letters, spaces and . , ' - & ! ? (no numbers, emojis or special characters).");
                     }
                     if (preg_match('/ {2,}/', $line)) {
                         return $fail("Feature {$pos} may not contain repeated spaces.");
@@ -1445,10 +1445,10 @@ class HomeController extends Controller
                 }
             }],
             'duration' => ['required', 'integer', 'min:1', 'max:99'],
-            'mode' => TextRules::line(true, $c['mode_min'], $c['mode_max'], $w),
+            'mode' => TextRules::lineNoDigits(true, $c['mode_min'], $c['mode_max'], $w),
             'sort_order' => ['nullable', 'integer', 'min:0', "max:{$c['order_max']}"],
             'image' => BannerRules::image($creating, 'program_card.image'),
-            'about_text' => array_merge(TextRules::line(false, config('banner.program_about.min'), config('banner.program_about.max'), config('banner.program_about.word_max')), [function (string $attribute, mixed $value, \Closure $fail) {
+            'about_text' => array_merge(TextRules::lineNoDigits(false, config('banner.program_about.min'), config('banner.program_about.max'), config('banner.program_about.word_max')), [function (string $attribute, mixed $value, \Closure $fail) {
                 $max = config('banner.program_about.max_words');
                 $words = count(preg_split('/\s+/u', trim((string) $value), -1, PREG_SPLIT_NO_EMPTY));
                 if ($words > $max) {
@@ -1457,19 +1457,19 @@ class HomeController extends Controller
             }]),
             // detail-page banner (all optional)
             'banner_image' => BannerRules::image(false, 'program_banner.image'),
-            'banner_title' => TextRules::line(false, $b['title_min'], $b['title_max'], $b['word_max']),
-            'banner_description' => TextRules::line(false, $b['description_min'], $b['description_max'], $b['word_max']),
+            'banner_title' => TextRules::lineNoDigits(false, $b['title_min'], $b['title_max'], $b['word_max']),
+            'banner_description' => TextRules::lineNoDigits(false, $b['description_min'], $b['description_max'], $b['word_max']),
             'banner_levels' => ['nullable', 'integer', 'min:1', 'max:99'],
             'banner_timeline' => TextRules::line(false, $b['timeline_min'], $b['timeline_max'], $b['word_max']),
             // tools & digital topics (optional): a name and an optional icon each
             'tool_items' => ['nullable', 'array', "max:{$ex['tools_max']}"],
-            'tool_items.*.name' => TextRules::line(true, $ex['tool_min'], $ex['tool_max'], $ex['word_max']),
+            'tool_items.*.name' => TextRules::lineNoDigits(true, $ex['tool_min'], $ex['tool_max'], $ex['word_max']),
             'tool_items.*.icon' => BannerRules::image(false, 'program_extras.icon'),
             'formats.*.icon' => BannerRules::image(false, 'program_extras.icon'),
             // learning format cards (optional)
             'formats' => ['nullable', 'array', "max:{$ex['format_max']}"],
-            'formats.*.title' => TextRules::line(true, $ex['format_title_min'], $ex['format_title_max'], $ex['word_max']),
-            'formats.*.description' => TextRules::line(false, $ex['format_desc_min'], $ex['format_desc_max'], $ex['word_max']),
+            'formats.*.title' => TextRules::lineNoDigits(true, $ex['format_title_min'], $ex['format_title_max'], $ex['word_max']),
+            'formats.*.description' => TextRules::lineNoDigits(false, $ex['format_desc_min'], $ex['format_desc_max'], $ex['word_max']),
             // curriculum points for programs without levels (optional)
             'curriculum_points' => ['nullable', 'string', function (string $attribute, mixed $value, \Closure $fail) use ($lv) {
                 $lines = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $value)), 'strlen'));
@@ -1479,8 +1479,8 @@ class HomeController extends Controller
                 foreach ($lines as $k => $line) {
                     $p = $k + 1;
                     $len = mb_strlen($line);
-                    if (! preg_match("/^[A-Za-z0-9 .,'&!?-]+$/", $line)) {
-                        return $fail("Curriculum point {$p}: only letters, numbers, spaces and . , ' - & ! ? are allowed.");
+                    if (! preg_match("/^[A-Za-z .,'&!?-]+$/", $line)) {
+                        return $fail("Curriculum point {$p}: only letters, spaces and . , ' - & ! ? are allowed.");
                     }
                     if (preg_match('/ {2,}/', $line)) {
                         return $fail("Curriculum point {$p}: repeated spaces are not allowed.");
@@ -1497,7 +1497,7 @@ class HomeController extends Controller
             }],
             // curriculum levels (all optional)
             'levels' => ['nullable', 'array', "max:{$lv['max_levels']}"],
-            'levels.*.title' => TextRules::line(false, $lv['title_min'], $lv['title_max'], $lv['word_max']),
+            'levels.*.title' => TextRules::lineNoDigits(false, $lv['title_min'], $lv['title_max'], $lv['word_max']),
             'levels.*.period' => ['nullable', 'integer', 'min:1', 'max:99'],
             'levels.*.points' => ['required', 'string', function (string $attribute, mixed $value, \Closure $fail) use ($lv) {
                 $lines = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $value)), 'strlen'));
@@ -1511,8 +1511,8 @@ class HomeController extends Controller
                 foreach ($lines as $k => $line) {
                     $p = $k + 1;
                     $len = mb_strlen($line);
-                    if (! preg_match("/^[A-Za-z0-9 .,'&!?-]+$/", $line)) {
-                        return $fail("Level {$n}, point {$p}: only letters, numbers, spaces and . , ' - & ! ? are allowed.");
+                    if (! preg_match("/^[A-Za-z .,'&!?-]+$/", $line)) {
+                        return $fail("Level {$n}, point {$p}: only letters, spaces and . , ' - & ! ? are allowed.");
                     }
                     if (preg_match('/ {2,}/', $line)) {
                         return $fail("Level {$n}, point {$p}: repeated spaces are not allowed.");
@@ -1530,7 +1530,7 @@ class HomeController extends Controller
         ];
 
         $messages = BannerRules::messages()
-            + TextRules::messages(['title', 'duration', 'mode', 'about_text', 'banner_title', 'banner_description', 'banner_timeline', 'levels.*.title', 'tool_items.*.name', 'formats.*.title', 'formats.*.description'])
+            + TextRules::messages(['duration', 'banner_timeline']) + TextRules::messagesNoDigits(['title', 'mode', 'about_text', 'banner_title', 'banner_description', 'levels.*.title', 'tool_items.*.name', 'formats.*.title', 'formats.*.description'])
             + [
                 'banner_image.dimensions' => "The banner image must be between {$b['image']['min_width']}x{$b['image']['min_height']} and {$b['image']['max_width']}x{$b['image']['max_height']} pixels.",
                 'banner_image.max' => 'The banner image may not be larger than ' . round($b['image']['max_kb'] / 1024) . ' MB.',

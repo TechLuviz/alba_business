@@ -21,9 +21,9 @@ class ProblemSectionController extends Controller
         $i = $c['image'];
         $problem = ProblemSection::current();
 
-        // Letters, digits, spaces and . , ' - & ! ? only; no leading or repeated spaces; no overlong words.
+        // Letters, spaces and . , ' - & ! ? only (no numbers); no leading or repeated spaces; no overlong words.
         $text = fn (int $wordMax) => [
-            "regex:/^(?! )(?!.*  )[A-Za-z0-9 .,'&!?-]+$/",
+            "regex:/^(?! )(?!.*  )[A-Za-z .,'&!?-]+$/",
             function (string $attribute, mixed $value, \Closure $fail) use ($wordMax) {
                 foreach (preg_split('/\s+/', (string) $value) as $word) {
                     if (mb_strlen($word) > $wordMax) {
@@ -58,7 +58,7 @@ class ProblemSectionController extends Controller
             $messages["card{$n}_image.max"] = "Card {$n} image may not be larger than " . round($i['max_kb'] / 1024) . ' MB.';
         }
         foreach (['eyebrow', 'heading', 'heading_accent', 'description', 'card1_title', 'card2_title', 'card3_title', 'card4_title'] as $field) {
-            $messages["{$field}.regex"] = "The {$attributes[$field]} may only contain letters, numbers, spaces and . , ' - & ! ? (no emojis, special characters, leading or repeated spaces).";
+            $messages["{$field}.regex"] = "The {$attributes[$field]} may only contain letters, spaces and . , ' - & ! ? (no numbers, emojis, special characters, leading or repeated spaces).";
         }
 
         $data = $request->validate($rules, $messages, $attributes);

@@ -31,15 +31,15 @@
 
         <h3>Banner text</h3>
         <label>Heading line 1 *
-            <input type="text" name="heading_line_1" value="{{ old('heading_line_1', $banner->heading_line_1) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+            <input type="text" name="heading_line_1" value="{{ old('heading_line_1', $banner->heading_line_1) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                    minlength="{{ $c['heading_min'] }}" maxlength="{{ $c['heading_max'] }}" placeholder="{{ $hint }}">
         </label>
         <label>Heading line 2 *
-            <input type="text" name="heading_line_2" value="{{ old('heading_line_2', $banner->heading_line_2) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+            <input type="text" name="heading_line_2" value="{{ old('heading_line_2', $banner->heading_line_2) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                    minlength="{{ $c['heading_min'] }}" maxlength="{{ $c['heading_max'] }}" placeholder="{{ $hint }}">
         </label>
         <label>Description *
-            <textarea name="description" rows="3" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+            <textarea name="description" rows="3" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                       minlength="{{ $c['description_min'] }}" maxlength="{{ $c['description_max'] }}" placeholder="{{ $hint }}">{{ old('description', $banner->description) }}</textarea>
         </label>
 

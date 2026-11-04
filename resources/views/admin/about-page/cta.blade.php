@@ -14,25 +14,25 @@
 
         <h3>Text</h3>
         <label>Section label (eyebrow) *
-            <input type="text" name="eyebrow" value="{{ old('eyebrow', $cta->eyebrow) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+            <input type="text" name="eyebrow" value="{{ old('eyebrow', $cta->eyebrow) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                    minlength="{{ $c['eyebrow_min'] }}" maxlength="{{ $c['eyebrow_max'] }}" placeholder="{{ $hint }}">
         </label>
         <div class="grid2">
             <label>Heading line 1 *
-                <input type="text" name="heading_line_1" value="{{ old('heading_line_1', $cta->heading_line_1) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+                <input type="text" name="heading_line_1" value="{{ old('heading_line_1', $cta->heading_line_1) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                        minlength="{{ $c['line_min'] }}" maxlength="{{ $c['line_max'] }}" placeholder="{{ $hint }}">
             </label>
             <label>Heading line 2 *
-                <input type="text" name="heading_line_2" value="{{ old('heading_line_2', $cta->heading_line_2) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+                <input type="text" name="heading_line_2" value="{{ old('heading_line_2', $cta->heading_line_2) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                        minlength="{{ $c['line_min'] }}" maxlength="{{ $c['line_max'] }}" placeholder="{{ $hint }}">
             </label>
         </div>
         <label>Heading accent (gold italic line) *
-            <input type="text" name="heading_accent" value="{{ old('heading_accent', $cta->heading_accent) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+            <input type="text" name="heading_accent" value="{{ old('heading_accent', $cta->heading_accent) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                    minlength="{{ $c['accent_min'] }}" maxlength="{{ $c['accent_max'] }}" placeholder="{{ $hint }}">
         </label>
         <label>Description *
-            <textarea name="description" rows="3" data-live="line" required data-word-max="{{ $c['long_word_max'] }}"
+            <textarea name="description" rows="3" data-live="line" data-no-digits required data-word-max="{{ $c['long_word_max'] }}"
                       minlength="{{ $c['description_min'] }}" maxlength="{{ $c['description_max'] }}" placeholder="{{ $hint }}">{{ old('description', $cta->description) }}</textarea>
         </label>
         <p class="hint">The "Get in touch" button is static and is changed in the code.</p>
@@ -61,7 +61,7 @@
             @endforeach
         </div>
         <label>Small image caption *
-            <input type="text" name="image_caption" value="{{ old('image_caption', $cta->image_caption) }}" data-live="line" required data-word-max="{{ $c['word_max'] }}"
+            <input type="text" name="image_caption" value="{{ old('image_caption', $cta->image_caption) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
                    minlength="{{ $c['caption_min'] }}" maxlength="{{ $c['caption_max'] }}" placeholder="{{ $hint }}">
         </label>
 

@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 class AudienceCardController extends Controller
 {
     /** Letters, digits, whitespace, and only standard safe punctuation: & , . ' " - ? ! ( ) : ; / */
-    private const TEXT_PATTERN = '/^[A-Za-z0-9\s&,.\'"\-?!():;\/]+$/D';
+    private const TEXT_PATTERN = '/^[A-Za-z .,\'&!?-]+$/D';
 
     public function store(Request $request)
     {
@@ -77,7 +77,7 @@ class AudienceCardController extends Controller
             'image_alt' => $this->clean($request->input('image_alt')),
         ]);
 
-        $textMsg = 'The :attribute may only contain English letters, numbers, spaces and standard punctuation & , . \' " - ? ! ( ) : ; / (no emojis, unicode, or special characters).';
+        $textMsg = 'The :attribute may only contain letters, spaces and . , \' - & ! ? (no numbers, emojis, unicode or special characters).';
 
         $rules = [
             'title' => ['required', 'string', "min:{$c['title_min']}", "max:{$c['title_max']}", 'regex:' . self::TEXT_PATTERN],
@@ -122,7 +122,7 @@ class AudienceCardController extends Controller
     private function clean(?string $v): ?string
     {
         if ($v === null) return null;
-        $v = trim($v);
+        $v = trim(preg_replace('/\s+/', ' ', $v));
         return $v === '' ? null : $v;
     }
 }

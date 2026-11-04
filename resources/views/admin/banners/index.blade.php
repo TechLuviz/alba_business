@@ -39,9 +39,35 @@
             </table>
             <form method="POST" action="{{ route('admin.banners.interval') }}" class="panel-foot">
                 @csrf
-                <label>Seconds between slides (2-30) <input type="number" name="autoplay_interval" min="2" max="30" value="{{ $interval }}" required></label>
+                <label>Seconds between slides (2-30) <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" name="autoplay_interval" id="autoplay_interval" value="{{ $interval }}" required></label>
                 <button class="btn small">Save</button>
+                <small id="autoplay_interval_error" class="field-error" style="display:none;color:#d93025;width:100%"></small>
             </form>
+            <script>
+            (function () {
+                var input = document.getElementById('autoplay_interval');
+                var err = document.getElementById('autoplay_interval_error');
+                var form = input.closest('form');
+                function show(msg) { err.textContent = msg; err.style.display = msg ? 'block' : 'none'; input.style.borderColor = msg ? '#d93025' : ''; }
+                function check() {
+                    var v = input.value;
+                    if (v === '') { show('Please enter a whole number between 2 and 30.'); return false; }
+                    var n = parseInt(v, 10);
+                    if (n < 2 || n > 30) { show('Value must be between 2 and 30.'); return false; }
+                    show(''); return true;
+                }
+                input.addEventListener('keydown', function (e) {
+                    if (e.ctrlKey || e.metaKey || e.altKey || e.key.length > 1) return; // allow navigation/editing keys
+                    if (!/^[0-9]$/.test(e.key)) { e.preventDefault(); show('Only whole numbers are allowed (no decimals, letters or symbols).'); }
+                });
+                input.addEventListener('input', function () {
+                    var cleaned = input.value.replace(/\D/g, '');
+                    if (cleaned !== input.value) { input.value = cleaned; show('Only whole numbers are allowed (no decimals, letters or symbols).'); }
+                    else if (input.value !== '') check(); else show('');
+                });
+                form.addEventListener('submit', function (e) { if (!check()) e.preventDefault(); });
+            })();
+            </script>
         </section>
 
         {{-- ============ Video banners ============ --}}
@@ -49,7 +75,6 @@
             <div class="panel-head">
                 <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7a2a8a" stroke-width="2"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg> Video Banners</h2>
                 <div class="panel-tools">
-                    <label class="toggle-all"><span class="switch"><input type="checkbox" data-toggle-all="{{ route('admin.banners.video.toggle-all') }}" data-group="video" @checked($videos->isNotEmpty() && $videos->every->is_active)><i></i></span> Toggle All</label>
                     <button type="button" class="btn red" id="createVideo">+ Create Video</button>
                 </div>
             </div>

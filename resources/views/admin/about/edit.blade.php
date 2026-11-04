@@ -7,19 +7,19 @@
 @section('content')
     @php($c = config('banner.about'))
     @php($img = config('banner.about_image'))
-    <form method="POST" action="{{ route('admin.about.update') }}" enctype="multipart/form-data" class="card form-card" id="aboutForm">
+    <form method="POST" action="{{ route('admin.about.update') }}" enctype="multipart/form-data" class="card form-card" id="aboutForm" data-live-validate>
         @csrf
         @method('PUT')
 
         <h3>Section content</h3>
         <label>Section label (eyebrow)
-            <input type="text" name="eyebrow" value="{{ old('eyebrow', $about->eyebrow) }}" maxlength="{{ $c['eyebrow_max'] }}">
+            <input type="text" name="eyebrow" data-live="line" data-no-digits value="{{ old('eyebrow', $about->eyebrow) }}" maxlength="{{ $c['eyebrow_max'] }}">
         </label>
         <label>Main heading
-            <input type="text" name="heading" value="{{ old('heading', $about->heading) }}" minlength="{{ $c['heading_min'] }}" maxlength="{{ $c['heading_max'] }}">
+            <input type="text" name="heading" data-live="line" data-no-digits value="{{ old('heading', $about->heading) }}" minlength="{{ $c['heading_min'] }}" maxlength="{{ $c['heading_max'] }}">
         </label>
         <label>Description
-            <textarea name="description" rows="4" minlength="{{ $c['description_min'] }}" maxlength="{{ $c['description_max'] }}">{{ old('description', $about->description) }}</textarea>
+            <textarea name="description" data-live="line" data-no-digits rows="4" minlength="{{ $c['description_min'] }}" maxlength="{{ $c['description_max'] }}">{{ old('description', $about->description) }}</textarea>
         </label>
 
         <h3>Images</h3>
@@ -37,7 +37,9 @@
                 <div class="img-field">
                     <label>{{ $label }}
                         <input type="file" name="{{ $key }}_image" accept="image/png,image/jpeg,image/webp" data-image-input="{{ $key }}"
-                               data-max-kb="{{ $img['max_kb'] }}">
+                               data-max-kb="{{ $img['max_kb'] }}" data-min-w="{{ $img['min_width'] }}" data-min-h="{{ $img['min_height'] }}"
+                               data-max-w="{{ $img['max_width'] }}" data-max-h="{{ $img['max_height'] }}">
+                        <small class="help">Image must be between {{ $img['min_width'] }}x{{ $img['min_height'] }} and {{ $img['max_width'] }}x{{ $img['max_height'] }} pixels (max {{ round($img['max_kb'] / 1024) }} MB).</small>
                         <span class="field-error" data-error="{{ $key }}"></span>
                     </label>
                     <div class="preview">

@@ -5,14 +5,17 @@ namespace App\Support;
 /** Shared validation rules for hero banners (dynamic + video) and brand settings. */
 class BannerRules
 {
+    public const TEXT_MESSAGE = "The :attribute may only contain letters, spaces and . , ' - & ! ? (no numbers, emojis, special characters, leading or repeated spaces).";
+
     public static function text(bool $headingRequired): array
     {
         $t = config('banner.text');
 
         // Input is trimmed by Laravel's TrimStrings middleware (whitespace-only becomes empty).
-        // Printable ASCII only: no emojis, unicode or control characters.
-        $line = '/^[\x20-\x7E]+$/';
-        $paragraph = '/^[\x20-\x7E\r\n]+$/';
+        // Letters, spaces and . , ' - & ! ? only (no numbers):
+        // no emojis, unicode, control characters or symbols such as # @ $ % *; no leading or repeated spaces.
+        $line = "/^(?! )(?!.*  )[A-Za-z .,'&!?-]+$/";
+        $paragraph = "/^(?! )(?!.*  )[A-Za-z .,'&!?-]+$/";
 
         return [
             'heading_line_1' => [$headingRequired ? 'required' : 'nullable', 'string', "min:{$t['heading_min']}", "max:{$t['heading_max']}", "regex:$line"],
@@ -85,10 +88,10 @@ class BannerRules
     public static function messages(): array
     {
         return [
-            'heading_line_1.regex' => 'Heading line 1 may only contain standard keyboard characters (no emojis or special unicode).',
-            'heading_line_2.regex' => 'Heading line 2 may only contain standard keyboard characters (no emojis or special unicode).',
-            'heading_accent.regex' => 'The heading accent may only contain standard keyboard characters (no emojis or special unicode).',
-            'description.regex' => 'The description may only contain standard keyboard characters (no emojis or special unicode).',
+            'heading_line_1.regex' => self::TEXT_MESSAGE,
+            'heading_line_2.regex' => self::TEXT_MESSAGE,
+            'heading_accent.regex' => self::TEXT_MESSAGE,
+            'description.regex' => self::TEXT_MESSAGE,
             'image.dimensions' => 'The image must be between ' . config('banner.image.min_width') . 'x' . config('banner.image.min_height')
                 . ' and ' . config('banner.image.max_width') . 'x' . config('banner.image.max_height') . ' pixels.',
             'brand_logo.dimensions' => 'The logo must be between ' . config('banner.logo.min_width') . 'x' . config('banner.logo.min_height')
