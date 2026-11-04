@@ -59,7 +59,7 @@ class ReelCard extends Model
             if ($id && preg_match('/^[A-Za-z0-9_-]{11}$/', $id)) {
                 return [
                     'provider' => 'youtube', 'id' => $id,
-                    'embed' => "https://www.youtube-nocookie.com/embed/{$id}?autoplay=1&mute=1&controls=0&loop=1&playlist={$id}&playsinline=1&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1",
+                    'embed' => "https://www.youtube-nocookie.com/embed/{$id}?autoplay=1&mute=1&controls=0&playsinline=1&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&fs=0&cc_load_policy=0",
                     'thumb' => "https://i.ytimg.com/vi/{$id}/hqdefault.jpg",
                 ];
             }

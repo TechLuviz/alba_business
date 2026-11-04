@@ -16,7 +16,7 @@
 
         {{-- ==================== 1. Main Section Settings ==================== --}}
         <section class="card form-card" style="max-width: 100%;">
-            <form method="POST" action="{{ route('admin.audience.settings.update') }}">
+            <form method="POST" action="{{ route('admin.audience.settings.update') }}" data-live-validate novalidate>
                 @csrf
                 @method('PUT')
 
@@ -38,20 +38,20 @@
                 </div>
 
                 <label>Section Eyebrow Text
-                    <input type="text" name="eyebrow" value="{{ old('eyebrow', $audience->eyebrow) }}" maxlength="{{ config('banner.audience.eyebrow_max') }}" placeholder="OUR EXPECTED AUDIENCE" data-clean-text>
+                    <input type="text" name="eyebrow" value="{{ old('eyebrow', $audience->eyebrow) }}" maxlength="{{ config('banner.audience.eyebrow_max') }}" placeholder="OUR EXPECTED AUDIENCE" data-live="line" data-no-digits>
                 </label>
 
                 <label>Main Heading *
-                    <input type="text" name="heading" value="{{ old('heading', $audience->heading) }}" required minlength="{{ config('banner.audience.heading_min') }}" maxlength="{{ config('banner.audience.heading_max') }}" placeholder="Who Is Alba Business School For?" data-clean-text>
+                    <input type="text" name="heading" value="{{ old('heading', $audience->heading) }}" required minlength="{{ config('banner.audience.heading_min') }}" maxlength="{{ config('banner.audience.heading_max') }}" placeholder="Who Is Alba Business School For?" data-live="line" data-no-digits>
                 </label>
 
                 <label>Highlighted Heading Text (Optional)
-                    <input type="text" name="highlight_text" value="{{ old('highlight_text', $audience->highlight_text) }}" maxlength="{{ config('banner.audience.highlight_max') }}" placeholder="e.g. Alba Business School" data-clean-text>
+                    <input type="text" name="highlight_text" value="{{ old('highlight_text', $audience->highlight_text) }}" maxlength="{{ config('banner.audience.highlight_max') }}" placeholder="e.g. Alba Business School" data-live="line" data-no-digits>
                     <small style="color: var(--muted); font-weight: 400; font-size: .72rem;">Shown in italic accent font where it appears in the main heading.</small>
                 </label>
 
                 <label>Supporting Description
-                    <textarea name="description" rows="2" minlength="{{ config('banner.audience.description_min') }}" maxlength="{{ config('banner.audience.description_max') }}" placeholder="Built for ambitious minds ready to learn, build, lead, and create meaningful impact." data-clean-text>{{ old('description', $audience->description) }}</textarea>
+                    <textarea name="description" rows="2" minlength="{{ config('banner.audience.description_min') }}" maxlength="{{ config('banner.audience.description_max') }}" placeholder="Built for ambitious minds ready to learn, build, lead, and create meaningful impact." data-live="line" data-no-digits>{{ old('description', $audience->description) }}</textarea>
                 </label>
 
                 <h3 style="font-size: .95rem; color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: 6px; margin: 10px 0 8px;">Carousel Behavior</h3>
@@ -66,7 +66,7 @@
                     </div>
 
                     <label>Autoplay Interval (2 - 30 seconds)
-                        <input type="number" name="autoplay_interval" min="2" max="30" value="{{ old('autoplay_interval', $audience->autoplay_interval ?? 5) }}" required>
+                        <input type="number" name="autoplay_interval" min="2" max="30" value="{{ old('autoplay_interval', $audience->autoplay_interval ?? 5) }}" required data-live="number">
                     </label>
                 </div>
 

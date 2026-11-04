@@ -266,6 +266,14 @@ const Admin = (() => {
             return '';
         }
         const kind = el.dataset.live;
+        if (kind === 'number') {
+            if (t === '') return el.required ? `${label} is required.` : '';
+            const n = Number(t);
+            if (!/^\d+$/.test(t) || !Number.isInteger(n)) return 'Enter a whole number.';
+            if (el.min !== '' && n < +el.min) return `${label.replace(/\s*\(.*\)/, '')} must be at least ${el.min}.`;
+            if (el.max !== '' && n > +el.max) return `${label.replace(/\s*\(.*\)/, '')} must be at most ${el.max}.`;
+            return '';
+        }
         if (kind === 'email' || kind === 'phone' || kind === 'address') {
             if (t === '') return el.required ? `${label} is required.` : '';
             if (/^\s/.test(v)) return 'Leading spaces are not allowed.';
