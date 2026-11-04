@@ -15,12 +15,19 @@ use App\Http\Controllers\Admin\SeoSettingsController;
 use App\Http\Controllers\Admin\VideoBannerController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InsightDetailController;
+use App\Http\Controllers\PrivacyController;
+use App\Http\Controllers\ProgramsPageController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('about', [HomeController::class, 'aboutPage'])->name('about');
 Route::get('contact', [HomeController::class, 'contactPage'])->name('contact');
+Route::get('programs', [ProgramsPageController::class, 'show'])->name('programs.index');
 Route::get('programs/{card:slug}', [HomeController::class, 'programShow'])->name('programs.show');
+Route::get('privacy-policy', [PrivacyController::class, 'show'])->name('privacy');
+Route::get('terms-of-service', [PrivacyController::class, 'show'])->defaults('type', 'terms')->name('terms');
+Route::get('sitemap', [\App\Http\Controllers\SitemapController::class, 'page'])->name('sitemap');
+Route::get('sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'xml'])->name('sitemap.xml');
 Route::get('insights',[HomeController::class, 'insightsPage'])->name('insights');
 Route::get('insights/{article}', [InsightDetailController::class, 'show'])->name('insights.show');
 Route::post('contact', [HomeController::class, 'contactSubmit'])->middleware('throttle:5,10')->name('contact.submit');
@@ -56,6 +63,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Page Settings > Home Page > Homepage Content
         Route::get('home-content', [HomeTextSectionController::class, 'edit'])->name('home-text.edit');
         Route::put('home-content', [HomeTextSectionController::class, 'update'])->name('home-text.update');
+
+        // Page Settings > Home Page > Content Section (after Insights)
+        Route::get('content-section', [\App\Http\Controllers\Admin\HomeContentController::class, 'edit'])->name('homecontent.edit');
+        Route::put('content-section', [\App\Http\Controllers\Admin\HomeContentController::class, 'update'])->name('homecontent.update');
+
+        // Page Settings > About Page > Content Section
+        Route::get('about-page/content', [\App\Http\Controllers\Admin\HomeContentController::class, 'edit'])->defaults('page', 'about')->name('aboutpage.content.edit');
+        Route::put('about-page/content', [\App\Http\Controllers\Admin\HomeContentController::class, 'update'])->defaults('page', 'about')->name('aboutpage.content.update');
 
         // Page Settings > Home Page > About Section
         Route::get('about-section', [AboutSectionController::class, 'edit'])->name('about.edit');
@@ -157,7 +172,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('contact-page/enquiries/{message}', [HomeController::class, 'contactMessageDestroy'])->name('contactpage.messages.destroy');
 
         // Insights Page Settings > Banner Settings (handled by HomeController)
-        Route::get('insights-page/banner', [HomeController::class, 'insightBannerEdit'])->name('insightpage.banner.edit');
+        // Programs Page Settings > Banner + Highlight Points
+        Route::get('programs-page/banner', [ProgramsPageController::class, 'bannerEdit'])->name('programpage.banner.edit');
+        Route::put('programs-page/banner', [ProgramsPageController::class, 'bannerUpdate'])->name('programpage.banner.update');
+
+        Route::prefix('programs-page/points')->name('programpage.points.')->group(function () {
+            Route::get('/', [ProgramsPageController::class, 'pointsIndex'])->name('index');
+            Route::patch('toggle-all', [ProgramsPageController::class, 'pointToggleAll'])->name('toggle-all');
+            Route::post('/', [ProgramsPageController::class, 'pointStore'])->name('store');
+            Route::put('{point}', [ProgramsPageController::class, 'pointUpdate'])->name('update');
+            Route::patch('{point}/toggle', [ProgramsPageController::class, 'pointToggle'])->name('toggle');
+            Route::delete('{point}', [ProgramsPageController::class, 'pointDestroy'])->name('destroy');
+        });
+
+        Route::get('insights-page/banner',[HomeController::class, 'insightBannerEdit'])->name('insightpage.banner.edit');
         Route::put('insights-page/banner', [HomeController::class, 'insightBannerUpdate'])->name('insightpage.banner.update');
 
 
@@ -192,7 +220,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('settings/newsletter/{subscriber}', [HomeController::class, 'newsletterDestroy'])->name('newsletter.destroy');
 
         // Site Settings > Logo & Brand
-        Route::get('settings/brand', [BrandSettingsController::class, 'edit'])->name('brand.edit');
+        Route::get('settings/privacy-policy', [PrivacyController::class, 'edit'])->name('privacy.edit');
+        Route::put('settings/privacy-policy', [PrivacyController::class, 'update'])->name('privacy.update');
+        Route::get('settings/terms-of-service', [PrivacyController::class, 'edit'])->defaults('type', 'terms')->name('terms.edit');
+        Route::put('settings/terms-of-service', [PrivacyController::class, 'update'])->defaults('type', 'terms')->name('terms.update');
+
+        Route::get('settings/brand',[BrandSettingsController::class, 'edit'])->name('brand.edit');
         Route::put('settings/brand', [BrandSettingsController::class, 'update'])->name('brand.update');
 
         // Site Settings > Quick Contact

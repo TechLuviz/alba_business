@@ -82,7 +82,7 @@
 
         @php($ab = config('banner.program_about'))
         <label>About this program (detail page)
-            <textarea name="about_text" rows="5" data-live="line" data-word-max="{{ $ab['word_max'] }}" minlength="{{ $ab['min'] }}" maxlength="{{ $ab['max'] }}" placeholder="{{ $hint }} - {{ $ab['min'] }} to {{ $ab['max'] }} characters"></textarea>
+            <textarea name="about_text" rows="8" data-live="line" data-word-max="{{ $ab['word_max'] }}" data-max-words="{{ $ab['max_words'] }}" minlength="{{ $ab['min'] }}" placeholder="{{ $hint }} - up to {{ $ab['max_words'] }} words"></textarea>
         </label>
 
         @php($lvc = config('banner.program_levels'))

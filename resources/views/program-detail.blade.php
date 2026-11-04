@@ -3,7 +3,12 @@
 @section('title', ($card->banner_title ?: $card->title) . ' | Alba Business')
 
 @section('content')
-    <section class="program-banner" @if($card->banner_image) style="background-image: url('{{ asset($card->banner_image) }}')" @endif>
+    {{-- Animations are enabled only when motion is allowed and IntersectionObserver exists (else everything stays visible) --}}
+    <script>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) document.documentElement.classList.add('pd-anim');
+    </script>
+    <section class="program-banner">
+        <div class="program-banner-bg" aria-hidden="true" @if($card->banner_image) style="background-image: url('{{ asset($card->banner_image) }}')" @endif></div>
         <div class="container program-banner-inner">
             <p class="program-banner-eyebrow">Program</p>
             <h1>{{ $card->banner_title ?: $card->title }}</h1>
@@ -33,8 +38,8 @@
         <div class="container program-layout {{ $hasHelp ? 'has-side' : '' }}">
             <div class="program-main">
                 @if($card->about_text)
-                    <h2>About This Program</h2>
-                    <p class="program-about">{{ $card->about_text }}</p>
+                    <h2 class="pd-reveal program-about-h">About This Program</h2>
+                    <p class="program-about pd-reveal" style="--d:.08s">{{ $card->about_text }}</p>
                 @endif
 
                 <h2>What You&rsquo;ll Learn</h2>
@@ -67,11 +72,6 @@
                             </details>
                         @endforeach
                     </div>
-                    <script>
-                        document.querySelectorAll('#programCurr details').forEach(function (d, _, all) {
-                            d.addEventListener('toggle', function () { if (d.open) all.forEach(function (o) { if (o !== d) o.open = false; }); });
-                        });
-                    </script>
                     @endif
                 @endif
                 @php($tools = $card->tool_items ?? [])
@@ -86,10 +86,10 @@
 
                 @php($formats = $card->formats ?? [])
                 @if(count($formats))
-                    <h2 class="program-sub-h">Learning Format</h2>
+                    <h2 class="program-sub-h pd-reveal">Learning Format</h2>
                     <div class="program-formats">
                         @foreach($formats as $f)
-                            <div class="program-format">
+                            <div class="program-format pd-reveal" style="--d:{{ min($loop->index, 5) * .07 }}s">
                                 <i aria-hidden="true">@if(!empty($f['icon']))<img src="{{ asset($f['icon']) }}" alt="" loading="lazy">@else<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 11h18M8 3v4M16 3v4"/></svg>@endif</i>
                                 <div>
                                     <strong>{{ $f['title'] }}</strong>
@@ -103,7 +103,7 @@
             </div>
 
             @if($hasHelp)
-                <aside class="program-help">
+                <aside class="program-help pd-reveal" style="--d:.2s">
                     @if($help->help_image)<img src="{{ asset($help->help_image) }}" alt="" loading="lazy">@endif
                     <div class="program-help-body">
                         <i class="program-help-rule" aria-hidden="true"></i>
@@ -117,3 +117,71 @@
         </div>
     </section>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    var root = document.documentElement;
+    var animate = root.classList.contains('pd-anim');
+    var DUR = 250;
+
+    /* Scroll reveals: each element animates once, then is released */
+    if (animate) {
+        var footer = document.querySelector('.site-footer');
+        if (footer) footer.classList.add('pd-reveal', 'pd-fade');
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+            });
+        }, { threshold: 0.12 });
+        document.querySelectorAll('.pd-reveal').forEach(function (el) { io.observe(el); });
+    }
+
+    /* Hero parallax: the background layer drifts slower than the page */
+    var bg = document.querySelector('.program-banner-bg');
+    var banner = document.querySelector('.program-banner');
+    if (animate && bg && banner) {
+        var ticking = false;
+        var update = function () {
+            ticking = false;
+            var h = banner.offsetHeight, y = window.scrollY;
+            if (window.innerWidth <= 768 || y > h) { bg.style.transform = ''; return; }
+            bg.style.transform = 'translate3d(0,' + Math.min(y * 0.25, h * 0.1).toFixed(1) + 'px,0)';
+        };
+        window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+        window.addEventListener('resize', update);
+        update();
+    }
+
+    /* Curriculum accordion: smooth open/close, one item open at a time */
+    var items = document.querySelectorAll('#programCurr .curr-item');
+    function isOpen(d) { return d.open && !d.classList.contains('is-closing'); }
+    function run(d, open) {
+        var ul = d.querySelector('ul');
+        var from = ul ? ul.offsetHeight : 0;
+        if (d._anim) { d._anim.cancel(); d._anim = null; }
+        if (!ul || !animate) { d.open = open; d.classList.remove('is-closing'); return; }
+        if (open) {
+            d.classList.remove('is-closing');
+            d.open = true;
+            var to = ul.offsetHeight;
+            d._anim = ul.animate([{ height: from + 'px', opacity: from ? 1 : 0 }, { height: to + 'px', opacity: 1 }], { duration: DUR, easing: 'ease-out' });
+            d._anim.onfinish = function () { d._anim = null; };
+        } else {
+            d.classList.add('is-closing');
+            d._anim = ul.animate([{ height: from + 'px', opacity: 1 }, { height: '0px', opacity: 0 }], { duration: DUR, easing: 'ease-in-out' });
+            d._anim.onfinish = function () { d._anim = null; d.open = false; d.classList.remove('is-closing'); };
+        }
+    }
+    items.forEach(function (d) {
+        var s = d.querySelector('summary');
+        s.addEventListener('click', function (e) {
+            e.preventDefault();
+            var open = !isOpen(d);
+            if (open) items.forEach(function (o) { if (o !== d && isOpen(o)) run(o, false); });
+            run(d, open);
+        });
+    });
+})();
+</script>
+@endpush

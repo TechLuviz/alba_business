@@ -148,8 +148,19 @@ const Admin = (() => {
         el.counterUpdate = update;
         update();
     }
+    /* live word counter for fields marked data-max-words */
+    function wordCounter(el) {
+        if (!el.dataset.maxWords) return;
+        let c = el.parentElement.querySelector('.counter.words');
+        if (!c) { c = document.createElement('small'); c.className = 'counter words'; el.insertAdjacentElement('afterend', c); }
+        const n = (el.value.trim().match(/\S+/g) || []).length, max = +el.dataset.maxWords;
+        c.textContent = n + ' / ' + max + ' words';
+        c.style.color = n > max ? '#c0392b' : '';
+    }
+    document.addEventListener('input', e => { if (e.target.matches && e.target.matches('[data-max-words]')) wordCounter(e.target); });
     function refreshCounters(scope = document) {
         scope.querySelectorAll('input[maxlength], textarea[maxlength]').forEach(el => { initCounter(el); el.counterUpdate(); });
+        scope.querySelectorAll('[data-max-words]').forEach(wordCounter);
     }
 
     /* ---- file checks: size, type, emptiness and (for images) pixel dimensions ---- */
@@ -307,6 +318,10 @@ const Admin = (() => {
         if (v !== '' && t === '') return `${label} cannot be blank spaces only.`;
         if (t === '') return el.required ? `${label} is required.` : '';
         if (el.minLength > 0 && t.length < el.minLength) return `Must be at least ${el.minLength} characters (currently ${t.length}).`;
+        if (el.dataset.maxWords) {
+            const n = t.split(/\s+/).length;
+            if (n > +el.dataset.maxWords) return `Must be at most ${el.dataset.maxWords} words (currently ${n}).`;
+        }
         if (el.maxLength > 0 && t.length > el.maxLength) return `Must be at most ${el.maxLength} characters.`;
         const max = parseInt(el.dataset.wordMax, 10);
         const long = max && t.split(/\s+/).find(w => w.length > max);

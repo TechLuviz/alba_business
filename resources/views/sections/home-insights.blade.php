@@ -11,10 +11,10 @@
                 </h2>
                 @if($insightSection->description)<p class="insights-desc">{{ $insightSection->description }}</p>@endif
                 {{-- Static button: change the text / link here in the code --}}
-                <a href="{{ route('insights') }}" class="insights-btn">Explore All Insights <span aria-hidden="true">&rarr;</span></a>
+                <a href="{{ route('insights') }}" class="insights-btn">Explore All Blogs <span aria-hidden="true">&rarr;</span></a>
             </div>
 
-            <div class="insights-stack{{ isset($insightArticles) && $insightArticles->isNotEmpty() ? ' has-mobile-articles' : '' }}" id="insightsStack" aria-label="Insights">
+            <div class="insights-stack{{ isset($insightArticles) && $insightArticles->isNotEmpty() ? ' has-mobile-articles' : '' }}" id="insightsStack" aria-label="Blogs">
                 @foreach($insightArticles as $i => $card)
                     <article class="insight-card" tabindex="0" role="button" aria-label="{{ $card->title }}">
                         <div class="insight-media">

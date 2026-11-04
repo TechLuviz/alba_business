@@ -3,7 +3,7 @@
         <div class="footer-brand">
             <a href="{{ route('home') }}" class="logo footer-logo">
                 @if($brand->brand_logo)
-                    <img src="{{ asset($brand->brand_logo) }}" alt="{{ $brand->brand_name ?: 'Albatech HUB' }}" class="logo-img">
+                    <img src="{{ asset($brand->brand_logo) }}" alt="{{ $brand->brand_name ?: 'Albahub' }}" class="logo-img">
                 @else
                     @php($parts = explode(' ', $brand->brand_name ?: 'ALBATECH HUB', 2))
                     <span class="logo-name">{{ $parts[0] }} @if(isset($parts[1]))<span class="logo-light">{{ $parts[1] }}</span>@endif <sup>TM</sup></span>
@@ -49,12 +49,12 @@
         </div>
     </div>
     <div class="container footer-bottom">
-        <p>&copy; {{ date('Y') }} Albatech HUB. All rights reserved.</p>
+        <p>&copy; {{ date('Y') }} Albahub. All rights reserved.</p>
         {{-- Static links: change the text / links here in the code --}}
         <nav class="footer-legal" aria-label="Legal">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-            <a href="#">Sitemap</a>
+            @if($privacyActive)<a href="{{ route('privacy') }}">Privacy Policy</a>@endif
+            @if($termsActive)<a href="{{ route('terms') }}">Terms of Service</a>@endif
+            <a href="{{ route('sitemap') }}">Sitemap</a>
         </nav>
     </div>
 </footer>

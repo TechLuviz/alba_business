@@ -67,10 +67,13 @@ class HomeController extends Controller
         // Phones show the real articles from the Insights page instead of the animated stack
         $insightArticles = InsightArticle::where('is_active', true)->orderBy('sort_order')->orderByDesc('published_on')->orderByDesc('id')->limit(6)->get();
 
+        $homeContent = \App\Models\HomeContentSection::current();
+
         $reelSection = ReelSection::current();
         $reelCards = ReelCard::where('is_active', true)->orderBy('sort_order')->orderBy('id')->get();
 
         return view('home', compact(
+            'homeContent',
             'problem', 'hero', 'video', 'slides', 'textSection', 'about', 'audience', 'audienceCards',
             'programSection', 'programCards', 'teamSection', 'teamMembers', 'insightSection', 'insightCards', 'insightArticles',
             'reelSection', 'reelCards'
@@ -592,6 +595,7 @@ class HomeController extends Controller
         return view('about', ['aboutBanner' => AboutBanner::current(), 'aboutStory' => AboutStory::current(),
             'aboutTeam' => AboutTeamSection::current(),
             'aboutCta' => AboutCta::current(),
+            'aboutContent' => \App\Models\HomeContentSection::current('about'),
             'teamMembers' => TeamMember::where('is_active', true)->orderBy('sort_order')->orderBy('id')->get(),
             'principleSection' => AboutPrincipleSection::current(),
             'principles' => AboutPrinciple::orderBy('sort_order')->orderBy('id')->take(2)->get(),
@@ -1444,7 +1448,13 @@ class HomeController extends Controller
             'mode' => TextRules::line(true, $c['mode_min'], $c['mode_max'], $w),
             'sort_order' => ['nullable', 'integer', 'min:0', "max:{$c['order_max']}"],
             'image' => BannerRules::image($creating, 'program_card.image'),
-            'about_text' => TextRules::line(false, config('banner.program_about.min'), config('banner.program_about.max'), config('banner.program_about.word_max')),
+            'about_text' => array_merge(TextRules::line(false, config('banner.program_about.min'), config('banner.program_about.max'), config('banner.program_about.word_max')), [function (string $attribute, mixed $value, \Closure $fail) {
+                $max = config('banner.program_about.max_words');
+                $words = count(preg_split('/\s+/u', trim((string) $value), -1, PREG_SPLIT_NO_EMPTY));
+                if ($words > $max) {
+                    $fail("The about this program text may not be longer than {$max} words (currently {$words}).");
+                }
+            }]),
             // detail-page banner (all optional)
             'banner_image' => BannerRules::image(false, 'program_banner.image'),
             'banner_title' => TextRules::line(false, $b['title_min'], $b['title_max'], $b['word_max']),

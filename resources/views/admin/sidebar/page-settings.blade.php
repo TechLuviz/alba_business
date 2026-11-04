@@ -2,11 +2,12 @@
     Page Settings (dropdown) > one dropdown per website page > that page's sections.
     To add a page: copy one of the <details class="menu-sub"> blocks below.
 --}}
-@php($inHome = request()->routeIs('admin.banners.*', 'admin.home-text.*', 'admin.about.*', 'admin.audience.*', 'admin.problem.*', 'admin.program.*', 'admin.team.*', 'admin.insight.*', 'admin.reel.*'))
+@php($inHome = request()->routeIs('admin.banners.*', 'admin.home-text.*', 'admin.about.*', 'admin.audience.*', 'admin.problem.*', 'admin.program.*', 'admin.team.*', 'admin.insight.*', 'admin.reel.*', 'admin.homecontent.*'))
 @php($inAbout = request()->routeIs('admin.aboutpage.*'))
 @php($inContact = request()->routeIs('admin.contactpage.*'))
 @php($inInsights = request()->routeIs('admin.insightpage.*'))
-<details class="menu-group" @if($inHome || $inAbout || $inContact || $inInsights) open @endif>
+@php($inPrograms = request()->routeIs('admin.programpage.*'))
+<details class="menu-group" @if($inHome || $inAbout || $inContact || $inInsights || $inPrograms) open @endif>
     <summary>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 20V9"/></svg>
         <span>Page Settings</span>
@@ -22,10 +23,18 @@
             <a href="{{ route('admin.problem.edit') }}" class="{{ request()->routeIs('admin.problem.*') ? 'active' : '' }}">Problem Section</a>
             <a href="{{ route('admin.program.index') }}" class="{{ request()->routeIs('admin.program.*') ? 'active' : '' }}">Programs Section</a>
             <a href="{{ route('admin.team.index') }}" class="{{ request()->routeIs('admin.team.*') ? 'active' : '' }}">Team Section</a>
+            <a href="{{ route('admin.homecontent.edit') }}" class="{{ request()->routeIs('admin.homecontent.*') ? 'active' : '' }}">Content Section</a>
             {{-- Home Insights Section (hidden: the home page now shows the Insights-page articles)
             <a href="{{ route('admin.insight.index') }}" class="{{ request()->routeIs('admin.insight.*') ? 'active' : '' }}">Insights Section</a>
             --}}
             <a href="{{ route('admin.reel.index') }}" class="{{ request()->routeIs('admin.reel.*') ? 'active' : '' }}">Video Section</a>
+        </details>
+
+        {{-- Programs Page --}}
+        <details class="menu-sub" @if($inPrograms) open @endif>
+            <summary>Programs Page</summary>
+            <a href="{{ route('admin.programpage.banner.edit') }}" class="{{ request()->routeIs('admin.programpage.banner.*') ? 'active' : '' }}">Banner Settings</a>
+            <a href="{{ route('admin.programpage.points.index') }}" class="{{ request()->routeIs('admin.programpage.points.*') ? 'active' : '' }}">Highlight Points</a>
         </details>
 
         {{-- About Page --}}
@@ -35,6 +44,7 @@
             <a href="{{ route('admin.aboutpage.story.edit') }}" class="{{ request()->routeIs('admin.aboutpage.story.*') ? 'active' : '' }}">Our Story Section</a>
             <a href="{{ route('admin.aboutpage.principles.index') }}" class="{{ request()->routeIs('admin.aboutpage.principles.*') ? 'active' : '' }}">Guiding Principles</a>
             <a href="{{ route('admin.aboutpage.team.edit') }}" class="{{ request()->routeIs('admin.aboutpage.team.*') ? 'active' : '' }}">Our Team Section</a>
+            <a href="{{ route('admin.aboutpage.content.edit') }}" class="{{ request()->routeIs('admin.aboutpage.content.*') ? 'active' : '' }}">Content Section</a>
             <a href="{{ route('admin.aboutpage.cta.edit') }}" class="{{ request()->routeIs('admin.aboutpage.cta.*') ? 'active' : '' }}">Get In Touch Section</a>
         </details>
 

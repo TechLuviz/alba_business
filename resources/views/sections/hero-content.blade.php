@@ -1,10 +1,10 @@
 @php($bare = blank($item->heading_line_1) && blank($item->heading_line_2) && blank($item->heading_accent) && blank($item->description))
 <div class="container hero-content {{ $bare ? 'is-bare' : '' }}">
-    <h1>
+    <h2>
         @if($item->heading_line_1)<span class="h-line">{{ $item->heading_line_1 }}</span>@endif
         @if($item->heading_line_2)<span class="h-line">{{ $item->heading_line_2 }}</span>@endif
         @if($item->heading_accent)<em class="h-line">{{ $item->heading_accent }}</em>@endif
-    </h1>
+    </h2>
     @if($item->description)<p>{{ $item->description }}</p>@endif
     <a href="#programs" class="btn-gold">
         <span>Explore Programs</span>

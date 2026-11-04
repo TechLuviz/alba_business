@@ -182,7 +182,7 @@ return [
         'timeline_max' => 50,
         'word_max' => 24,
         'image' => [
-            'recommended' => '1920 x 600 px (wide landscape), JPG, PNG or WEBP',
+            'recommended' => '1920 x 1000 px (JPG, PNG or WEBP; keep the subject centred, the sides may be cropped)',
             'min_width' => 1280,
             'min_height' => 400,
             'max_width' => 4000,
@@ -210,8 +210,9 @@ return [
 
     // Program detail page "About This Program" text
     'program_about' => [
-        'min' => 20,
-        'max' => 400,
+        'min' => 20,        // characters
+        'max' => 6000,      // characters (safety cap; the real limit is max_words)
+        'max_words' => 400,
         'word_max' => 30,
     ],
 
@@ -554,6 +555,59 @@ return [
             'recommended' => '800 x 600 px (4:3 landscape), JPG, PNG or WEBP',
             'min_width' => 240,
             'min_height' => 180,
+            'max_width' => 4000,
+            'max_height' => 4000,
+            'max_kb' => 5120, // 5 MB
+        ],
+    ],
+
+    // Programs listing page: banner + highlight points with uploaded icons
+    'program_page_banner' => [
+        'title_min' => 5,
+        'title_max' => 70,
+        'description_min' => 20,
+        'description_max' => 220,
+        'word_max' => 18,
+        'recommended' => '1920 x 1080 px (16:9, landscape), JPG, PNG or WEBP',
+        'min_width' => 1280,
+        'min_height' => 600,
+        'max_width' => 4000,
+        'max_height' => 3000,
+        'max_kb' => 5120, // 5 MB
+    ],
+    'program_point' => [
+        'title_min' => 3,
+        'title_max' => 30,
+        'description_min' => 3,
+        'description_max' => 40,
+        'order_max' => 999,
+        'word_max' => 18,
+        'icon_recommended' => 'Square icon, 64 x 64 px or larger (PNG, SVG, WEBP or JPG; a transparent background looks best)',
+        'icon_max_kb' => 512,
+    ],
+
+    // Privacy Policy page (content is written in the Summernote editor)
+    'privacy' => [
+        'title_min' => 3,
+        'title_max' => 60,
+        'word_max' => 18,
+        'content_min' => 50,    // visible characters
+        'content_max' => 30000, // visible characters
+    ],
+
+    // Home page "Content Section" (after Insights); the body is written in the Summernote editor
+    'home_content' => [
+        'eyebrow_min' => 2,
+        'eyebrow_max' => 40,
+        'heading_min' => 3,
+        'heading_max' => 80,
+        'word_max' => 18,
+        'content_min' => 350,  // words
+        'content_max' => 400,  // words
+        'image' => [
+            'recommended' => '1200 x 900 px (4:3), JPG, PNG or WEBP',
+            'min_width' => 600,
+            'min_height' => 400,
             'max_width' => 4000,
             'max_height' => 4000,
             'max_kb' => 5120, // 5 MB

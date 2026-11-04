@@ -1,7 +1,7 @@
 @if($textSection->hasContent())
     <section class="home-text" id="homeText" aria-label="{{ trim($textSection->heading_line_1 . ' ' . $textSection->heading_line_2) }}">
         <div class="container">
-            <h2 aria-hidden="true">
+            <h1 aria-label="{{ trim($textSection->heading_line_1 . ' ' . $textSection->heading_line_2) }}">
                 @foreach([$textSection->heading_line_1, $textSection->heading_line_2] as $line)
                     @continue(blank($line))
                     <span class="ht-line">
@@ -10,7 +10,7 @@
                         @endforeach
                     </span>
                 @endforeach
-            </h2>
+            </h1>
         </div>
     </section>
 
@@ -19,7 +19,7 @@
         (function () {
             const root = document.getElementById('homeText');
             const chars = root.querySelectorAll('.ht-char');
-            const h2 = root.querySelector('h2'), lines = root.querySelectorAll('.ht-line');
+            const h2 = root.querySelector('h1'), lines = root.querySelectorAll('.ht-line');
 
             // Keep every line on one row: shrink the font only if a line is wider than the container.
             function fit() {

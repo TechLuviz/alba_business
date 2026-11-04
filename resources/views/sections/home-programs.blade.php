@@ -69,7 +69,7 @@
                 </div>
                 <div class="cf-field">
                     <label for="enPhone">Phone number <b>*</b></label>
-                    <input type="tel" id="enPhone" name="phone" placeholder="+91 98765 43210" maxlength="{{ $ef['phone_max'] }}" autocomplete="tel" inputmode="tel" required>
+                    <input type="tel" id="enPhone" name="phone" placeholder="Enter your phone number" maxlength="{{ $ef['phone_max'] }}" autocomplete="tel" inputmode="tel" required>
                     <p class="cf-err" data-for="phone" role="alert"></p>
                 </div>
                 <div class="cf-field">
@@ -98,6 +98,7 @@
             const modal = document.getElementById('enrollModal'), form = document.getElementById('enrollForm');
             const L = { nameMin: {{ $ef['name_min'] }}, nameMax: {{ $ef['name_max'] }}, msgMin: {{ $ef['message_min'] }}, msgMax: {{ $ef['message_max'] }} };
             const fields = ['name', 'email', 'phone', 'course', 'message'].map(n => form.elements[n]);
+            let statusTimer;
             const status = document.getElementById('enStatus'), count = document.getElementById('enCount');
             const EMAIL = /^[A-Za-z0-9.!#$%&'*+\/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*\.[A-Za-z]{2,}$/;
             const rules = {
@@ -182,6 +183,7 @@
 
             form.addEventListener('submit', async e => {
                 e.preventDefault();
+                clearTimeout(statusTimer);
                 status.className = 'cf-status'; status.textContent = '';
                 let first = null;
                 fields.forEach(el => { el.dataset.touched = '1'; if (check(el) && !first) first = el; });
@@ -194,6 +196,7 @@
                         form.reset(); count.textContent = '0 / ' + L.msgMax;
                         fields.forEach(el => { delete el.dataset.touched; show(el, ''); });
                         status.className = 'cf-status ok'; status.textContent = j.message || 'Thank you! We will be in touch soon.';
+                        statusTimer = setTimeout(() => { status.className = 'cf-status'; status.textContent = ''; }, 5000);
                     } else if (r.status === 422 && j.errors) {
                         fields.forEach(el => { if (j.errors[el.name]) { el.dataset.touched = '1'; show(el, j.errors[el.name][0]); } });
                         const bad = fields.find(el => j.errors[el.name]); if (bad) bad.focus();

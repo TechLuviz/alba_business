@@ -8,6 +8,9 @@
     @if($seo?->meta_description)
         <meta name="description" content="{{ $seo->meta_description }}">
     @endif
+    @if($seo?->focus_keyword)
+        <meta name="keywords" content="{{ $seo->focus_keyword }}">
+    @endif
     @include('layout.favicon')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,6 +19,8 @@
     @stack('styles')
 </head>
 <body>
+    @include('layout.loader')
+
     @include('layout.header')
 
     <main>

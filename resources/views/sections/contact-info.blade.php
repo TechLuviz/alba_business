@@ -13,21 +13,21 @@
 
                 <div class="contact-cards">
                     @if($contactInfo->email)
-                        <a class="contact-card" href="mailto:{{ $contactInfo->email }}">
+                        <a class="contact-card" draggable="false" href="mailto:{{ $contactInfo->email }}">
                             <span class="contact-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span>
                             <span class="contact-txt"><small>Email us</small><strong>{{ $contactInfo->email }}</strong></span>
                             <span class="contact-go" aria-hidden="true">&nearr;</span>
                         </a>
                     @endif
                     @if($contactInfo->phone)
-                        <a class="contact-card" href="tel:{{ preg_replace('/[^0-9+]/', '', $contactInfo->phone) }}">
+                        <a class="contact-card" draggable="false" href="tel:{{ preg_replace('/[^0-9+]/', '', $contactInfo->phone) }}">
                             <span class="contact-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></span>
                             <span class="contact-txt"><small>Call us</small><strong>{{ $contactInfo->phone }}</strong></span>
                             <span class="contact-go" aria-hidden="true">&nearr;</span>
                         </a>
                     @endif
                     @if($contactInfo->address)
-                        <a class="contact-card" href="https://www.google.com/maps/search/?api=1&query={{ urlencode($contactInfo->address) }}" target="_blank" rel="noopener noreferrer">
+                        <a class="contact-card" draggable="false" href="https://www.google.com/maps/search/?api=1&query={{ urlencode($contactInfo->address) }}" target="_blank" rel="noopener noreferrer">
                             <span class="contact-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.800 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></span>
                             <span class="contact-txt"><small>Our location</small><strong class="is-address">{{ $contactInfo->address }}</strong></span>
                             <span class="contact-go" aria-hidden="true">&nearr;</span>
@@ -53,7 +53,7 @@
                     </div>
                     <div class="cf-field">
                         <label for="cfPhone">Phone number <b>*</b></label>
-                        <input type="tel" id="cfPhone" name="phone" placeholder="+91 98765 43210" maxlength="{{ $f['phone_max'] }}" autocomplete="tel" inputmode="tel" required>
+                        <input type="tel" id="cfPhone" name="phone" placeholder="Enter your phone number" maxlength="{{ $f['phone_max'] }}" autocomplete="tel" inputmode="tel" required>
                         <p class="cf-err" data-for="phone" role="alert"></p>
                     </div>
                     <div class="cf-field">
@@ -84,10 +84,38 @@
 
     @push('scripts')
     <script>
+        // selecting text inside a contact card (to copy it) must not also open the mail app / dialer / map
+        document.querySelectorAll('.contact-card').forEach(function (card) {
+            card.addEventListener('click', function (e) {
+                const sel = window.getSelection();
+                if (sel && !sel.isCollapsed && card.contains(sel.anchorNode)) e.preventDefault();
+            });
+        });
+
+        // mailto: does nothing when no mail app is registered. If the page never loses focus after the click
+        // (i.e. no mail app opened), fall back to a web compose window addressed to the same email.
+        document.querySelectorAll('.contact-card[href^="mailto:"]').forEach(function (card) {
+            card.addEventListener('click', function (e) {
+                if (e.defaultPrevented) return;
+                const to = card.getAttribute('href').replace(/^mailto:/i, '');
+                let handled = false;
+                const mark = function () { handled = true; };
+                window.addEventListener('blur', mark, { once: true });
+                document.addEventListener('visibilitychange', mark, { once: true });
+                setTimeout(function () {
+                    window.removeEventListener('blur', mark);
+                    document.removeEventListener('visibilitychange', mark);
+                    if (!handled) window.open('https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(to), '_blank', 'noopener');
+                }, 1500);
+            });
+        });
+    </script>
+    <script>
         (function () {
             const form = document.getElementById('contactForm');
             const L = { nameMin: {{ $f['name_min'] }}, nameMax: {{ $f['name_max'] }}, msgMin: {{ $f['message_min'] }}, msgMax: {{ $f['message_max'] }} };
             const fields = ['name', 'email', 'phone', 'course', 'message'].map(n => form.elements[n]);
+            let statusTimer;
             const status = document.getElementById('cfStatus'), count = document.getElementById('cfCount');
             const EMAIL = /^[A-Za-z0-9.!#$%&'*+\/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*\.[A-Za-z]{2,}$/;
 
@@ -160,6 +188,7 @@
 
             form.addEventListener('submit', async e => {
                 e.preventDefault();
+                clearTimeout(statusTimer);
                 status.className = 'cf-status'; status.textContent = '';
                 let first = null;
                 fields.forEach(el => { el.dataset.touched = '1'; if (check(el) && !first) first = el; });
@@ -173,6 +202,7 @@
                         form.reset(); count.textContent = '0 / ' + L.msgMax;
                         fields.forEach(el => { delete el.dataset.touched; show(el, ''); });
                         status.className = 'cf-status ok'; status.textContent = j.message || 'Thank you! We will be in touch soon.';
+                        statusTimer = setTimeout(() => { status.className = 'cf-status'; status.textContent = ''; }, 5000);
                     } else if (r.status === 422 && j.errors) {
                         fields.forEach(el => { if (j.errors[el.name]) { el.dataset.touched = '1'; show(el, j.errors[el.name][0]); } });
                         const bad = fields.find(el => j.errors[el.name]); if (bad) bad.focus();

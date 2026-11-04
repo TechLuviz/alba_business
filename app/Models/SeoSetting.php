@@ -12,7 +12,7 @@ class SeoSetting extends Model
         'about' => 'About Page',
     ];
 
-    protected $fillable = ['page', 'meta_title', 'meta_description'];
+    protected $fillable = ['page', 'meta_title', 'meta_description', 'focus_keyword'];
 
     public static function forPage(string $page): self
     {

@@ -7,5 +7,6 @@
     @include('sections.about-story')
     @include('sections.about-principles')
     @include('sections.about-team')
+    @include('sections.home-content', ['homeContent' => $aboutContent, 'contentId' => 'aboutContent'])
     @include('sections.about-cta')
 @endsection
