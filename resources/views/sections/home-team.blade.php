@@ -10,7 +10,7 @@
                     @if($teamSection->description)<p class="team-desc">{{ $teamSection->description }}</p>@endif
                 </div>
                 {{-- Static button: change the text / link here in the code --}}
-                <a href="#team" class="team-viewall">View All <span aria-hidden="true">&rarr;</span></a>
+                <a href="{{ route('about') }}#our-team" class="team-viewall">View All <span aria-hidden="true">&rarr;</span></a>
             </div>
 
             <div class="team-row" id="teamRow">

@@ -74,7 +74,10 @@
             if (v.length > 254) return 'The email address is too long.';
             return '';
         }
-        function show(text, ok) {
+        let hideTimer;
+        function show(text, ok, autoHide) {
+            clearTimeout(hideTimer);
+            if (autoHide && text) hideTimer = setTimeout(() => show('', false), 5000);
             msg.textContent = text; msg.className = 'nl-msg' + (text ? (ok ? ' ok' : ' bad') : '');
             input.classList.toggle('invalid', !!text && !ok);
         }
@@ -88,11 +91,18 @@
             try {
                 const r = await fetch(form.action, { method: 'POST', headers: { 'Accept': 'application/json' }, body: new FormData(form) });
                 const j = await r.json().catch(() => ({}));
-                if (r.ok) { show(j.message || 'Thank you for subscribing!', true); form.reset(); }
-                else if (r.status === 422) show((j.errors && j.errors.email && j.errors.email[0]) || 'Please check your email address.', false);
-                else if (r.status === 429) show('Too many attempts. Please wait a minute and try again.', false);
-                else show('Something went wrong. Please try again later.', false);
-            } catch (x) { show('Cannot reach the server. Check your connection and try again.', false); }
+                if (r.ok) {
+                    const text = j.message || 'Thank you for subscribing!';
+                    show(text, true, true); form.reset();
+                } else if (r.status === 422) {
+                    const text = (j.errors && j.errors.email && j.errors.email[0]) || 'Please check your email address.';
+                    const already = /already/i.test(text);
+                    show(text, already, true);
+                    if (already) form.reset();
+                }
+                else if (r.status === 429) show('Too many attempts. Please wait a minute and try again.', false, true);
+                else show('Something went wrong. Please try again later.', false, true);
+            } catch (x) { show('Cannot reach the server. Check your connection and try again.', false, true); }
             btn.disabled = false;
         });
     })();

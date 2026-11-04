@@ -1471,9 +1471,20 @@ a.insight-arrow:hover, a.insight-arrow:focus-visible { background: var(--gold); 
 .enroll-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(5, 10, 20, .72); overflow-y: auto; }
 .enroll-modal[hidden] { display: none; }
 .enroll-box { position: relative; width: 100%; max-width: 520px; margin: auto; }
-.enroll-box h3 { color: #fff; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.6rem; margin: 0 0 12px 4px; }
-.enroll-box .contact-form { max-height: calc(100vh - 110px); overflow-y: auto; }
-.enroll-close { position: absolute; top: -6px; right: 2px; z-index: 3; width: 34px; height: 34px; border: 0; border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; font-size: 22px; line-height: 34px; padding: 0; cursor: pointer; }
+/* title + close button live inside the card (top-left / top-right), the card border wraps everything */
+.enroll-box h3 { position: absolute; z-index: 3; top: 22px; left: 26px; right: 70px; color: #fff; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.5rem; line-height: 1.2; margin: 0; }
+/* the overlay scrolls (only if the screen is really short), not the form: the border always wraps every field and the button */
+.enroll-box .contact-form { max-height: none; overflow: visible; padding: 66px 26px 24px; }
+.enroll-box .cf-field { margin-bottom: 10px; }
+.enroll-box .cf-field label { margin-bottom: 5px; }
+.enroll-box .cf-field input, .enroll-box .cf-field select, .enroll-box .cf-field textarea { padding: 10px 14px; }
+.enroll-box .cf-field textarea { min-height: 72px; }
+.enroll-box .cf-submit { padding: 13px; margin-top: 4px; }
+.enroll-modal { align-items: flex-start; scrollbar-width: thin; scrollbar-color: #2a3547 transparent; }
+.enroll-modal::-webkit-scrollbar { width: 8px; }
+.enroll-modal::-webkit-scrollbar-track { background: transparent; }
+.enroll-modal::-webkit-scrollbar-thumb { background: #2a3547; border-radius: 8px; }
+.enroll-close { position: absolute; top: 16px; right: 16px; z-index: 4; width: 34px; height: 34px; border: 0; border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; font-size: 22px; line-height: 34px; padding: 0; cursor: pointer; }
 .enroll-close:hover { background: var(--gold); color: #130d05; }
 
 /* contact cards: the text can be highlighted and copied, a plain click still opens the link */
