@@ -155,27 +155,53 @@
                     return '';
                 },
             };
+            const errTimers = {};
+            const ERR_MS = 4000; // validation warnings fade away after a few seconds
             function show(el, msg) {
                 const out = form.querySelector('.cf-err[data-for="' + el.name + '"]');
                 out.textContent = msg;
                 el.closest('.cf-field').classList.toggle('is-bad', !!msg);
+                clearTimeout(errTimers[el.name]);
+                if (msg) errTimers[el.name] = setTimeout(() => {
+                    out.textContent = '';
+                    el.closest('.cf-field').classList.remove('is-bad');
+                }, ERR_MS);
                 return msg;
             }
             const check = el => show(el, rules[el.name](el.value));
 
-            // emojis, unicode and control characters can never be entered: they are removed as typed or pasted
-            const NOT_PLAIN = /[^\x20-\x7E\r\n]/;
-            const NOT_PLAIN_ALL = /[^\x20-\x7E\r\n]/g;
+            // characters that can never be entered in each field: removed as typed or pasted
+            const BLOCK = {
+                name:    { re: /[^A-Za-z .'-]/g, msg: "Only letters, spaces and . ' - are allowed in the name." },
+                email:   { re: /[^A-Za-z0-9.!#$%&'*+\/=?^_`{|}~@-]/g, msg: 'Spaces and unsupported characters are not allowed in an email address.' },
+                phone:   { re: /[^0-9+ ()-]/g, msg: 'Only digits, +, spaces, dashes and brackets are allowed in a phone number.' },
+                message: { re: /[^\x20-\x7E\r\n]/g, msg: 'Emojis and special unicode characters are not allowed - they were removed.' },
+            };
+            function sanitize(el) {
+                const b = BLOCK[el.name];
+                if (!b) return null;
+                let v = el.value, pos = el.selectionStart, bad = false;
+                const clean = s => { const r = s.replace(b.re, ''); if (r !== s) bad = true; return r; };
+                const before = clean(v.slice(0, pos)), after = clean(v.slice(pos));
+                let out = before + after, cur = before.length;
+                if (el.name === 'name') {
+                    const t = out.replace(/ {2,}/g, ' ').replace(/^[ .'-]+/, '');
+                    if (t !== out) { bad = true; cur = Math.max(0, cur - (out.length - t.length)); out = t; }
+                }
+                if (el.name === 'phone') {
+                    const t = out.replace(/(?!^)\+/g, '').replace(/^ +/, '').replace(/ {2,}/g, ' ');
+                    if (t !== out) { bad = true; cur = Math.max(0, cur - (out.length - t.length)); out = t; }
+                }
+                if (bad) { el.value = out; try { el.setSelectionRange(cur, cur); } catch (x) {} return b.msg; }
+                return null;
+            }
             fields.forEach(el => {
                 el.addEventListener('input', () => {
-                    if (el.tagName !== 'SELECT' && NOT_PLAIN.test(el.value)) {
-                        el.value = el.value.replace(NOT_PLAIN_ALL, '');
-                        el.dataset.touched = '1';
+                    if (el.tagName !== 'SELECT') {
+                        const blocked = sanitize(el);
                         if (el.name === 'message') count.textContent = el.value.length + ' / ' + L.msgMax;
-                        show(el, 'Emojis and special unicode characters are not allowed - they were removed.');
-                        return;
+                        if (blocked) { el.dataset.touched = '1'; show(el, blocked); return; }
                     }
-                    if (el.name === 'message') count.textContent = el.value.length + ' / ' + L.msgMax;
                     if (el.dataset.touched) check(el);
                 });
                 el.addEventListener('blur', () => {
@@ -208,12 +234,13 @@
                         const bad = fields.find(el => j.errors[el.name]); if (bad) bad.focus();
                     } else if (r.status === 429) {
                         status.className = 'cf-status bad'; status.textContent = 'Too many messages sent. Please wait a few minutes and try again.';
-                    } else {
+                    } else if (r.status !== 422) {
                         status.className = 'cf-status bad'; status.textContent = 'Something went wrong. Please try again later.';
                     }
                 } catch (x) {
                     status.className = 'cf-status bad'; status.textContent = 'Cannot reach the server. Check your connection and try again.';
                 }
+                if (status.classList.contains('bad')) statusTimer = setTimeout(() => { status.className = 'cf-status'; status.textContent = ''; }, 6000);
                 btn.disabled = false; btn.classList.remove('is-busy');
             });
         })();
