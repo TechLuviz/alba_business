@@ -5,8 +5,10 @@
 @section('breadcrumbs')<a href="{{ route('admin.banners.index') }}">Home</a> <span>&rsaquo;</span> Page Settings <span>&rsaquo;</span> Home Page <span>&rsaquo;</span> Team Section @endsection
 
 @section('content')
-    @php($c = config('banner.team'))
-    @php($hint = "Letters, numbers, spaces and . , ' - & ! ? only")
+    @php
+        $c = config('banner.team');
+        $hint = "Letters, numbers, spaces and . , ' - & ! ? only";
+    @endphp
     <p class="hint">Edit the section heading and add as many team members as you need. All fields marked * are mandatory.</p>
 
     <section class="card form-card" style="max-width: 100%;">
@@ -41,13 +43,18 @@
         </form>
     </section>
 
+    @php
+        $sortLink = fn ($key) => route('admin.team.index', array_merge(request()->except('page'), ['sort' => $key, 'dir' => ($sort === $key && $dir === 'asc') ? 'desc' : 'asc']));
+        $arrow = fn ($key) => $sort === $key ? ($dir === 'asc' ? ' ▲' : ' ▼') : '';
+        $hasFilter = $q !== '';
+    @endphp
     <section class="card panel" style="margin-top: 20px;">
         <div class="panel-head">
-            <h2>Team Members ({{ $members->count() }})</h2>
+            <h2>Team Members ({{ $totalMembers }})</h2>
             <div class="panel-tools">
                 <label class="toggle-all">
                     <span class="switch">
-                        <input type="checkbox" data-toggle-all="{{ route('admin.team.members.toggle-all') }}" data-group="members" @checked($members->isNotEmpty() && $members->every->is_active)>
+                        <input type="checkbox" data-toggle-all="{{ route('admin.team.members.toggle-all') }}" data-group="members" @checked($allActive)>
                         <i></i>
                     </span> Toggle All
                 </label>
@@ -55,14 +62,36 @@
             </div>
         </div>
 
+        <form method="GET" action="{{ route('admin.team.index') }}" class="dt-bar">
+            <input type="hidden" name="sort" value="{{ $sort }}"><input type="hidden" name="dir" value="{{ $dir }}">
+            <label class="dt-len">Show
+                <select name="per_page" onchange="this.form.submit()">
+                    @foreach([10, 25, 50, 100] as $n)<option value="{{ $n }}" @selected($perPage === $n)>{{ $n }}</option>@endforeach
+                    <option value="all" @selected($perPage === 'all')>All</option>
+                </select> entries
+            </label>
+            <div class="dt-search">
+                <input type="search" name="q" value="{{ $q }}" maxlength="100" placeholder="Search name or designation..." aria-label="Search team members">
+                <button type="submit" class="btn small">Search</button>
+                @if($hasFilter)<a href="{{ route('admin.team.index', ['per_page' => $perPage]) }}" class="dt-clear">Clear</a>@endif
+            </div>
+        </form>
+
+        <div style="overflow-x: auto;">
         <table class="tbl">
             <thead>
-                <tr><th>S.N.</th><th>Photo</th><th>Member</th><th>Order</th><th>Status</th><th class="r">Action</th></tr>
+                <tr>
+                    <th>S.N.</th><th>Photo</th>
+                    <th><a class="dt-sort" href="{{ $sortLink('member') }}">Member{{ $arrow('member') }}</a></th>
+                    <th><a class="dt-sort" href="{{ $sortLink('order') }}">Order{{ $arrow('order') }}</a></th>
+                    <th><a class="dt-sort" href="{{ $sortLink('status') }}">Status{{ $arrow('status') }}</a></th>
+                    <th class="r">Action</th>
+                </tr>
             </thead>
             <tbody>
             @forelse($members as $i => $member)
                 <tr>
-                    <td>{{ $i + 1 }}</td>
+                    <td>{{ $members->firstItem() + $i }}</td>
                     <td>
                         @if($member->image)
                             <img class="thumb" src="{{ asset($member->image) }}" alt="" onerror="this.classList.add('missing')">
@@ -88,11 +117,34 @@
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="6" class="empty">No team members yet. Click "+ Add Member" to create one.</td></tr>
+                <tr><td colspan="6" class="empty">{{ $hasFilter ? 'No team members match your search.' : 'No team members yet. Click "+ Add Member" to create one.' }}</td></tr>
             @endforelse
             </tbody>
         </table>
+        </div>
+
+        @if($members->total() > 0)
+            <div class="dt-foot">
+                <span class="dt-info">Showing {{ $members->firstItem() }} to {{ $members->lastItem() }} of {{ $members->total() }} entries</span>
+                @if($members->hasPages())
+                    @php
+                        $cur = $members->currentPage(); $last = $members->lastPage();
+                        $pages = collect([1, $last])->merge(range(max(1, $cur - 2), min($last, $cur + 2)))->unique()->sort()->values();
+                    @endphp
+                    <nav class="dt-pager" aria-label="Pagination">
+                        @if($members->onFirstPage())<span class="dis">&lsaquo; Prev</span>@else<a href="{{ $members->previousPageUrl() }}">&lsaquo; Prev</a>@endif
+                        @foreach($pages as $idx => $p)
+                            @if($idx > 0 && $p - $pages[$idx - 1] > 1)<span class="gap">&hellip;</span>@endif
+                            @if($p === $cur)<span class="cur" aria-current="page">{{ $p }}</span>@else<a href="{{ $members->url($p) }}">{{ $p }}</a>@endif
+                        @endforeach
+                        @if($members->hasMorePages())<a href="{{ $members->nextPageUrl() }}">Next &rsaquo;</a>@else<span class="dis">Next &rsaquo;</span>@endif
+                    </nav>
+                @endif
+            </div>
+        @endif
     </section>
+
+    @include('admin.partials.datatable-assets')
 
     @include('admin.team._canvas')
 
@@ -109,7 +161,7 @@
 @push('scripts')
 <script>
     (function () {
-        const next = {{ ($members->max('sort_order') ?? 0) + 1 }};
+        const next = {{ $nextOrder }};
         const preview = document.getElementById('teamImgPreview');
         const blank = { name: '', designation: '', sort_order: next, is_active: true };
 

@@ -218,7 +218,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Site Settings > Newsletter subscribers (handled by HomeController)
         Route::get('settings/newsletter', [HomeController::class, 'newsletterIndex'])->name('newsletter.index');
         Route::get('settings/newsletter/export', [HomeController::class, 'newsletterExport'])->name('newsletter.export');
-        Route::delete('settings/newsletter/{subscriber}', [HomeController::class, 'newsletterDestroy'])->name('newsletter.destroy');
+        Route::delete('settings/newsletter', [HomeController::class, 'newsletterBulkDestroy'])->name('newsletter.bulk-destroy');
+        Route::delete('settings/newsletter/{subscriber}',[HomeController::class, 'newsletterDestroy'])->name('newsletter.destroy');
 
         // Site Settings > Logo & Brand
         Route::get('settings/privacy-policy', [PrivacyController::class, 'edit'])->name('privacy.edit');

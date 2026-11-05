@@ -565,7 +565,8 @@ class HomeController extends Controller
         $sorts = ['name' => 'name', 'email' => 'email', 'course' => 'course', 'received' => 'created_at'];
         $sort = array_key_exists($request->query('sort'), $sorts) ? $request->query('sort') : 'received';
         $dir = $request->query('dir') === 'asc' ? 'asc' : 'desc';
-        $perPage = in_array((int) $request->query('per_page'), [10, 25, 50, 100], true) ? (int) $request->query('per_page') : 10;
+        $showAll = $request->query('per_page') === 'all';
+        $perPage = $showAll ? 'all' : (in_array((int) $request->query('per_page'), [10, 25, 50, 100], true) ? (int) $request->query('per_page') : 10);
         $q = trim((string) $request->query('q', ''));
 
         $query = ContactMessage::query();
@@ -576,7 +577,8 @@ class HomeController extends Controller
         }
         $query->orderBy($sorts[$sort], $dir)->orderBy('id', $dir);
 
-        $messages = $query->paginate($perPage)->withQueryString();
+        // "All" = a single page holding every matching row
+        $messages = $query->paginate($showAll ? max(1, (clone $query)->count()) : $perPage)->withQueryString();
         // e.g. the last row of the last page was just deleted: step back to the new last page
         if ($messages->isEmpty() && $messages->currentPage() > 1) {
             return redirect()->route('admin.contactpage.messages.index', array_merge($request->query(), ['page' => $messages->lastPage()]));
@@ -594,7 +596,7 @@ class HomeController extends Controller
 
     public function contactMessagesBulkDestroy(Request $request)
     {
-        $data = $request->validate(['ids' => ['required', 'array', 'min:1', 'max:200'], 'ids.*' => ['integer']], [
+        $data = $request->validate(['ids' => ['required', 'array', 'min:1', 'max:5000'], 'ids.*' => ['integer']], [
             'ids.required' => 'Select at least one enquiry to delete.',
         ]);
         $count = ContactMessage::whereIn('id', $data['ids'])->delete();
@@ -899,9 +901,37 @@ class HomeController extends Controller
         return response()->json(['message' => 'Thank you for subscribing!']);
     }
 
-    public function newsletterIndex()
+    public function newsletterIndex(Request $request)
     {
-        return view('admin.newsletter.index', ['subscribers' => NewsletterSubscriber::latest('id')->get()]);
+        $sorts = ['email' => 'email', 'subscribed' => 'created_at'];
+        $sort = array_key_exists($request->query('sort'), $sorts) ? $request->query('sort') : 'subscribed';
+        $dir = $request->query('dir') === 'asc' ? 'asc' : 'desc';
+        $showAll = $request->query('per_page') === 'all';
+        $perPage = $showAll ? 'all' : (in_array((int) $request->query('per_page'), [10, 25, 50, 100], true) ? (int) $request->query('per_page') : 10);
+        $q = trim((string) $request->query('q', ''));
+
+        $query = NewsletterSubscriber::query();
+        if ($q !== '') {
+            $query->where('email', 'like', '%' . addcslashes(mb_substr($q, 0, 100), '%_\\') . '%');
+        }
+        $query->orderBy($sorts[$sort], $dir)->orderBy('id', $dir);
+
+        $subscribers = $query->paginate($showAll ? max(1, (clone $query)->count()) : $perPage)->withQueryString();
+        if ($subscribers->isEmpty() && $subscribers->currentPage() > 1) {
+            return redirect()->route('admin.newsletter.index', array_merge($request->query(), ['page' => $subscribers->lastPage()]));
+        }
+
+        return view('admin.newsletter.index', compact('subscribers', 'sort', 'dir', 'perPage', 'q'));
+    }
+
+    public function newsletterBulkDestroy(Request $request)
+    {
+        $data = $request->validate(['ids' => ['required', 'array', 'min:1', 'max:5000'], 'ids.*' => ['integer']], [
+            'ids.required' => 'Select at least one subscriber to remove.',
+        ]);
+        $count = NewsletterSubscriber::whereIn('id', $data['ids'])->delete();
+
+        return back()->with('success', $count . ' ' . ($count === 1 ? 'subscriber' : 'subscribers') . ' removed.');
     }
 
     public function newsletterDestroy(NewsletterSubscriber $subscriber)
@@ -1146,11 +1176,39 @@ class HomeController extends Controller
 
     /* ---------- Admin: Page Settings > Home Page > Team Section ---------- */
 
-    public function teamIndex()
+    public function teamIndex(Request $request)
     {
+        $sorts = ['member' => 'name', 'order' => 'sort_order', 'status' => 'is_active'];
+        $sort = array_key_exists($request->query('sort'), $sorts) ? $request->query('sort') : 'order';
+        $dir = $request->query('dir') === 'desc' ? 'desc' : 'asc';
+        $showAll = $request->query('per_page') === 'all';
+        $perPage = $showAll ? 'all' : (in_array((int) $request->query('per_page'), [10, 25, 50, 100], true) ? (int) $request->query('per_page') : 10);
+        $q = trim((string) $request->query('q', ''));
+
+        $query = TeamMember::query();
+        if ($q !== '') {
+            $like = '%' . addcslashes(mb_substr($q, 0, 100), '%_\\') . '%';
+            $query->where(fn ($w) => $w->where('name', 'like', $like)->orWhere('designation', 'like', $like));
+        }
+        $query->orderBy($sorts[$sort], $dir);
+        if ($sort !== 'order') {
+            $query->orderBy('sort_order');
+        }
+        $query->orderBy('id', $dir);
+
+        $members = $query->paginate($showAll ? max(1, (clone $query)->count()) : $perPage)->withQueryString();
+        if ($members->isEmpty() && $members->currentPage() > 1) {
+            return redirect()->route('admin.team.index', array_merge($request->query(), ['page' => $members->lastPage()]));
+        }
+
         return view('admin.team.index', [
             'team' => TeamSection::current(),
-            'members' => TeamMember::orderBy('sort_order')->orderBy('id')->get(),
+            'members' => $members,
+            'sort' => $sort, 'dir' => $dir, 'perPage' => $perPage, 'q' => $q,
+            // computed over every member, not just the visible page
+            'totalMembers' => TeamMember::count(),
+            'allActive' => TeamMember::count() > 0 && ! TeamMember::where('is_active', false)->exists(),
+            'nextOrder' => (TeamMember::max('sort_order') ?? 0) + 1,
         ]);
     }
 
