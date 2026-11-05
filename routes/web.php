@@ -169,7 +169,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('contact-page/get-in-touch', [HomeController::class, 'contactInfoUpdate'])->name('contactpage.info.update');
         Route::get('contact-page/enquiries', [HomeController::class, 'contactMessagesIndex'])->name('contactpage.messages.index');
         Route::get('contact-page/enquiries/export', [HomeController::class, 'contactMessagesExport'])->name('contactpage.messages.export');
-        Route::delete('contact-page/enquiries/{message}', [HomeController::class, 'contactMessageDestroy'])->name('contactpage.messages.destroy');
+        Route::delete('contact-page/enquiries', [HomeController::class, 'contactMessagesBulkDestroy'])->name('contactpage.messages.bulk-destroy');
+        Route::delete('contact-page/enquiries/{message}',[HomeController::class, 'contactMessageDestroy'])->name('contactpage.messages.destroy');
 
         // Insights Page Settings > Banner Settings (handled by HomeController)
         // Programs Page Settings > Banner + Highlight Points

@@ -560,9 +560,29 @@ class HomeController extends Controller
         return back()->with('success', 'Contact details saved.');
     }
 
-    public function contactMessagesIndex()
+    public function contactMessagesIndex(Request $request)
     {
-        return view('admin.contact-page.messages', ['messages' => ContactMessage::latest('id')->get()]);
+        $sorts = ['name' => 'name', 'email' => 'email', 'course' => 'course', 'received' => 'created_at'];
+        $sort = array_key_exists($request->query('sort'), $sorts) ? $request->query('sort') : 'received';
+        $dir = $request->query('dir') === 'asc' ? 'asc' : 'desc';
+        $perPage = in_array((int) $request->query('per_page'), [10, 25, 50, 100], true) ? (int) $request->query('per_page') : 10;
+        $q = trim((string) $request->query('q', ''));
+
+        $query = ContactMessage::query();
+        if ($q !== '') {
+            $like = '%' . addcslashes(mb_substr($q, 0, 100), '%_\\') . '%';
+            $query->where(fn ($w) => $w->where('name', 'like', $like)->orWhere('email', 'like', $like)
+                ->orWhere('phone', 'like', $like)->orWhere('course', 'like', $like)->orWhere('message', 'like', $like));
+        }
+        $query->orderBy($sorts[$sort], $dir)->orderBy('id', $dir);
+
+        $messages = $query->paginate($perPage)->withQueryString();
+        // e.g. the last row of the last page was just deleted: step back to the new last page
+        if ($messages->isEmpty() && $messages->currentPage() > 1) {
+            return redirect()->route('admin.contactpage.messages.index', array_merge($request->query(), ['page' => $messages->lastPage()]));
+        }
+
+        return view('admin.contact-page.messages', compact('messages', 'sort', 'dir', 'perPage', 'q'));
     }
 
     public function contactMessageDestroy(ContactMessage $message)
@@ -570,6 +590,16 @@ class HomeController extends Controller
         $message->delete();
 
         return back()->with('success', 'Enquiry deleted.');
+    }
+
+    public function contactMessagesBulkDestroy(Request $request)
+    {
+        $data = $request->validate(['ids' => ['required', 'array', 'min:1', 'max:200'], 'ids.*' => ['integer']], [
+            'ids.required' => 'Select at least one enquiry to delete.',
+        ]);
+        $count = ContactMessage::whereIn('id', $data['ids'])->delete();
+
+        return back()->with('success', $count . ' ' . ($count === 1 ? 'enquiry' : 'enquiries') . ' deleted.');
     }
 
     public function contactMessagesExport()
