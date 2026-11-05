@@ -51,7 +51,7 @@ class ProblemSectionController extends Controller
 
         foreach (ProblemSection::CARDS as $n) {
             $rules["card{$n}_title"] = ['required', 'string', "min:{$c['caption_min']}", "max:{$c['caption_max']}", ...$text($c['word_max'])];
-            $rules["card{$n}_image"] = BannerRules::image(! $problem->{"card{$n}_image"}, 'problem.image');
+            $rules["card{$n}_image"] = BannerRules::image(! $problem->{"card{$n}_image"} || $request->input("remove_card{$n}_image") === '1', 'problem.image');
             $attributes["card{$n}_title"] = "card {$n} caption";
             $attributes["card{$n}_image"] = "card {$n} image";
             $messages["card{$n}_image.dimensions"] = "Card {$n} image must be between {$i['min_width']}x{$i['min_height']} and {$i['max_width']}x{$i['max_height']} pixels.";

@@ -50,7 +50,11 @@
                                data-max-w="{{ $img['max_width'] }}" data-max-h="{{ $img['max_height'] }}">
                     </label>
                     <div class="preview">
-                        <img id="card{{ $n }}Preview" src="{{ $path ? asset($path) : '' }}" alt="" @if(!$path) style="display:none" @endif>
+                        <span class="img-wrap" data-img-wrap="card{{ $n }}" data-saved="{{ $path ? asset($path) : '' }}" @if(!$path) style="display:none" @endif>
+                            <img id="card{{ $n }}Preview" src="{{ $path ? asset($path) : '' }}" alt="">
+                            <button type="button" class="img-remove" data-img-remove="card{{ $n }}" aria-label="Remove card {{ $n }} image" title="Remove image">&times;</button>
+                        </span>
+                        <input type="hidden" name="remove_card{{ $n }}_image" value="0" data-remove-flag="card{{ $n }}">
                     </div>
                     <label>Card {{ $n }} caption *
                         <input type="text" name="card{{ $n }}_title" value="{{ old("card{$n}_title", $problem->{"card{$n}_title"}) }}" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}"
@@ -71,6 +75,47 @@
 
         <button type="submit" class="btn">Save changes</button>
     </form>
+
+    <style>
+        .img-wrap { position: relative; display: inline-block; line-height: 0; }
+        .img-remove { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; border: 0; border-radius: 50%; background: rgba(15, 23, 42, .78); color: #fff; font-size: 18px; line-height: 26px; text-align: center; padding: 0; cursor: pointer; transition: background .2s, transform .2s; }
+        .img-remove:hover, .img-remove:focus-visible { background: #e5321b; transform: scale(1.1); outline: none; }
+    </style>
+    <script>
+    (function () {
+        document.querySelectorAll('[data-image-input]').forEach(function (input) {
+            var k = input.dataset.imageInput;
+            var wrap = document.querySelector('[data-img-wrap="' + k + '"]');
+            var img = document.getElementById(k + 'Preview');
+            var flag = document.querySelector('[data-remove-flag="' + k + '"]');
+            var saved = wrap.dataset.saved, hadSaved = !!saved, baseRequired = input.required;
+
+            function sync() {
+                var hasFile = input.files && input.files[0];
+                var showing = hasFile || (hadSaved && flag.value !== '1');
+                wrap.style.display = showing ? '' : 'none';
+                input.required = baseRequired || (hadSaved && flag.value === '1');
+            }
+            input.addEventListener('change', function () {
+                var f = input.files && input.files[0];
+                if (f && /^image\//.test(f.type)) { img.src = URL.createObjectURL(f); flag.value = '0'; }
+                else if (!f) { img.src = saved; }
+                sync();
+            });
+            wrap.querySelector('[data-img-remove]').addEventListener('click', function () {
+                if (input.files && input.files[0]) {          // discard the newly chosen file, go back to the saved image
+                    input.value = '';
+                    img.src = saved;
+                } else {                                      // remove the saved image: a replacement is then required
+                    flag.value = '1';
+                    img.removeAttribute('src');
+                    input.focus();
+                }
+                sync();
+            });
+        });
+    })();
+    </script>
 @endsection
 
 @push('scripts')

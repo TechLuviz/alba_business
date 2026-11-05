@@ -13,7 +13,7 @@ class InsightDetailController extends Controller
 
         return view('insight-detail', [
             // per-article SEO (falls back to the article title / description when left blank)
-            'seoOverride' => (object) ['meta_title' => $article->seo_title ?: $article->title, 'meta_description' => $article->seo_description ?: $article->description],'article' => $article->load('sections'), 'cta' => InsightCtaCard::current(),
+            'seoOverride' => (object) ['meta_title' => $article->seo_title ?: $article->title, 'meta_description' => $article->seo_description ?: $article->description, 'focus_keyword' => null],'article' => $article->load('sections'), 'cta' => InsightCtaCard::current(),
             'related' => InsightArticle::where('is_active', true)->where('show_related', true)->whereKeyNot($article->id)
                 ->orderBy('sort_order')->orderByDesc('published_on')->take(3)->get()]);
     }

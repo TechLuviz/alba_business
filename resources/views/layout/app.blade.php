@@ -8,8 +8,8 @@
     @if($seo?->meta_description)
         <meta name="description" content="{{ $seo->meta_description }}">
     @endif
-    @if($seo?->focus_keyword)
-        <meta name="keywords" content="{{ $seo->focus_keyword }}">
+    @if(data_get($seo, 'focus_keyword'))
+        <meta name="keywords" content="{{ data_get($seo, 'focus_keyword') }}">
     @endif
     @include('layout.favicon')
     <link rel="preconnect" href="https://fonts.googleapis.com">
