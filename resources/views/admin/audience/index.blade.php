@@ -47,7 +47,7 @@
 
                 <label>Highlighted Heading Text (Optional)
                     <input type="text" name="highlight_text" value="{{ old('highlight_text', $audience->highlight_text) }}" maxlength="{{ config('banner.audience.highlight_max') }}" placeholder="e.g. Alba Business School" data-live="line" data-no-digits>
-                    <small style="color: var(--muted); font-weight: 400; font-size: .72rem;">Shown in italic accent font where it appears in the main heading.</small>
+                    <small style="color: var(--muted); font-weight: 400; font-size: .72rem;">Shown in italic accent font. If these exact words appear in the Main Heading (upper/lower case ignored), that part turns italic. If they don't appear there, this text is added in italic at the end of the heading.<br><strong>Example:</strong> Heading "Build a Better Business Future" + highlight "Business Future" &rarr; "Build a Better <em>Business Future</em>". Heading "Build a Better" + highlight "Business Future" &rarr; "Build a Better <em>Business Future</em>".</small>
                 </label>
 
                 <label>Supporting Description

@@ -73,10 +73,24 @@ class AudienceSection extends Model
     {
         $heading = e($this->heading ?? '');
 
-        if (filled($this->highlight_text) && str_contains($heading, e($this->highlight_text))) {
-            $highlightEscaped = e($this->highlight_text);
-            $replacement = '<span class="audience-highlight" style="color: ' . e($this->highlight_color ?: '#C8914A') . '">' . $highlightEscaped . '</span>';
-            return str_replace($highlightEscaped, $replacement, $heading);
+        if (filled($this->highlight_text)) {
+            $needle = preg_quote(e(trim($this->highlight_text)), '/');
+            $color = e($this->highlight_color ?: '#C8914A');
+
+            // Case-insensitive; keeps the heading's original casing. First match only.
+            $result = preg_replace_callback(
+                '/' . $needle . '/iu',
+                fn ($m) => '<span class="audience-highlight" style="color: ' . $color . '">' . $m[0] . '</span>',
+                $heading,
+                1
+            );
+
+            if ($result !== null && $result !== $heading) {
+                return $result;
+            }
+
+            // Highlight text isn't part of the heading: append it as the italic ending.
+            return trim($heading . ' <span class="audience-highlight" style="color: ' . $color . '">' . e(trim($this->highlight_text)) . '</span>');
         }
 
         return $heading;
