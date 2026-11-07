@@ -172,12 +172,16 @@ a { text-decoration: none; color: inherit; }
 
 .audience-intro {
     min-width: 0;
+    width: 100%;
+    max-width: 100%;
     z-index: 2;
+    overflow-wrap: anywhere; /* long unbroken words wrap instead of widening the column */
 }
 
 .audience-eyebrow {
     display: inline-flex;
-    align-items: center;
+    max-width: 100%;
+    min-width: 0;
     gap: 14px;
     font-size: 0.8rem;
     font-weight: 600;
@@ -193,6 +197,12 @@ a { text-decoration: none; color: inherit; }
     flex-shrink: 0;
 }
 
+.audience-eyebrow > span:not(.audience-eyebrow-line) {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
 .audience-heading {
     font-family: 'Cormorant Garamond', Georgia, serif;
     font-weight: 500;
@@ -200,7 +210,8 @@ a { text-decoration: none; color: inherit; }
     line-height: 1.08;
     margin-bottom: 24px;
     word-break: normal;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
+    max-width: 100%;
 }
 
 .audience-highlight {
@@ -212,8 +223,9 @@ a { text-decoration: none; color: inherit; }
 .audience-desc {
     font-size: clamp(0.98rem, 1.15vw, 1.12rem);
     line-height: 1.7;
-    max-width: 440px;
+    max-width: min(440px, 100%);
     margin-bottom: 0;
+    overflow-wrap: anywhere;
 }
 
 /* ==========================================================================
@@ -304,6 +316,7 @@ a { text-decoration: none; color: inherit; }
     color: #111111;
     line-height: 1.15;
     margin-bottom: 8px;
+    overflow-wrap: anywhere;
 }
 
 .audience-card-desc {
@@ -312,6 +325,7 @@ a { text-decoration: none; color: inherit; }
     color: #5b6677;
     line-height: 1.55;
     min-height: 0;
+    overflow-wrap: anywhere;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -423,12 +437,12 @@ a { text-decoration: none; color: inherit; }
 /* Responsive adjustments */
 @media (max-width: 1024px) {
     .audience-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: 36px;
     }
     .audience-intro {
         text-align: center;
-        max-width: 680px;
+        max-width: min(680px, 100%);
         margin: 0 auto;
     }
     .audience-desc {

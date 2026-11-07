@@ -44,7 +44,7 @@
         </div>
         <div class="grid2">
             <label>Duration (months) *
-                <input type="number" name="duration" required min="1" max="99" step="1" inputmode="numeric" placeholder="e.g. 12">
+                <input type="number" name="duration" data-live="number" required min="1" max="99" step="1" inputmode="numeric" placeholder="e.g. 12">
             </label>
             <label>Study mode *
                 <input type="text" name="mode" data-live="line" data-no-digits required data-word-max="{{ $c['word_max'] }}" minlength="{{ $c['mode_min'] }}" maxlength="{{ $c['mode_max'] }}" placeholder="e.g. Full-time">
@@ -73,7 +73,7 @@
         </label>
         <div class="grid2">
             <label>Levels text
-                <input type="number" name="banner_levels" min="1" max="99" step="1" inputmode="numeric" placeholder="e.g. 3">
+                <input type="number" name="banner_levels" data-live="number" min="1" max="99" step="1" inputmode="numeric" placeholder="e.g. 3">
             </label>
             <label>Timeline text
                 <input type="text" name="banner_timeline" data-live="line" data-word-max="{{ $b['word_max'] }}" minlength="{{ $b['timeline_min'] }}" maxlength="{{ $b['timeline_max'] }}" placeholder="e.g. Month 1 through Months 4-5">
@@ -106,7 +106,7 @@
 
         <div class="grid2">
             <label>Display order (0-{{ $c['order_max'] }})
-                <input type="number" name="sort_order" min="0" max="{{ $c['order_max'] }}" value="0">
+                <input type="number" name="sort_order" data-live="number" min="0" max="{{ $c['order_max'] }}" value="0">
             </label>
             <div class="check end">
                 <label class="check"><input type="checkbox" name="is_featured" value="1"> Featured (gold highlight)</label>
