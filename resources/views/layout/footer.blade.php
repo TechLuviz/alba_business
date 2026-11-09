@@ -5,7 +5,7 @@
                 @if($brand->brand_logo)
                     <img src="{{ asset($brand->brand_logo) }}" alt="{{ $brand->brand_name ?: 'Albahub' }}" class="logo-img">
                 @else
-                    @php($parts = explode(' ', $brand->brand_name ?: 'ALBATECH HUB', 2))
+                    @php($parts = explode(' ', $brand->brand_name ?: 'ALBAHUB', 2))
                     <span class="logo-name">{{ $parts[0] }} @if(isset($parts[1]))<span class="logo-light">{{ $parts[1] }}</span>@endif <sup>TM</sup></span>
                     <span class="logo-sub">{{ strtoupper($brand->brand_tagline ?: 'School of Business') }}</span>
                 @endif

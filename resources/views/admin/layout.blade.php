@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Admin') | Albatech HUB</title>
+    <title>@yield('title', 'Admin') | Albahub</title>
     @include('layout.favicon')
     <link rel="stylesheet" href="{{ asset('assets/css/admin.css') }}?v={{ filemtime(public_path('assets/css/admin.css')) }}">
 </head>
@@ -40,6 +40,7 @@
 
     <div class="backdrop" id="backdrop"></div>
     <script src="{{ asset('assets/js/admin.js') }}?v={{ filemtime(public_path('assets/js/admin.js')) }}"></script>
+    <script src="{{ asset('assets/js/admin-select.js') }}?v={{ filemtime(public_path('assets/js/admin-select.js')) }}"></script>
     <script>
         // Stop the mouse wheel from silently changing a focused number field while scrolling the page/panel.
         document.addEventListener('wheel', function (e) {

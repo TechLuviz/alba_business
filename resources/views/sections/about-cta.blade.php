@@ -19,11 +19,11 @@
                 @if($aboutCta->image_main || $aboutCta->image_small)
                     <div class="about-cta-media">
                         @if($aboutCta->image_main)
-                            <figure class="cta-photo is-main"><img src="{{ asset($aboutCta->image_main) }}" alt="Albatech campus" loading="lazy"></figure>
+                            <figure class="cta-photo is-main"><img src="{{ asset($aboutCta->image_main) }}" alt="Albahub campus" loading="lazy"></figure>
                         @endif
                         @if($aboutCta->image_small)
                             <figure class="cta-photo is-small">
-                                <img src="{{ asset($aboutCta->image_small) }}" alt="{{ $aboutCta->image_caption ?: 'Albatech community' }}" loading="lazy">
+                                <img src="{{ asset($aboutCta->image_small) }}" alt="{{ $aboutCta->image_caption ?: 'Albahub community' }}" loading="lazy">
                                 @if($aboutCta->image_caption)<figcaption>{{ $aboutCta->image_caption }}</figcaption>@endif
                             </figure>
                         @endif
@@ -32,7 +32,7 @@
             </div>
 
             {{-- Static footer strip --}}
-            <div class="about-cta-foot"><span>ALBAHUB &mdash; School of Business</span><i></i></div>
+            <div class="about-cta-foot"><span>ALBAHUB &mdash; School of Business</span></div>
         </div>
     </section>
 @endif

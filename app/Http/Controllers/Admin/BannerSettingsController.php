@@ -23,7 +23,7 @@ class BannerSettingsController extends Controller
     {
         $data = $request->validate(['autoplay_interval' => ['required', 'integer', 'min:2', 'max:30']]);
 
-        $hero = HeroBanner::latest('id')->first() ?? new HeroBanner(['is_active' => true, 'brand_name' => 'ALBATECH HUB']);
+        $hero = HeroBanner::latest('id')->first() ?? new HeroBanner(['is_active' => true, 'brand_name' => 'ALBAHUB']);
         $hero->fill($data)->save();
 
         return back()->with('success', 'Slide interval updated.');

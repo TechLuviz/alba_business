@@ -136,8 +136,8 @@
                     current.classList.add('is-focus');
                     readTime.textContent = link.dataset.minutes + ' min read'; // this entry's own reading time
 
-                    // scroll down to the start of the content (the "min read" line)
-                    content.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+                    // scroll to the clicked section itself; CSS scroll-margin keeps it just below the fixed header
+                    current.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
                 });
             })();
         </script>

@@ -32,6 +32,31 @@
     @include('layout.quick-contact')
 
     <script src="{{ asset('assets/js/cf-select.js') }}?v={{ @filemtime(public_path('assets/js/cf-select.js')) }}"></script>
+    <script>
+        // Links, buttons, images, icons and videos can't be dragged (no ghost box with the link name/URL following the cursor).
+        document.addEventListener('dragstart', function (e) {
+            if (e.target && e.target.closest && e.target.closest('a, img, svg, button, video, picture')) e.preventDefault();
+        });
+    </script>
+    <script>
+        // Header: hides while scrolling down, slides back in while scrolling up; always shown at the top of the page.
+        (function () {
+            var header = document.querySelector('.site-header'), toggle = document.getElementById('navToggle');
+            if (!header) return;
+            var last = window.pageYOffset, ticking = false;
+            function update() {
+                ticking = false;
+                var y = Math.max(0, window.pageYOffset), d = y - last;
+                if (y <= 10) { header.classList.remove('is-hidden', 'is-stuck'); last = y; return; }
+                if (Math.abs(d) < 6) return;
+                var navOpen = toggle && toggle.getAttribute('aria-expanded') === 'true';
+                if (d > 0 && !navOpen) header.classList.add('is-hidden');
+                else if (d < 0) { header.classList.remove('is-hidden'); header.classList.add('is-stuck'); }
+                last = y;
+            }
+            window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+        })();
+    </script>
     @stack('scripts')
 </body>
 </html>

@@ -1897,3 +1897,122 @@ a.insight-arrow:hover, a.insight-arrow:focus-visible { background: var(--gold); 
     .home-hero:has(.hero-video) .hero-slide { position: relative; inset: auto; padding: 28px 0 56px; align-items: flex-start; }
     .home-hero:has(.hero-video) .hero-overlay::before { display: none; }
 }
+
+/* Mobile video banner v2: the heading / button sit ON the video (bottom-left) instead of in a separate band below it. */
+@media (max-width: 768px) {
+    .home-hero:has(.hero-video) { position: relative; }
+    .home-hero:has(.hero-video) .hero-slide { position: absolute; inset: 84px 0 0 0; padding: 0 0 16px; align-items: flex-end; }
+    .home-hero:has(.hero-video) .hero-overlay::before { display: block; background: linear-gradient(180deg, rgba(10,22,40,0) 40%, rgba(10,22,40,.85) 100%); }
+    .home-hero:has(.hero-video) .hero-slide .btn-gold { padding: 10px 18px; font-size: .9rem; }
+    .home-hero:has(.hero-video) .hero-slide h2 { font-size: clamp(1.3rem, 6vw, 1.8rem); margin-bottom: 12px; }
+    .home-hero:has(.hero-video) .hero-slide p { font-size: .85rem; margin-bottom: 14px; }
+}
+
+/* Blog card arrow: on hover the circle fills gold, so the arrow must switch to a dark colour to stay visible
+   (the active card's gold arrow colour was winning over the generic hover colour -> gold on gold). */
+.insight-card.is-active:hover .insight-arrow,
+.insight-card.is-active a.insight-arrow:hover,
+.insight-card.is-active a.insight-arrow:focus-visible {
+    background: var(--gold); border-color: var(--gold); color: #0a1628; cursor: pointer;
+}
+
+/* Article sidebar: when it sticks it must sit BELOW the fixed desktop header (97px) with a gap, never under it.
+   Sticky only lives inside .insight-layout, so it stops at the end of the article (above Related / footer). */
+@media (min-width: 961px) {
+    .insight-side { top: 121px; }
+}
+
+/* Links, buttons, images and icons cannot be dragged (no drag ghost with the link name / URL). Text inputs stay selectable. */
+a, img, svg, button, video, picture {
+    -webkit-user-drag: none;
+    user-drag: none;
+}
+a, button, img, svg { -webkit-user-select: none; user-select: none; }
+
+/* Problem-section image captions: show the full text (wrap to 2-3 lines) instead of cutting it with "..." */
+.problem-card figcaption {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+    line-height: 1.3;
+    border-radius: 18px;
+}
+@media (max-width: 640px) {
+    .problem-card figcaption { left: 10px; right: 10px; bottom: 10px; padding: 8px 12px; font-size: .78rem; }
+}
+
+/* Problem-section captions: ONE line, full text (no "..."). The text shrinks with the screen width so it always fits the card. */
+.problem-card figcaption {
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+    border-radius: 999px;
+    text-align: center;
+}
+@media (max-width: 640px) {
+    .problem-card figcaption {
+        left: 8px; right: 8px; bottom: 8px;
+        padding: 8px 6px;
+        font-size: clamp(.5rem, 2.7vw, .74rem);
+        letter-spacing: -.01em;
+    }
+}
+
+/* Target Audience (desktop): wider text column + calmer heading size so the copy reads in natural lines
+   instead of one word per line, and the text block sits centred next to the carousel. */
+@media (min-width: 961px) {
+    .audience-grid {
+        grid-template-columns: minmax(340px, 5fr) minmax(0, 7fr);
+        gap: clamp(32px, 4vw, 72px);
+    }
+    .audience-eyebrow { letter-spacing: .14em; line-height: 1.6; margin-bottom: 20px; }
+    .audience-heading { font-size: clamp(2.2rem, 3.2vw, 3.5rem); line-height: 1.12; margin-bottom: 22px; }
+    .audience-desc { max-width: 520px; font-size: clamp(.95rem, 1vw, 1.05rem); line-height: 1.65; }
+}
+
+/* Audience eyebrow: the gold dash sits level with the middle of the FIRST text line (it used to float above it) */
+.audience-eyebrow { align-items: flex-start; line-height: 1.6; }
+.audience-eyebrow .audience-eyebrow-line { margin-top: calc(.8rem * 1.6 / 2 - 1px); width: 32px; }
+
+/* App-like feel: page text (banners, headings, menus, cards, buttons) cannot be highlighted by an accidental drag.
+   Form fields and long reading content (blog article, policy pages) stay selectable. */
+body {
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+input, textarea, select, [contenteditable="true"],
+.insight-content, .insight-content *,
+.policy-content, .policy-content *,
+.privacy-content, .privacy-content * {
+    -webkit-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+
+/* About page principles (Mission / Vision) on mobile: the single column must never grow wider than the screen,
+   so the text wraps inside the padding instead of running off the right edge. */
+@media (max-width: 900px) {
+    .about-principles { grid-template-columns: minmax(0, 1fr); width: 100%; max-width: 100%; }
+    .principles-media, .principles-body { width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; }
+    .principles-body { padding: 36px 20px 40px; }
+    .principle { gap: 16px; min-width: 0; }
+    .principle-icon { margin-top: 6px; margin-left: 4px; }
+    .principle-text, .principle h3, .principle p.principle-desc { min-width: 0; max-width: 100%; overflow-wrap: anywhere; word-break: normal; }
+}
+
+/* Table of contents: the chosen section lands just BELOW the fixed header (97px) with a small gap, never behind it. */
+.insight-section { scroll-margin-top: 24px; }
+@media (min-width: 769px) { .insight-section { scroll-margin-top: 121px; } }
+
+/* Header hides when scrolling DOWN and slides back in when scrolling UP (always visible at the very top of the page). */
+.site-header { transition: transform .35s ease, background-color .3s ease, box-shadow .3s ease; will-change: transform; }
+.site-header.is-hidden { transform: translateY(-110%); box-shadow: none; }
+@media (max-width: 768px) {
+    .site-header { position: fixed; }
+    .site-header.is-stuck { background: rgba(10, 22, 40, .94); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); padding-bottom: 10px; box-shadow: 0 6px 20px rgba(0, 0, 0, .25); }
+}
+@media (prefers-reduced-motion: reduce) { .site-header { transition: none; } }

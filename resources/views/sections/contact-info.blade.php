@@ -118,7 +118,10 @@
             let statusTimer;
             const status = document.getElementById('cfStatus'), count = document.getElementById('cfCount');
             const EMAIL = /^[A-Za-z0-9.!#$%&'*+\/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*\.[A-Za-z]{2,}$/;
+            // Incomplete / mistyped endings (e.g. name@site.co instead of .com) are rejected.
+            const BAD_TLD = /\.(co|cm|con|cmo|ocm|vom|xom|cpm|comm|coom|nte|ogr|ne|or)$/i;
 
+            const MSG_SYMBOLS = /[^A-Za-z0-9\s.,'"?!&():;\/-]/, SYMBOL_MSG = 'Symbols like # @ % are not allowed.';
             const rules = {
                 name(v) {
                     v = v.replace(/\s+/g, ' ').trim();
@@ -133,7 +136,7 @@
                     if (!v) return 'Please enter your email address.';
                     if (/\s/.test(v)) return 'The email address cannot contain spaces.';
                     if (!v.includes('@')) return 'The email address must contain an @.';
-                    if (!EMAIL.test(v)) return 'Enter a valid email address, like name@example.com.';
+                    if (!EMAIL.test(v) || BAD_TLD.test(v)) return 'Enter a valid email address with a complete domain, like name@example.com.';
                     return '';
                 },
                 phone(v) {
@@ -148,7 +151,8 @@
                 message(v) {
                     const t = v.trim();
                     if (!t) return 'Please write your message.';
-                    if (/[^\x20-\x7E\r\n]/.test(v)) return 'Use plain text only - emojis and special symbols are not allowed.';
+                    if (/[^\x20-\x7E\r\n]/.test(v)) return 'Emojis are not allowed.';
+                    if (MSG_SYMBOLS.test(v)) return SYMBOL_MSG;
                     if (t.length < L.msgMin) return 'The message must be at least ' + L.msgMin + ' characters (currently ' + t.length + ').';
                     if (t.length > L.msgMax) return 'The message can be at most ' + L.msgMax + ' characters.';
                     if (t.split(/\s+/).some(w => w.length > 40)) return 'A single word is too long - please add spaces.';
@@ -175,7 +179,7 @@
                 name:    { re: /[^A-Za-z .'-]/g, msg: "Only letters, spaces and . ' - are allowed in the name." },
                 email:   { re: /[^A-Za-z0-9.!#$%&'*+\/=?^_`{|}~@-]/g, msg: 'Spaces and unsupported characters are not allowed in an email address.' },
                 phone:   { re: /[^0-9+ ()-]/g, msg: 'Only digits, +, spaces, dashes and brackets are allowed in a phone number.' },
-                message: { re: /[^\x20-\x7E\r\n]/g, msg: 'Emojis and special unicode characters are not allowed - they were removed.' },
+                message: { re: /[^A-Za-z0-9\s.,'"?!&():;\/-]/g, msg: v => /[^\x20-\x7E\r\n]/.test(v) ? 'Emojis are not allowed.' : SYMBOL_MSG },
             };
             function sanitize(el) {
                 const b = BLOCK[el.name];
@@ -192,11 +196,16 @@
                     const t = out.replace(/(?!^)\+/g, '').replace(/^ +/, '').replace(/ {2,}/g, ' ');
                     if (t !== out) { bad = true; cur = Math.max(0, cur - (out.length - t.length)); out = t; }
                 }
-                if (bad) { el.value = out; try { el.setSelectionRange(cur, cur); } catch (x) {} return b.msg; }
+                if (bad) { el.value = out; try { el.setSelectionRange(cur, cur); } catch (x) {} return typeof b.msg === 'function' ? b.msg(v) : b.msg; }
                 return null;
             }
             fields.forEach(el => {
                 el.addEventListener('input', () => {
+                    // Phone: digits only (plus one leading +). Letters and symbols are dropped as they are typed or pasted.
+                    if (el.name === 'phone') {
+                        const clean = el.value.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, '');
+                        if (clean !== el.value) el.value = clean;
+                    }
                     if (el.tagName !== 'SELECT') {
                         const blocked = sanitize(el);
                         if (el.name === 'message') count.textContent = el.value.length + ' / ' + L.msgMax;

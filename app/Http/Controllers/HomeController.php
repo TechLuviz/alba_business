@@ -472,7 +472,7 @@ class HomeController extends Controller
         $plain = [];
         foreach (['name', 'email', 'phone', 'course', 'message'] as $field) {
             if (preg_match('/[^\x20-\x7E\n]/', (string) $request->input($field))) {
-                $plain[$field] = 'Emojis, special unicode characters and symbols are not allowed.';
+                $plain[$field] = 'Emojis are not allowed.';
             }
         }
         if ($plain) {
@@ -481,7 +481,7 @@ class HomeController extends Controller
 
         $data = $request->validate([
             'name' => ['required', 'string', "min:{$f['name_min']}", "max:{$f['name_max']}", "regex:/^[A-Za-z][A-Za-z .'-]*$/"],
-            'email' => ['required', 'string', "max:{$f['email_max']}", 'email:rfc', 'regex:/^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/'],
+            'email' => ['required', 'string', "max:{$f['email_max']}", 'email:rfc', 'regex:/^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/', 'not_regex:/\.(co|cm|con|cmo|ocm|vom|xom|cpm|comm|coom|nte|ogr|ne|or)$/i'],
             'phone' => ['required', 'string', "max:{$f['phone_max']}", 'regex:/^\+?[0-9][0-9 ()-]*[0-9]$/', function (string $attr, mixed $value, \Closure $fail) {
                 $digits = strlen(preg_replace('/\D/', '', $value));
                 if ($digits < 7 || $digits > 15) {
@@ -489,7 +489,7 @@ class HomeController extends Controller
                 }
             }],
             'course' => ['required', 'string', \Illuminate\Validation\Rule::in($courses)],
-            'message' => ['required', 'string', "min:{$f['message_min']}", "max:{$f['message_max']}", "regex:/^[\\x20-\\x7E\\n]+$/", function (string $attr, mixed $value, \Closure $fail) {
+            'message' => ['required', 'string', "min:{$f['message_min']}", "max:{$f['message_max']}", "regex:/^[A-Za-z0-9\\s.,'\"?!&():;\\/-]+$/", function (string $attr, mixed $value, \Closure $fail) {
                 foreach (preg_split('/\s+/', $value) as $word) {
                     if (mb_strlen($word) > 40) {
                         $fail('A single word in the message is too long (40 characters maximum).');
@@ -504,7 +504,7 @@ class HomeController extends Controller
             'email.regex' => 'Enter a valid email address, like name@example.com.',
             'phone.regex' => 'Use digits only, with an optional leading + and spaces, dashes or brackets.',
             'course.in' => 'Please choose a course from the list.',
-            'message.regex' => 'The message may contain only plain text (no emojis or special symbols).',
+            'message.regex' => 'Symbols like # @ % $ * are not allowed. Use letters, numbers and . , \' " ? ! & ( ) : ; / - only.',
         ], [
             'name' => 'name',
             'email' => 'email',
@@ -532,7 +532,7 @@ class HomeController extends Controller
             'heading' => TextRules::line(true, $c['heading_min'], $c['heading_max'], $w),
             'heading_accent' => TextRules::line(true, $c['accent_min'], $c['accent_max'], $w),
             'description' => TextRules::line(true, $c['description_min'], $c['description_max'], $c['long_word_max']),
-            'email' => ['required', 'string', "max:{$c['email_max']}", 'email:rfc', 'regex:/^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/'],
+            'email' => ['required', 'string', "max:{$c['email_max']}", 'email:rfc', 'regex:/^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/', 'not_regex:/\.(co|cm|con|cmo|ocm|vom|xom|cpm|comm|coom|nte|ogr|ne|or)$/i'],
             'phone' => ['required', 'string', "max:{$c['phone_max']}", 'regex:/^\+?[0-9][0-9 ()-]*[0-9]$/', function (string $attr, mixed $value, \Closure $fail) {
                 $digits = strlen(preg_replace('/\D/', '', $value));
                 if ($digits < 7 || $digits > 15) {

@@ -3,7 +3,7 @@
     To add a new menu: create resources/views/admin/sidebar/<name>.blade.php and @include it below.
 --}}
 <aside class="sidebar">
-    <div class="brand">ALBATECH <span>HUB</span><small>Admin Panel</small></div>
+    <div class="brand">ALBA<span>HUB</span><small>Admin Panel</small></div>
 
     <nav class="menu">
         @include('admin.sidebar.page-settings')

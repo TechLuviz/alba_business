@@ -51,6 +51,11 @@
             let statusTimer;
             const status = document.getElementById('enStatus'), count = document.getElementById('enCount');
             const EMAIL = /^[A-Za-z0-9.!#$%&'*+\/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*\.[A-Za-z]{2,}$/;
+            // Incomplete / mistyped endings (e.g. name@site.co instead of .com) are rejected.
+            const BAD_TLD = /\.(co|cm|con|cmo|ocm|vom|xom|cpm|comm|coom|nte|ogr|ne|or)$/i;
+            const NOT_PLAIN = /[^\x20-\x7E\r\n]/, NOT_PLAIN_ALL = /[^\x20-\x7E\r\n]/g;
+            // Message: letters, numbers, spaces and . , ' " ? ! & ( ) : ; / - only. Symbols such as # @ % $ * ^ are blocked.
+            const MSG_SYMBOLS = /[^A-Za-z0-9\s.,'"?!&():;\/-]/, MSG_SYMBOLS_ALL = /[^A-Za-z0-9\s.,'"?!&():;\/-]/g, SYMBOL_MSG = 'Symbols like # @ % are not allowed.';
             const rules = {
                 name(v) {
                     v = v.replace(/\s+/g, ' ').trim();
@@ -65,7 +70,7 @@
                     if (!v) return 'Please enter your email address.';
                     if (/\s/.test(v)) return 'The email address cannot contain spaces.';
                     if (!v.includes('@')) return 'The email address must contain an @.';
-                    if (!EMAIL.test(v)) return 'Enter a valid email address, like name@example.com.';
+                    if (!EMAIL.test(v) || BAD_TLD.test(v)) return 'Enter a valid email address with a complete domain, like name@example.com.';
                     return '';
                 },
                 phone(v) {
@@ -80,26 +85,42 @@
                 message(v) {
                     const t = v.trim();
                     if (!t) return 'Please write your message.';
-                    if (/[^\x20-\x7E\r\n]/.test(v)) return 'Use plain text only - emojis and special symbols are not allowed.';
+                    if (/[^\x20-\x7E\r\n]/.test(v)) return 'Emojis are not allowed.';
+                    if (MSG_SYMBOLS.test(v)) return SYMBOL_MSG;
                     if (t.length < L.msgMin) return 'The message must be at least ' + L.msgMin + ' characters (currently ' + t.length + ').';
                     if (t.length > L.msgMax) return 'The message can be at most ' + L.msgMax + ' characters.';
                     if (t.split(/\s+/).some(w => w.length > 40)) return 'A single word is too long - please add spaces.';
                     return '';
                 },
             };
+            // Each field's error hides itself after ~5 seconds (and is replaced / cleared as soon as the value is re-checked).
+            const errTimers = {};
             function show(el, msg) {
+                clearTimeout(errTimers[el.name]);
                 form.querySelector('.cf-err[data-for="' + el.name + '"]').textContent = msg;
                 el.closest('.cf-field').classList.toggle('is-bad', !!msg);
+                if (msg) errTimers[el.name] = setTimeout(() => show(el, ''), 5000);
                 return msg;
             }
+            // Returned value of check() must stay the message so submit can still tell which field is invalid.
             const check = el => show(el, rules[el.name](el.value));
-            const NOT_PLAIN = /[^\x20-\x7E\r\n]/, NOT_PLAIN_ALL = /[^\x20-\x7E\r\n]/g;
             fields.forEach(el => {
                 el.addEventListener('input', () => {
+                    // Phone: digits only (plus one leading +). Letters and symbols are dropped as they are typed or pasted.
+                    if (el.name === 'phone') {
+                        const clean = el.value.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, '');
+                        if (clean !== el.value) el.value = clean;
+                    }
                     if (el.tagName !== 'SELECT' && NOT_PLAIN.test(el.value)) {
                         el.value = el.value.replace(NOT_PLAIN_ALL, ''); el.dataset.touched = '1';
                         if (el.name === 'message') count.textContent = el.value.length + ' / ' + L.msgMax;
-                        show(el, 'Emojis and special unicode characters are not allowed - they were removed.');
+                        show(el, 'Emojis are not allowed.');
+                        return;
+                    }
+                    if (el.name === 'message' && MSG_SYMBOLS.test(el.value)) {
+                        el.value = el.value.replace(MSG_SYMBOLS_ALL, ''); el.dataset.touched = '1';
+                        count.textContent = el.value.length + ' / ' + L.msgMax;
+                        show(el, SYMBOL_MSG);
                         return;
                     }
                     if (el.name === 'message') count.textContent = el.value.length + ' / ' + L.msgMax;
@@ -118,7 +139,8 @@
                 lastFocus = document.activeElement;
                 form.reset(); count.textContent = '0 / ' + L.msgMax; status.className = 'cf-status'; status.textContent = '';
                 fields.forEach(el => { delete el.dataset.touched; show(el, ''); });
-                if ([...form.elements.course.options].some(o => o.value === course)) form.elements.course.value = course;
+                // The course always starts on the "Select a course" placeholder - the visitor must choose one consciously.
+                form.elements.course.value = '';
                 modal.hidden = false; document.body.style.overflow = 'hidden';
                 setTimeout(() => form.elements.name.focus(), 30);
             }
