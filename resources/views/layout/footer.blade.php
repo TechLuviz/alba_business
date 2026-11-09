@@ -81,12 +81,13 @@
             msg.textContent = text; msg.className = 'nl-msg' + (text ? (ok ? ' ok' : ' bad') : '');
             input.classList.toggle('invalid', !!text && !ok);
         }
-        input.addEventListener('input', () => { show(input.value ? check(input.value.trim()) : '', false); });
-        input.addEventListener('blur', () => { input.value = input.value.trim(); if (input.value) show(check(input.value), false); });
+        // Typing clears any error straight away; the field is validated again on blur / submit.
+        input.addEventListener('input', () => show('', false));
+        input.addEventListener('blur', () => { input.value = input.value.trim(); if (input.value) show(check(input.value), false, true); });
         form.addEventListener('submit', async e => {
             e.preventDefault();
             const v = input.value.trim(), err = check(v);
-            if (err) { show(err, false); input.focus(); return; }
+            if (err) { show(err, false, true); input.focus(); return; }
             const btn = form.querySelector('button'); btn.disabled = true;
             try {
                 const r = await fetch(form.action, { method: 'POST', headers: { 'Accept': 'application/json' }, body: new FormData(form) });

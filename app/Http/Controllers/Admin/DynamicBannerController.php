@@ -19,6 +19,7 @@ class DynamicBannerController extends Controller
         if ($data['is_active']) {
             BannerMode::slidesActivated();
         }
+        BannerMode::ensureOneActive('slides');
 
         return redirect()->route('admin.banners.index')->with('success', 'Dynamic banner created.');
     }
@@ -36,27 +37,34 @@ class DynamicBannerController extends Controller
         if ($data['is_active']) {
             BannerMode::slidesActivated();
         }
+        $auto = BannerMode::ensureOneActive('slides');
 
-        return redirect()->route('admin.banners.index')->with('success', 'Dynamic banner updated.');
+        return redirect()->route('admin.banners.index')->with('success', 'Dynamic banner updated.' . ($auto ? ' ' . BannerMode::autoMessage($auto) : ''));
     }
 
     public function destroy(HeroSlide $slide)
     {
         Uploads::delete($slide->image);
         $slide->delete();
+        $auto = BannerMode::ensureOneActive('slides');
 
-        return redirect()->route('admin.banners.index')->with('success', 'Dynamic banner deleted.');
+        return redirect()->route('admin.banners.index')->with('success', 'Dynamic banner deleted.' . ($auto ? ' ' . BannerMode::autoMessage($auto) : ''));
     }
 
     public function toggle(Request $request, HeroSlide $slide)
     {
         $slide->update(['is_active' => $request->boolean('is_active')]);
         $videosOff = $slide->is_active ? BannerMode::slidesActivated() : 0;
+        $auto = $slide->is_active ? null : BannerMode::ensureOneActive('slides');
+
+        $message = $videosOff
+            ? 'Image banner activated. The active video banner was switched off, because only one banner type can be active at a time.'
+            : BannerMode::autoMessage($auto);
 
         return response()->json([
-            'is_active' => $slide->is_active,
-            'reload' => $videosOff > 0,
-            'message' => $videosOff ? 'Image banner activated. The active video banner was switched off, because only one banner type can be active at a time.' : null,
+            'is_active' => $slide->fresh()->is_active,
+            'reload' => $videosOff > 0 || $auto !== null,
+            'message' => $message,
         ]);
     }
 
@@ -65,11 +73,16 @@ class DynamicBannerController extends Controller
         $on = $request->boolean('is_active');
         HeroSlide::query()->update(['is_active' => $on]);
         $videosOff = $on ? BannerMode::slidesActivated() : 0;
+        $auto = $on ? null : BannerMode::ensureOneActive('slides');
+
+        $message = $videosOff
+            ? 'All image banners activated. The active video banner was switched off, because only one banner type can be active at a time.'
+            : BannerMode::autoMessage($auto);
 
         return response()->json([
             'is_active' => $on,
-            'reload' => $videosOff > 0,
-            'message' => $videosOff ? 'All image banners activated. The active video banner was switched off, because only one banner type can be active at a time.' : null,
+            'reload' => $videosOff > 0 || $auto !== null,
+            'message' => $message,
         ]);
     }
 

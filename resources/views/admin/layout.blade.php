@@ -40,6 +40,15 @@
 
     <div class="backdrop" id="backdrop"></div>
     <script src="{{ asset('assets/js/admin.js') }}?v={{ filemtime(public_path('assets/js/admin.js')) }}"></script>
+    <script>
+        // Stop the mouse wheel from silently changing a focused number field while scrolling the page/panel.
+        document.addEventListener('wheel', function (e) {
+            var el = document.activeElement;
+            if (el && el.type === 'number' && el === e.target) {
+                el.blur();
+            }
+        }, { passive: true });
+    </script>
     @stack('scripts')
 </body>
 </html>

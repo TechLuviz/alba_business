@@ -19,6 +19,7 @@ class VideoBannerController extends Controller
         if ($video->is_active) {
             BannerMode::videoActivated($video);
         }
+        BannerMode::ensureOneActive('videos');
 
         return redirect()->route('admin.banners.index')->with('success', 'Video banner created.');
     }
@@ -36,24 +37,27 @@ class VideoBannerController extends Controller
         if ($video->is_active) {
             BannerMode::videoActivated($video);
         }
+        $auto = BannerMode::ensureOneActive('videos');
 
-        return redirect()->route('admin.banners.index')->with('success', 'Video banner updated.');
+        return redirect()->route('admin.banners.index')->with('success', 'Video banner updated.' . ($auto ? ' ' . BannerMode::autoMessage($auto) : ''));
     }
 
     public function destroy(HeroVideo $video)
     {
         Uploads::delete($video->video);
         $video->delete();
+        $auto = BannerMode::ensureOneActive('videos');
 
-        return redirect()->route('admin.banners.index')->with('success', 'Video banner deleted.');
+        return redirect()->route('admin.banners.index')->with('success', 'Video banner deleted.' . ($auto ? ' ' . BannerMode::autoMessage($auto) : ''));
     }
 
     public function toggle(Request $request, HeroVideo $video)
     {
         $video->update(['is_active' => $request->boolean('is_active')]);
         $off = $video->is_active ? BannerMode::videoActivated($video) : ['videos' => 0, 'slides' => 0];
+        $auto = $video->is_active ? null : BannerMode::ensureOneActive('videos');
 
-        $message = null;
+        $message = BannerMode::autoMessage($auto);
         if ($off['videos'] && $off['slides']) {
             $message = 'Video banner activated. The other video and the image banners were switched off, because only one video and one banner type can be active at a time.';
         } elseif ($off['videos']) {
@@ -62,7 +66,7 @@ class VideoBannerController extends Controller
             $message = 'Video banner activated. The image banners were switched off, because only one banner type can be active at a time.';
         }
 
-        return response()->json(['is_active' => $video->is_active, 'reload' => $message !== null, 'message' => $message]);
+        return response()->json(['is_active' => $video->fresh()->is_active, 'reload' => $message !== null, 'message' => $message]);
     }
 
     public function toggleAll(Request $request)
@@ -74,11 +78,14 @@ class VideoBannerController extends Controller
             BannerMode::videoActivated($first);
         }
 
+        $on = $request->boolean('is_active');
+        $auto = $on ? null : BannerMode::ensureOneActive('videos');
+
         return response()->json([
             'reload' => true,
-            'message' => $request->boolean('is_active')
+            'message' => $on
                 ? 'Only one video can be active, so just the first video was activated and the image banners were switched off.'
-                : 'All video banners were switched off.',
+                : (BannerMode::autoMessage($auto) ?? 'All video banners were switched off.'),
         ]);
     }
 

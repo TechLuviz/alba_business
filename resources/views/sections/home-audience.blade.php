@@ -208,12 +208,20 @@
                 restartAutoplay();
             });
 
+            // On touch, scrolling the page fires pointercancel (not pointerup): resume autoplay then too.
+            window.addEventListener('pointercancel', () => {
+                if (!isPointerDown) return;
+                isPointerDown = false;
+                wrap.classList.remove('is-dragging');
+                restartAutoplay();
+            });
+
             // Autoplay management
             function startAutoplay() {
                 if (!autoplayEnabled || total <= 1) return;
                 stopAutoplay();
                 timer = setInterval(() => {
-                    if (!isHovered) {
+                    if (!isHovered && !isPointerDown) {
                         next();
                     }
                 }, autoplayInterval);
@@ -234,8 +242,10 @@
             window.addEventListener('pagehide', stopAutoplay);
             document.addEventListener('visibilitychange', () => { document.hidden ? stopAutoplay() : restartAutoplay(); });
 
-            root.addEventListener('mouseenter', () => { isHovered = true; });
-            root.addEventListener('mouseleave', () => { isHovered = false; });
+            // Pause on hover for real mice only. Touch screens fake mouseenter on tap and never send mouseleave,
+            // which would leave autoplay paused forever on mobile.
+            root.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') isHovered = true; });
+            root.addEventListener('pointerleave', () => { isHovered = false; });
 
             // Initialize slot positions
             applySlots();

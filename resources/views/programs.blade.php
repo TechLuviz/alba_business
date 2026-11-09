@@ -82,7 +82,7 @@
                             </ul>
                             <div class="program-foot">
                                 <div class="program-meta"><strong>{{ is_numeric($card->duration) ? $card->duration . ' ' . Str::plural('Month', (int) $card->duration) : $card->duration }}</strong><span>{{ $card->mode }}</span></div>
-                                <a href="{{ route('programs.show', $card->slug) }}" class="program-btn">Enroll Now &rarr;</a>
+                                <button type="button" class="program-btn" data-enroll="{{ $card->title }}">Enroll Now &rarr;</button>
                             </div>
                         </article>
                     @endforeach
@@ -90,6 +90,10 @@
             @endif
         </div>
     </section>
+
+    @if($programCards->isNotEmpty())
+        @include('sections.enroll-modal')
+    @endif
 @endsection
 
 @push('scripts')

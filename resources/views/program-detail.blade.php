@@ -59,7 +59,7 @@
                     @if(count($levels))
                     <div class="program-curr" id="programCurr">
                         @foreach($levels as $i => $lvl)
-                            <details class="curr-item" @if($i === 0) open @endif>
+                            <details class="curr-item">
                                 <summary>
                                     <span class="curr-num">{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</span>
                                     <span class="curr-text">

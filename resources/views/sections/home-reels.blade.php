@@ -26,7 +26,6 @@
                         <span class="reel-shade"></span>
                         <span class="reel-top">
                             <span class="reel-tag">{{ $card->tag }}</span>
-                            <span class="reel-platform">&#9654; {{ $card->platform() ?? 'Watch' }}</span>
                             <button type="button" class="reel-pause" aria-label="Pause">
                                 <svg class="i-pause" width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect x="2" y="1" width="3.5" height="12" rx="1"/><rect x="8.5" y="1" width="3.5" height="12" rx="1"/></svg>
                                 <svg class="i-play" width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M3 1l10 6-10 6z"/></svg>

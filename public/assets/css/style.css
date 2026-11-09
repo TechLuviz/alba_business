@@ -410,7 +410,7 @@ a { text-decoration: none; color: inherit; }
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.25s ease;
+    transition: background-color 0.25s ease, color 0.25s ease;
     /* --nav-color is the section's highlight colour, set inline from the admin setting. */
     border: 1.5px solid var(--nav-color, #c8914a);
     background: #ffffff;
@@ -427,11 +427,17 @@ a { text-decoration: none; color: inherit; }
     color: #ffffff;
 }
 
-.audience-nav-btn.btn-prev:hover { transform: translateX(-3px); }
-.audience-nav-btn.btn-next:hover { transform: translateX(3px); }
+/* Nudge only the arrow icon: moving the button itself shifts its hit area away from
+   the cursor at the circle's edge and causes hover flicker. */
+.audience-nav-btn svg {
+    transition: transform 0.25s ease;
+    pointer-events: none;
+}
+.audience-nav-btn.btn-prev:hover svg { transform: translateX(-3px); }
+.audience-nav-btn.btn-next:hover svg { transform: translateX(3px); }
 
-.audience-nav-btn:active {
-    transform: scale(0.94);
+.audience-nav-btn:active svg {
+    transform: scale(0.9);
 }
 
 /* Responsive adjustments */
@@ -480,6 +486,8 @@ a { text-decoration: none; color: inherit; }
         pointer-events: none;
         z-index: 1;
     }
+    /* Let the page scroll vertically over the carousel; horizontal swipes still flip the card. */
+    .audience-stage-wrap { touch-action: pan-y; }
     .audience-card.is-left   { transform: translateX(-50%) rotateY(-180deg); }
     .audience-card.is-right,
     .audience-card.is-hidden { transform: translateX(-50%) rotateY(180deg); }
@@ -824,7 +832,7 @@ a { text-decoration: none; color: inherit; }
 /* Insights in Motion: embedded YouTube / Vimeo autoplay (cropped to fill the tall card; clicks pass through to the link) */
 .reel-thumb { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .reel-embed { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-.reel-embed iframe { position: absolute; top: -12%; left: 50%; height: 124%; width: 392%; transform: translateX(-50%); border: 0; pointer-events: none; animation: reelFade .8s ease both; }
+.reel-embed iframe { position: absolute; top: -20%; left: 50%; height: 140%; width: 443%; transform: translateX(-50%); border: 0; pointer-events: none; animation: reelFade .8s ease both; }
 @keyframes reelFade { from { opacity: 0; } to { opacity: 1; } }
 
 
@@ -1091,6 +1099,23 @@ a { text-decoration: none; color: inherit; }
 .cf-field textarea { resize: vertical; min-height: 96px; max-height: 260px; overflow-wrap: anywhere; word-break: break-word; line-height: 1.5; }
 .cf-field select { appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23aab4c3' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 38px; }
 .cf-field select option { background: #0a111c; color: #fff; }
+
+/* Custom dropdown (built by assets/js/cf-select.js). Always exactly as wide as the field, at any zoom. */
+.cf-dd { position: relative; width: 100%; }
+.cf-dd-native { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; }
+.cf-dd-btn { display: flex; align-items: center; width: 100%; max-width: 100%; padding: 12px 38px 12px 14px; border-radius: 10px; background: #060b13 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23aab4c3' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>") no-repeat right 14px center; border: 1px solid rgba(255,255,255,.1); color: #fff; font: inherit; font-size: .88rem; line-height: 1.4; text-align: left; cursor: pointer; outline: 0; transition: border-color .25s, box-shadow .25s; }
+.cf-dd-btn.is-placeholder { color: #5f6b7e; }
+.cf-dd-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cf-dd-btn:focus-visible, .cf-dd.is-open .cf-dd-btn { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(200, 145, 74, .18); }
+.cf-field.is-bad .cf-dd-btn { border-color: #e5604f; }
+.cf-dd-list { position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 50; margin: 0; padding: 6px; list-style: none; max-height: 280px; overflow-y: auto; background: #0a111c; border: 1px solid rgba(255,255,255,.12); border-radius: 10px; box-shadow: 0 16px 40px rgba(0,0,0,.5); display: none; }
+.cf-dd.is-open .cf-dd-list { display: block; }
+.cf-dd.is-up .cf-dd-list { top: auto; bottom: calc(100% + 6px); }
+.cf-dd-opt { padding: 10px 12px; border-radius: 7px; color: #e6ebf2; font-size: .88rem; line-height: 1.4; cursor: pointer; white-space: normal; overflow-wrap: anywhere; }
+.cf-dd-opt.is-placeholder { color: #5f6b7e; }
+.cf-dd-opt.is-active { background: rgba(200, 145, 74, .16); color: #fff; }
+.cf-dd-opt.is-selected { color: var(--gold); font-weight: 600; }
+.cf-dd-list { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.25) transparent; }
 .cf-field input::placeholder, .cf-field textarea::placeholder { color: #5f6b7e; }
 .cf-field input:focus, .cf-field select:focus, .cf-field textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(200, 145, 74, .18); }
 .cf-field.is-bad input, .cf-field.is-bad select, .cf-field.is-bad textarea { border-color: #e5604f; }
@@ -1840,3 +1865,35 @@ a.insight-arrow:hover, a.insight-arrow:focus-visible { background: var(--gold); 
 .sitemap-group ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
 .sitemap-group a { color: #c9d1dc; overflow-wrap: anywhere; word-break: break-word; transition: color .25s ease, padding-left .25s ease; }
 .sitemap-group a:hover { color: var(--gold); padding-left: 4px; }
+
+/* Back-to-top button (lives in the quick-contact stack; appears after scrolling down) */
+.qc-top { --c: #1a2433; border: 0; font: inherit; cursor: pointer; animation: none; transform: translateX(110%); opacity: 0; pointer-events: none; transition: max-width .35s ease, filter .25s, transform .3s ease, opacity .3s ease; }
+.qc-top.is-visible { transform: none; opacity: 1; pointer-events: auto; }
+.qc-top[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { .qc-top { transition: none; } }
+
+/* Mobile: keep the footer (newsletter arrow, legal links) clear of the fixed quick-contact buttons on the right edge. */
+@media (max-width: 768px) {
+    .site-footer .footer-grid.container,
+    .site-footer .footer-bottom.container { padding-right: 68px; }
+}
+
+/* Blogs page banner: start below the fixed desktop header so the image is not cropped behind it. */
+@media (min-width: 769px) {
+    .insights-banner { margin-top: 97px; min-height: clamp(440px, calc(80vh - 97px), 700px); padding-top: 80px; }
+}
+/* Blogs banner: keep the top of the photo (what sits right under the header) visible; trim from the bottom instead. */
+.insights-banner { background-position: center top; }
+/* Blogs banner (desktop): as tall as the photo itself (16:9), so nothing is cropped top or bottom. */
+@media (min-width: 769px) {
+    .insights-banner { aspect-ratio: 1672 / 941; min-height: 0; background-size: 100% 100%; }
+}
+
+/* Mobile: show the home banner video in full landscape (16:9) instead of cropping it to a tall portrait box.
+   The video sits under the header; the heading / button go below it. */
+@media (max-width: 768px) {
+    .home-hero:has(.hero-video) { height: auto; min-height: 0; display: flex; flex-direction: column; padding-top: 84px; background: #0a1628; }
+    .home-hero:has(.hero-video) .hero-video { position: relative; inset: auto; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: contain; background: #000; }
+    .home-hero:has(.hero-video) .hero-slide { position: relative; inset: auto; padding: 28px 0 56px; align-items: flex-start; }
+    .home-hero:has(.hero-video) .hero-overlay::before { display: none; }
+}

@@ -32,7 +32,7 @@
             </div>
 
             {{-- Static footer strip --}}
-            <div class="about-cta-foot"><span>Albatech HUB &mdash; School of Business</span><i></i></div>
+            <div class="about-cta-foot"><span>ALBAHUB &mdash; School of Business</span><i></i></div>
         </div>
     </section>
 @endif

@@ -25,4 +25,44 @@ class BannerMode
     {
         return HeroVideo::where('is_active', true)->update(['is_active' => false]);
     }
+
+    /**
+     * Guard: the home page must always have one active banner type.
+     * If nothing is active after a change, switch on the other type automatically
+     * (or, if the other type has no banners, turn the same type back on).
+     *
+     * @param  string  $lastOff  'slides' or 'videos' - the type the user just switched off
+     * @return string|null  'slides' / 'videos' if something was auto-enabled, else null
+     */
+    public static function ensureOneActive(string $lastOff): ?string
+    {
+        if (HeroSlide::where('is_active', true)->exists() || HeroVideo::where('is_active', true)->exists()) {
+            return null;
+        }
+
+        $order = $lastOff === 'videos' ? ['slides', 'videos'] : ['videos', 'slides'];
+
+        foreach ($order as $type) {
+            if ($type === 'videos' && $first = HeroVideo::orderBy('sort_order')->orderBy('id')->first()) {
+                $first->update(['is_active' => true]);
+                return 'videos';
+            }
+            if ($type === 'slides' && HeroSlide::exists()) {
+                HeroSlide::query()->update(['is_active' => true]);
+                return 'slides';
+            }
+        }
+
+        return null;
+    }
+
+    /** Human-readable note for an auto-enable result. */
+    public static function autoMessage(?string $enabled): ?string
+    {
+        return match ($enabled) {
+            'videos' => 'At least one banner must stay active, so the first video banner was switched on automatically.',
+            'slides' => 'At least one banner must stay active, so the image banners were switched on automatically.',
+            default => null,
+        };
+    }
 }

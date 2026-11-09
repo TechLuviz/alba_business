@@ -31,6 +31,7 @@
 
     @include('layout.quick-contact')
 
+    <script src="{{ asset('assets/js/cf-select.js') }}?v={{ @filemtime(public_path('assets/js/cf-select.js')) }}"></script>
     @stack('scripts')
 </body>
 </html>
