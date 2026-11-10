@@ -27,7 +27,7 @@
                         </a>
                     @endif
                     @if($contactInfo->address)
-                        <a class="contact-card" draggable="false" href="https://www.google.com/maps/search/?api=1&query={{ urlencode($contactInfo->address) }}" target="_blank" rel="noopener noreferrer">
+                        <a class="contact-card" draggable="false" href="https://maps.app.goo.gl/9M3KPnybNWkFCRXp7" target="_blank" rel="noopener noreferrer">
                             <span class="contact-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.800 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></span>
                             <span class="contact-txt"><small>Our location</small><strong class="is-address">{{ $contactInfo->address }}</strong></span>
                             <span class="contact-go" aria-hidden="true">&nearr;</span>
