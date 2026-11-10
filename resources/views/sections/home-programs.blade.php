@@ -27,9 +27,14 @@
                         </div>
                         <h3><a href="{{ route('programs.show', $card->slug) }}" class="program-link">{{ $card->title }}</a></h3>
                         <ul class="program-features">
-                            @foreach($card->features() as $feature)
+                            {{-- home cards show the first 5 points; the rest are on the programme's detail page --}}
+                            @php($allFeatures = $card->features())
+                            @foreach(array_slice($allFeatures, 0, 5) as $feature)
                                 <li>{{ $feature }}</li>
                             @endforeach
+                            @if(count($allFeatures) > 5)
+                                <li class="program-more"><a href="{{ route('programs.show', $card->slug) }}">Read more...&hellip;</a></li>
+                            @endif
                         </ul>
                         <div class="program-foot">
                             <div class="program-meta"><strong>{{ is_numeric($card->duration) ? $card->duration . ' ' . Str::plural('Month', (int) $card->duration) : $card->duration }}</strong><span>{{ $card->mode }}</span></div>

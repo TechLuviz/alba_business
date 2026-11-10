@@ -2024,3 +2024,9 @@ input, textarea, select, [contenteditable="true"],
     .home-hero:has(.hero-video) .hero-video { top: var(--header-h, 97px); height: calc(100% - var(--header-h, 97px)); }
     .home-hero:has(.hero-video) .hero-slide { top: var(--header-h, 97px); padding-top: 0; }
 }
+
+/* Home programme cards: "Continue..." link after the first points */
+.program-features li.program-more::before { display: none; }
+.program-features li.program-more { padding-left: 0; }
+.program-features li.program-more a { color: var(--gold-dark); font-weight: 600; text-decoration: none; }
+.program-features li.program-more a:hover { text-decoration: underline; }
