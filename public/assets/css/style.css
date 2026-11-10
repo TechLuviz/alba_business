@@ -2046,3 +2046,13 @@ input, textarea, select, [contenteditable="true"],
     .program-banner { padding-top: 56px; min-height: 420px; }
     .insight-detail-banner { padding-top: 0; min-height: 360px; }
 }
+
+/* About + Contact banners (desktop): sit below the header and are as tall as the photo itself,
+   so the image is shown in full - nothing cropped top, bottom or sides. */
+@media (min-width: 769px) {
+    .about-banner:not(.programs-banner):not(.insights-banner):not(.privacy-banner):not(.insight-detail-banner):not(.contact-banner) { aspect-ratio: 1672 / 941; min-height: 0; background-size: 100% 100%; background-position: center top; padding: 0 0 40px; }
+    .contact-banner { aspect-ratio: 1832 / 859; min-height: 0; background-size: 100% 100%; background-position: center top; padding: 0 0 40px; }
+}
+@media (max-width: 768px) {
+    .about-banner:not(.programs-banner):not(.insights-banner):not(.privacy-banner):not(.insight-detail-banner), .contact-banner { background-size: cover; background-position: center top; }
+}
