@@ -6,6 +6,10 @@
         <script>
             (function () {
                 const v = document.currentScript.previousElementSibling;
+                // desktop: the video starts just below the fixed header so the header never covers its top edge
+                const hdr = document.querySelector('.site-header');
+                const setH = () => document.documentElement.style.setProperty('--header-h', (hdr ? hdr.offsetHeight : 97) + 'px');
+                setH(); window.addEventListener('resize', setH); window.addEventListener('load', setH);
                 const show = () => v.classList.add('is-ready');
                 if (v.readyState >= 3) show(); else { v.addEventListener('canplay', show, { once: true }); v.addEventListener('loadeddata', show, { once: true }); setTimeout(show, 4000); }
             })();

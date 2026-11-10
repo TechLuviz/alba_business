@@ -65,7 +65,7 @@
                 <div class="programs-list-grid">
                     @foreach($programCards as $i => $card)
                         <article class="program-card in {{ $card->is_featured ? 'is-featured' : '' }}">
-                            <p class="program-level"><span>Level {{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</span><i></i></p>
+                            <p class="program-level"><span>Programme {{ $i + 1 }}</span><i></i></p>
                             <div class="program-media">
                                 @if($card->image)
                                     <img src="{{ asset($card->image) }}" alt="{{ $card->title }}" loading="lazy">

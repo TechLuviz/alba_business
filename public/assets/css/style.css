@@ -618,12 +618,13 @@ a { text-decoration: none; color: inherit; }
     .programs-grid[data-count="4"] .program-card { padding: 22px 20px 20px; }
 }
 @media (min-width: 600px) {
-.programs-wrap.is-carousel .programs-viewport { overflow: hidden; padding: 44px 60px; margin: -44px auto; }
+/* side padding leaves room for the hover shadow; clip-path trims it to just under the 24px card gap so the neighbouring card never peeks in at either edge */
+.programs-wrap.is-carousel .programs-viewport { overflow: hidden; padding: 44px 60px; margin: -44px auto; clip-path: inset(0 40px); }
 .programs-wrap.is-carousel .programs-grid { --v: 4; display: flex; gap: 24px; transition: transform .7s cubic-bezier(.22, 1, .36, 1); }
 .programs-wrap.is-carousel .program-card { flex: 0 0 calc((100% - (var(--v) - 1) * 24px) / var(--v)); }
 }
 @media (max-width: 1199px) { .programs-wrap.is-carousel .programs-grid { --v: 3; } }
-@media (max-width: 899px)  { .programs-wrap.is-carousel .programs-grid { --v: 2; } .programs-wrap.is-carousel .programs-viewport { padding: 44px 16px; } }
+@media (max-width: 899px)  { .programs-wrap.is-carousel .programs-grid { --v: 2; } .programs-wrap.is-carousel .programs-viewport { padding: 44px 16px; clip-path: none; } }
 @media (max-width: 599px)  { .programs-wrap.is-carousel .programs-grid { --v: 1; } }
 .programs-nav { display: flex; justify-content: center; gap: 14px; margin-top: 36px; }
 @media (max-width: 599px) { .programs-nav { display: none; } }
@@ -2016,3 +2017,10 @@ input, textarea, select, [contenteditable="true"],
     .site-header.is-stuck { background: rgba(10, 22, 40, .94); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); padding-bottom: 10px; box-shadow: 0 6px 20px rgba(0, 0, 0, .25); }
 }
 @media (prefers-reduced-motion: reduce) { .site-header { transition: none; } }
+
+/* Desktop video banner: the video (and its heading / button) start BELOW the fixed header, so the header no longer covers the top of the video. */
+@media (min-width: 769px) {
+    .home-hero:has(.hero-video) { background: #0a1628; }
+    .home-hero:has(.hero-video) .hero-video { top: var(--header-h, 97px); height: calc(100% - var(--header-h, 97px)); }
+    .home-hero:has(.hero-video) .hero-slide { top: var(--header-h, 97px); padding-top: 0; }
+}

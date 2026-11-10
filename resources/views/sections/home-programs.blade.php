@@ -12,13 +12,14 @@
                 @if($programSection->description)<p class="programs-desc">{{ $programSection->description }}</p>@endif
             </div>
 
-            @php($carousel = $programCards->count() > 4)
+            {{-- always a single-row auto-sliding carousel, whatever the number of cards --}}
+            @php($carousel = true)
             <div class="programs-wrap {{ $carousel ? 'is-carousel' : '' }}" id="programsWrap">
             <div class="programs-viewport">
             <div class="programs-grid" data-count="{{ $programCards->count() }}">
                 @foreach($programCards as $i => $card)
                     <article class="program-card {{ $card->is_featured ? 'is-featured' : '' }}" style="--i: {{ $i }}">
-                        <p class="program-level"><span>Level {{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</span><i></i></p>
+                        <p class="program-level"><span>Programme {{ $i + 1 }}</span><i></i></p>
                         <div class="program-media">
                             @if($card->image)
                                 <img src="{{ asset($card->image) }}" alt="{{ $card->title }}" loading="lazy">
@@ -56,7 +57,7 @@
         (function () {
             const cards = document.querySelectorAll('.program-card');
 
-            // 5+ cards: slide as a carousel (4 / 3 / 2 / 1 cards visible depending on screen width)
+            // slide as a carousel (4 / 3 / 2 / 1 cards visible depending on screen width)
             const wrap = document.getElementById('programsWrap');
             // phones (<600px) stack the cards one under another instead of sliding
             if (wrap && wrap.classList.contains('is-carousel') && window.matchMedia('(min-width: 600px)').matches) {
@@ -66,7 +67,8 @@
                 let index = 0, timer = null, hovered = false, busy = false;
 
                 // endless loop: append copies of the first cards so the last slide runs straight into the first
-                Array.from(cards).slice(0, Math.min(4, n)).forEach(c => {
+                // (4 copies, cycling through the cards when there are fewer than 4, so the row never shows a gap)
+                Array.from({ length: 4 }, (_, k) => cards[k % n]).forEach(c => {
                     const copy = c.cloneNode(true);
                     copy.setAttribute('aria-hidden', 'true');
                     copy.classList.add('in');
