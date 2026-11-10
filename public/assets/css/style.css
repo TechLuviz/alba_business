@@ -568,7 +568,7 @@ a { text-decoration: none; color: inherit; }
 .home-programs h2 em { display: block; font-style: normal; color: var(--gold-dark); }
 .home-programs h2 span { display: block; }
 .programs-desc { font-size: clamp(1rem, 1.3vw, 1.2rem); line-height: 1.7; color: #525866; overflow-wrap: anywhere; }
-.programs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: clamp(20px, 2.4vw, 36px); align-items: stretch; max-width: 1240px; margin: 0 auto; }
+.programs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 360px)); justify-content: center; gap: clamp(20px, 2.4vw, 36px); align-items: stretch; max-width: 1240px; margin: 0 auto; }
 .program-card { display: flex; flex-direction: column; background: #fff; border: 1px solid rgba(10, 22, 40, .06); border-radius: 26px; padding: 26px 26px 22px; box-shadow: 0 12px 34px rgba(20, 20, 30, .06); min-width: 0;
     opacity: 0; transform: translateY(46px) scale(.97); transition: opacity .8s ease, transform .8s cubic-bezier(.22, 1, .36, 1), box-shadow .4s ease, border-color .4s ease; transition-delay: calc(var(--i) * 120ms), calc(var(--i) * 120ms), 0s, 0s; }
 .program-card.in { opacity: 1; transform: none; transition-delay: calc(var(--i) * 120ms), calc(var(--i) * 120ms), 0s, 0s; }

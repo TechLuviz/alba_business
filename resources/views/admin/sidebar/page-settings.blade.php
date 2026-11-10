@@ -24,9 +24,7 @@
             <a href="{{ route('admin.program.index') }}" class="{{ request()->routeIs('admin.program.*') ? 'active' : '' }}">Programs Section</a>
             <a href="{{ route('admin.team.index') }}" class="{{ request()->routeIs('admin.team.*') ? 'active' : '' }}">Team Section</a>
             <a href="{{ route('admin.homecontent.edit') }}" class="{{ request()->routeIs('admin.homecontent.*') ? 'active' : '' }}">Content Section</a>
-            {{-- Home Insights Section (hidden: the home page now shows the Insights-page articles)
-            <a href="{{ route('admin.insight.index') }}" class="{{ request()->routeIs('admin.insight.*') ? 'active' : '' }}">Insights Section</a>
-            --}}
+            <a href="{{ route('admin.insight.index') }}" class="{{ request()->routeIs('admin.insight.*') ? 'active' : '' }}">Blogs Section</a>
             <a href="{{ route('admin.reel.index') }}" class="{{ request()->routeIs('admin.reel.*') ? 'active' : '' }}">Video Section</a>
         </details>
 

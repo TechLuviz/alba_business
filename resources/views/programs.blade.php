@@ -10,9 +10,6 @@
             <span class="pb-orb pb-orb-2" aria-hidden="true"></span>
             <span class="pb-orb pb-orb-3" aria-hidden="true"></span>
             <div class="container about-banner-inner">
-                <nav class="programs-crumb" aria-label="Breadcrumb">
-                    <a href="{{ route('home') }}">Home</a><span aria-hidden="true">&gt;</span><b>Programs</b>
-                </nav>
                 {{-- Words are split so each one can animate in turn; normal spaces stay between them so wrapping is unchanged --}}
                 @if($banner->title)
                     <h1 class="pb-title" aria-label="{{ $banner->title }}"><span>@foreach(preg_split('/\s+/', $banner->title) as $w)<span class="pw" aria-hidden="true" style="--w: {{ $loop->index }}"><span>{{ $w }}</span></span>{{ $loop->last ? '' : ' ' }}@endforeach</span></h1>

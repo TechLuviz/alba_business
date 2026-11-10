@@ -11,7 +11,7 @@
                 </h2>
                 @if($problem->description)<p class="problem-text">{{ $problem->description }}</p>@endif
                 {{-- Static button: change the text / link here in the code --}}
-                <a href="#programs" class="btn-gold">
+                <a href="{{ route('programs.index') }}" class="btn-gold">
                     <span>Explore Programs</span>
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 11L11 3M5 3h6v6"/></svg>
                 </a>

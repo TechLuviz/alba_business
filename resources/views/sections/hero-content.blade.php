@@ -6,7 +6,7 @@
         @if($item->heading_accent)<em class="h-line">{{ $item->heading_accent }}</em>@endif
     </h2>
     @if($item->description)<p>{{ $item->description }}</p>@endif
-    <a href="#programs" class="btn-gold">
+    <a href="{{ route('programs.index') }}" class="btn-gold">
         <span>Explore Programs</span>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 11L11 3M5 3h6v6"/></svg>
     </a>
