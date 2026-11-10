@@ -619,12 +619,12 @@ a { text-decoration: none; color: inherit; }
 }
 @media (min-width: 600px) {
 /* side padding leaves room for the hover shadow; clip-path trims it to just under the 24px card gap so the neighbouring card never peeks in at either edge */
-.programs-wrap.is-carousel .programs-viewport { overflow: hidden; padding: 44px 60px; margin: -44px auto; clip-path: inset(0 40px); }
-.programs-wrap.is-carousel .programs-grid { --v: 4; display: flex; gap: 24px; transition: transform .7s cubic-bezier(.22, 1, .36, 1); }
+.programs-wrap.is-carousel .programs-viewport { overflow: hidden; padding: 44px 0; margin: -44px auto; clip-path: none; }
+.programs-wrap.is-carousel .programs-grid { --v: 3; display: flex; gap: 24px; transition: transform .7s cubic-bezier(.22, 1, .36, 1); }
 .programs-wrap.is-carousel .program-card { flex: 0 0 calc((100% - (var(--v) - 1) * 24px) / var(--v)); }
 }
 @media (max-width: 1199px) { .programs-wrap.is-carousel .programs-grid { --v: 3; } }
-@media (max-width: 899px)  { .programs-wrap.is-carousel .programs-grid { --v: 2; } .programs-wrap.is-carousel .programs-viewport { padding: 44px 16px; clip-path: none; } }
+@media (max-width: 899px)  { .programs-wrap.is-carousel .programs-grid { --v: 2; } .programs-wrap.is-carousel .programs-viewport { padding: 44px 0; } }
 @media (max-width: 599px)  { .programs-wrap.is-carousel .programs-grid { --v: 1; } }
 .programs-nav { display: flex; justify-content: center; gap: 14px; margin-top: 36px; }
 @media (max-width: 599px) { .programs-nav { display: none; } }
@@ -2030,3 +2030,19 @@ input, textarea, select, [contenteditable="true"],
 .program-features li.program-more { padding-left: 0; }
 .program-features li.program-more a { color: var(--gold-dark); font-weight: 600; text-decoration: none; }
 .program-features li.program-more a:hover { text-decoration: underline; }
+
+/* All page banners (About, Programs, Contact, Privacy, Sitemap, Insight detail, Program detail):
+   start BELOW the fixed header so it never covers/crops the top of the banner image. */
+@media (min-width: 769px) {
+    .about-banner, .program-banner { margin-top: var(--header-h, 97px); background-color: #0a1628; }
+    .about-banner { min-height: clamp(440px, calc(80vh - var(--header-h, 97px)), 700px); padding-top: 80px; }
+    .program-banner { min-height: clamp(520px, calc(88vh - var(--header-h, 97px)), 820px); padding-top: 90px; }
+    .insight-detail-banner { padding-top: 0; min-height: clamp(440px, calc(85vh - var(--header-h, 97px)), 740px); }
+    .privacy-banner { padding-top: 60px; }
+}
+@media (max-width: 768px) {
+    .about-banner, .program-banner { margin-top: 84px; background-color: #0a1628; }
+    .about-banner { padding-top: 56px; min-height: 0; }
+    .program-banner { padding-top: 56px; min-height: 420px; }
+    .insight-detail-banner { padding-top: 0; min-height: 360px; }
+}

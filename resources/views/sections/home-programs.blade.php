@@ -90,12 +90,13 @@
                 function slide(dir) {
                     if (busy) return;
                     busy = true;
-                    if (dir < 0 && index === 0) setPos(n, false);
+                    // one card per step (3 stay visible)
+                    if (dir < 0 && index <= 0) setPos(n, false);
                     setPos(index + dir, true);
                     setTimeout(() => { busy = false; }, 750);
                 }
                 track.addEventListener('transitionend', e => {
-                    if (e.target === track && e.propertyName === 'transform' && index >= n) setPos(0, false);
+                    if (e.target === track && e.propertyName === 'transform' && index >= n) setPos(index - n, false);
                 });
                 function restart() {
                     clearInterval(timer);
