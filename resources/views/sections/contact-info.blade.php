@@ -145,6 +145,8 @@
                     if (!/^\+?[0-9][0-9 ()-]*[0-9]$/.test(v)) return 'Use digits only, with an optional leading + and spaces, dashes or brackets.';
                     const d = v.replace(/\D/g, '').length;
                     if (d < 7 || d > 15) return 'A phone number has 7 to 15 digits (you entered ' + d + ').';
+                    const ds = v.replace(/\D/g, '');
+                    if (new Set(ds).size < 3 || /(\d)\1{5,}/.test(ds) || '01234567890123456789'.includes(ds) || '98765432109876543210'.includes(ds)) return 'Enter a valid phone number - repeated or sequential digits like 0000000000 are not accepted.';
                     return '';
                 },
                 course(v) { return v ? '' : 'Please choose the course you are interested in.'; },

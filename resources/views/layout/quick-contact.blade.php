@@ -21,29 +21,27 @@
             </a>
         @endif
 @endif
-    <button type="button" class="qc-btn qc-top" id="backToTop" aria-label="Back to top" hidden>
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-        <span>Back to top</span>
+    <button type="button" class="qc-toggle" id="qcToggle" aria-label="Show quick actions" aria-expanded="false">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
     </button>
 </aside>
 <script>
 (function () {
-    var b = document.getElementById('backToTop');
-    if (!b) return;
-    var shown = false, ticking = false;
-    function update() {
-        ticking = false;
-        var show = (window.pageYOffset || document.documentElement.scrollTop) > 300;
-        if (show === shown) return;
-        shown = show;
-        if (show) { b.hidden = false; requestAnimationFrame(function () { b.classList.add('is-visible'); }); }
-        else { b.classList.remove('is-visible'); setTimeout(function () { if (!shown) b.hidden = true; }, 300); }
+    var qc = document.querySelector('.quick-contact'), t = document.getElementById('qcToggle');
+    if (qc && t) {
+        function setOpen(o) {
+            qc.classList.toggle('is-open', o);
+            t.setAttribute('aria-expanded', o ? 'true' : 'false');
+            t.setAttribute('aria-label', o ? 'Hide quick actions' : 'Show quick actions');
+        }
+        t.addEventListener('click', function (e) { e.stopPropagation(); setOpen(!qc.classList.contains('is-open')); });
+        document.addEventListener('click', function (e) { if (!qc.contains(e.target)) setOpen(false); });
+        qc.addEventListener('click', function (e) { if (e.target.closest('.qc-btn')) setTimeout(function () { setOpen(false); }, 150); });
     }
-    window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
-    b.addEventListener('click', function () {
+    var b = document.getElementById('backToTop');
+    if (b) b.addEventListener('click', function () {
         var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
     });
-    update();
 })();
 </script>

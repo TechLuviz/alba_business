@@ -190,9 +190,12 @@
 
             wrap.addEventListener('pointerdown', (e) => {
                 isPointerDown = true;
+                pressedAt = Date.now();
                 startX = e.clientX;
                 wrap.classList.add('is-dragging');
                 stopAutoplay();
+                // Fallback: if no release event ever arrives, resume anyway
+                setTimeout(() => { if (isPointerDown && Date.now() - pressedAt >= 3000) releasePress(); }, 3100);
             });
 
             window.addEventListener('pointerup', (e) => {
@@ -216,11 +219,30 @@
                 restartAutoplay();
             });
 
+            // Mobile browsers can drop pointerup/pointercancel (long-press, system gestures, scroll takeover),
+            // which would leave the press flag set and autoplay stopped forever. Touch end events are a backstop.
+            const releasePress = () => {
+                if (!isPointerDown) return;
+                isPointerDown = false;
+                wrap.classList.remove('is-dragging');
+                restartAutoplay();
+            };
+            wrap.addEventListener('touchend', releasePress, { passive: true });
+            wrap.addEventListener('touchcancel', releasePress, { passive: true });
+            wrap.addEventListener('lostpointercapture', releasePress);
+            wrap.addEventListener('contextmenu', releasePress);
+
             // Autoplay management
+            let pressedAt = 0;
             function startAutoplay() {
                 if (!autoplayEnabled || total <= 1) return;
                 stopAutoplay();
                 timer = setInterval(() => {
+                    // A press older than a few seconds is a lost release, not a real drag.
+                    if (isPointerDown && Date.now() - pressedAt > 3000) {
+                        isPointerDown = false;
+                        wrap.classList.remove('is-dragging');
+                    }
                     if (!isHovered && !isPointerDown) {
                         next();
                     }

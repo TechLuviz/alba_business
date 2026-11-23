@@ -41,6 +41,16 @@ use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
+    /** Obviously fake numbers: one repeated digit (0000000000), 6+ identical digits in a row, or a plain 0123456789 / 9876543210 run. */
+    private static function fakePhone(string $value): bool
+    {
+        $d = preg_replace('/\D/', '', $value);
+        if ($d === '' ) return true;
+        if (count(array_unique(str_split($d))) < 3) return true;
+        if (preg_match('/(\d)\1{5,}/', $d)) return true;
+        return str_contains('01234567890123456789', $d) || str_contains('98765432109876543210', $d);
+    }
+
     public function index()
     {
         $hero = HeroBanner::current();
@@ -487,6 +497,9 @@ class HomeController extends Controller
                 if ($digits < 7 || $digits > 15) {
                     $fail('A phone number has 7 to 15 digits.');
                 }
+                elseif (self::fakePhone($value)) {
+                    $fail('Enter a valid phone number.');
+                }
             }],
             'course' => ['required', 'string', \Illuminate\Validation\Rule::in($courses)],
             'message' => ['required', 'string', "min:{$f['message_min']}", "max:{$f['message_max']}", "regex:/^[A-Za-z0-9\\s.,'\"?!&():;\\/-]+$/", function (string $attr, mixed $value, \Closure $fail) {
@@ -537,6 +550,9 @@ class HomeController extends Controller
                 $digits = strlen(preg_replace('/\D/', '', $value));
                 if ($digits < 7 || $digits > 15) {
                     $fail('A phone number has 7 to 15 digits.');
+                }
+                elseif (self::fakePhone($value)) {
+                    $fail('Enter a valid phone number.');
                 }
             }],
             'address' => ['required', 'string', "min:{$c['address_min']}", "max:{$c['address_max']}", "regex:/^(?! )(?!.*  )[A-Za-z0-9 .,'&#\/-]+$/"],

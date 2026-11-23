@@ -39,6 +39,13 @@
         });
     </script>
     <script>
+        // Media protection: no right-click / long-press "Save image" menu on images, videos and picture-style banners.
+        document.addEventListener('contextmenu', function (e) {
+            if (e.target && e.target.closest && e.target.closest('img, video, picture, svg, canvas, [style*="background-image"], .hero-slide, .insights-banner, .about-banner, .contact-banner')) e.preventDefault();
+        });
+        document.querySelectorAll('video').forEach(function (v) { v.setAttribute('controlsList', 'nodownload'); v.setAttribute('disablePictureInPicture', ''); });
+    </script>
+    <script>
         // Header: hides while scrolling down, slides back in while scrolling up; always shown at the top of the page.
         (function () {
             var header = document.querySelector('.site-header'), toggle = document.getElementById('navToggle');

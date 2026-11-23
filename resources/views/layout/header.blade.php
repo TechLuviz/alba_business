@@ -14,6 +14,13 @@
         </a>
         <nav class="nav-pill" id="siteNav">
             <button type="button" class="nav-close" id="navClose" aria-label="Close menu">&times;</button>
+            <div class="nav-brand" aria-hidden="true">
+                @if($brand->brand_logo)
+                    <img src="{{ asset($brand->brand_logo) }}" alt="" class="nav-brand-img">
+                @else
+                    <span class="nav-brand-text">{{ $brand->brand_name ?: 'ALBAHUB' }}</span>
+                @endif
+            </div>
             {{-- Static Home link (skipped if a "Home" item already exists in the menu) --}}
             @unless($navItems->contains(fn ($n) => strtolower(trim($n->label)) === 'home'))
                 <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'is-current' : '' }}">Home</a>
@@ -58,7 +65,7 @@
             toggle.setAttribute('aria-expanded', open);
             document.body.style.overflow = open ? 'hidden' : '';
         }
-        toggle.addEventListener('click', () => set(true));
+        toggle.addEventListener('click', () => set(toggle.getAttribute('aria-expanded') !== 'true'));
         close.addEventListener('click', () => set(false));
         backdrop.addEventListener('click', () => set(false));
         nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => set(false)));
