@@ -2214,3 +2214,22 @@ html { background: var(--navy); }
 .page-leave { position: fixed; inset: 0; z-index: 9998; opacity: 0; pointer-events: none; transition: opacity .22s ease;
     background: radial-gradient(90% 70% at 50% 40%, #0e1b30 0%, #07101f 60%, #050b16 100%); }
 .page-leave.is-on { opacity: 1; pointer-events: auto; }
+
+/* Browser zoom-in (Ctrl/Cmd +) shrinks the viewport to a very narrow, short window. Below 480px: the video banner's
+   heading/text/button sit in a band under the video (never overlaid on it, so they cannot run up under the header or logo),
+   and the header controls and floating buttons get smaller fixed sizes so they do not swallow the screen. */
+@media (max-width: 480px) {
+    .home-hero:has(.hero-video) .hero-slide { position: relative; inset: auto; padding: 24px 0 48px; align-items: flex-start; }
+    .home-hero:has(.hero-video) .hero-overlay::before { display: none; }
+    .home-hero:not(:has(.hero-video)) { height: auto; min-height: 100svh; }
+    .home-hero:not(:has(.hero-video)) .hero-slide { position: absolute; inset: 72px 0 0 0; min-height: 0; overflow: hidden auto; }
+    .header-inner.container { min-height: 60px; padding: 6px 14px; gap: 8px; }
+    .logo-img { max-height: 36px; }
+    .nav-toggle { width: 36px; height: 36px; padding: 0 9px; gap: 4px; border-radius: 10px; }
+    .quick-contact { right: 0; bottom: 70px; }
+    .qc-btn, .qc-toggle { height: 36px; }
+    .qc-btn { padding: 0 10px; max-width: 40px; }
+    .qc-btn svg { width: 20px; height: 20px; }
+    .qc-btn:hover, .qc-btn:focus-visible { max-width: 150px; }
+    .qc-toggle { width: 18px; }
+}

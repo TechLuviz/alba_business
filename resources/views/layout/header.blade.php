@@ -5,7 +5,7 @@
         </button>
         <a href="{{ route('home') }}" class="logo">
             @if($brand->brand_logo)
-                <img src="{{ asset($brand->brand_logo) }}" alt="{{ $brand->brand_name }}" class="logo-img">
+                <img src="{{ asset($brand->brand_logo) }}" alt="{{ $brand->brand_name ?: 'ALBAHUB' }}" class="logo-img">
             @else
                 @php($parts = explode(' ', $brand->brand_name ?: 'ALBAHUB', 2))
                 <span class="logo-name">{{ $parts[0] }} @if(isset($parts[1]))<span class="logo-light">{{ $parts[1] }}</span>@endif <sup>TM</sup></span>

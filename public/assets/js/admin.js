@@ -203,9 +203,41 @@ const Admin = (() => {
         img.src = URL.createObjectURL(file);
     });
 
-    /* ---- inline validation for banner canvas forms (while typing, on blur and before submit) ---- */
+    /* ---- whole-number fields (<input type=number>): only digits can be typed or pasted (no e, +, -, .) ---- */
+    const NUM = 'input[type=number]';
+    document.addEventListener('keydown', e => {
+        if (!e.target.matches || !e.target.matches(NUM) || e.ctrlKey || e.metaKey || e.altKey) return;
+        if (e.key.length === 1 && !/\d/.test(e.key)) e.preventDefault();
+    });
+    document.addEventListener('beforeinput', e => {
+        if (e.target.matches && e.target.matches(NUM) && typeof e.data === 'string' && /\D/.test(e.data)) e.preventDefault();
+    });
+    document.addEventListener('paste', e => {
+        if (!e.target.matches || !e.target.matches(NUM)) return;
+        e.preventDefault();
+        const digits = (e.clipboardData?.getData('text') || '').replace(/\D/g, '');
+        if (digits) document.execCommand('insertText', false, digits);
+    });
+    document.addEventListener('drop', e => { if (e.target.matches && e.target.matches(NUM)) e.preventDefault(); });
+
+    /* ---- block emojis/symbols: typed or pasted characters outside the allowed set are removed immediately ---- */
     const FIELDS = '.canvas-body input[name], .canvas-body textarea[name]';
     const TEXT = '[name^=heading_], [name=description], [data-clean-text]';
+    const LIVE_PLAIN = 'form[data-live-validate] [data-live]:not([data-live=date]):not([data-live=number]):not([data-live=email]):not([data-live=phone]):not([data-live=address]):not([data-live=url]):not([data-live=points])';
+    function stripDisallowed(el) {
+        let re = null;
+        if (el.matches(LIVE_PLAIN)) re = el.hasAttribute('data-no-digits') ? /[^A-Za-z .,'&!?-]/g : /[^A-Za-z0-9 .,'&!?-]/g;
+        else if (el.matches(FIELDS) && el.matches(TEXT)) re = el.tagName === 'TEXTAREA' ? /[^A-Za-z .,'&!?\r\n-]/g : /[^A-Za-z .,'&!?-]/g;
+        if (!re || !re.test(el.value)) return;
+        const pos = el.selectionStart;
+        const before = el.value.slice(0, pos ?? el.value.length).replace(re, '').length;
+        el.value = el.value.replace(re, '');
+        try { el.setSelectionRange(before, before); } catch (e) { /* input types without selection */ }
+    }
+    document.addEventListener('input', e => { if (e.target.matches && !e.isComposing) stripDisallowed(e.target); });
+    document.addEventListener('compositionend', e => { if (e.target.matches) { stripDisallowed(e.target); e.target.dispatchEvent(new Event('input', { bubbles: true })); } });
+
+    /* ---- inline validation for banner canvas forms (while typing, on blur and before submit) ---- */
     function fieldMsg(el) {
         if (el.type === 'hidden' || el.type === 'checkbox') return '';
         if (el.type === 'file') return el.files[0] ? '' : (el.dataset.err || (el.required ? 'Please choose a file.' : ''));
