@@ -1920,7 +1920,13 @@ a.insight-arrow:hover, a.insight-arrow:focus-visible { background: var(--gold); 
     .home-hero:has(.hero-video) .hero-overlay::before { display: none; }
 }
 
-/* Mobile video banner v2: the heading / button sit ON the video (bottom-left) instead of in a separate band below it. */
+/* Mobile video banner v3: the banner is a tall box (video covers it) so the heading, text and button always fit ON the video. */
+@media (max-width: 768px) {
+    .home-hero:has(.hero-video) { display: block; height: 100svh; min-height: 520px; max-height: 760px; padding-top: 0; overflow: hidden; }
+    .home-hero:has(.hero-video) .hero-video { position: absolute; top: 84px; left: 0; width: 100%; height: calc(100% - 84px); aspect-ratio: auto; object-fit: cover; object-position: 70% center; }
+    .home-hero:has(.hero-video) .hero-slide { padding-bottom: 28px; }
+    .home-hero:has(.hero-video) .hero-overlay::before { background: linear-gradient(180deg, rgba(10,22,40,0) 20%, rgba(10,22,40,.9) 100%); }
+}
 @media (max-width: 768px) {
     .home-hero:has(.hero-video) { position: relative; }
     .home-hero:has(.hero-video) .hero-slide { position: absolute; inset: 84px 0 0 0; padding: 0 0 16px; align-items: flex-end; }
@@ -2219,8 +2225,6 @@ html { background: var(--navy); }
    heading/text/button sit in a band under the video (never overlaid on it, so they cannot run up under the header or logo),
    and the header controls and floating buttons get smaller fixed sizes so they do not swallow the screen. */
 @media (max-width: 480px) {
-    .home-hero:has(.hero-video) .hero-slide { position: relative; inset: auto; padding: 24px 0 48px; align-items: flex-start; }
-    .home-hero:has(.hero-video) .hero-overlay::before { display: none; }
     .home-hero:not(:has(.hero-video)) { height: auto; min-height: 100svh; }
     .home-hero:not(:has(.hero-video)) .hero-slide { position: absolute; inset: 72px 0 0 0; min-height: 0; overflow: hidden auto; }
     .header-inner.container { min-height: 60px; padding: 6px 14px; gap: 8px; }
