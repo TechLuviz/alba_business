@@ -18,7 +18,7 @@
         <input type="hidden" name="_id" value="">
 
         <div class="spec">
-            <strong>Card Requirements</strong>
+            <strong>Card   Requirements</strong>
             <ul>
                 <li>Letters, spaces and <code>. , ' - &amp; ! ?</code> only &mdash; no numbers, emojis, unicode or special characters.</li>
                 <li>Recommended: {{ $img['recommended'] }}</li>
