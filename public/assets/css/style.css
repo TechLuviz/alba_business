@@ -1922,18 +1922,18 @@ a.insight-arrow:hover, a.insight-arrow:focus-visible { background: var(--gold); 
 
 /* Mobile video banner v3: the banner is a tall box (video covers it) so the heading, text and button always fit ON the video. */
 @media (max-width: 768px) {
-    .home-hero:has(.hero-video) { display: block; height: 100svh; min-height: 520px; max-height: 760px; padding-top: 0; overflow: hidden; }
-    .home-hero:has(.hero-video) .hero-video { position: absolute; top: 84px; left: 0; width: 100%; height: calc(100% - 84px); aspect-ratio: auto; object-fit: cover; object-position: 70% center; }
-    .home-hero:has(.hero-video) .hero-slide { padding-bottom: 28px; }
-    .home-hero:has(.hero-video) .hero-overlay::before { background: linear-gradient(180deg, rgba(10,22,40,0) 20%, rgba(10,22,40,.9) 100%); }
+    .home-hero:has(.hero-video) { display: block; height: auto; min-height: 0; max-height: none; padding-top: 84px; overflow: hidden; }
+    .home-hero:has(.hero-video) .hero-video { position: relative; top: auto; display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
+    .home-hero:has(.hero-video) .hero-slide { position: absolute; inset: 84px 0 0 0; padding: 0 0 10px; align-items: flex-end; overflow: hidden; }
+    .home-hero:has(.hero-video) .hero-overlay::before { display: block; background: linear-gradient(90deg, rgba(10,22,40,.75) 0%, rgba(10,22,40,.35) 60%, rgba(10,22,40,0) 100%), linear-gradient(180deg, rgba(10,22,40,0) 30%, rgba(10,22,40,.7) 100%); }
+    .home-hero:has(.hero-video) .hero-content.container { padding-left: 14px; padding-right: 14px; max-width: 70%; margin-left: 0; }
+    .home-hero:has(.hero-video) .hero-slide h2 { font-size: clamp(.95rem, 4.6vw, 1.3rem); line-height: 1.1; margin-bottom: 6px; }
+    .home-hero:has(.hero-video) .hero-slide h2 .h-line { white-space: normal; }
+    .home-hero:has(.hero-video) .hero-slide p { font-size: .7rem; line-height: 1.35; margin-bottom: 8px; -webkit-line-clamp: 2; }
+    .home-hero:has(.hero-video) .hero-slide .btn-gold { padding: 6px 12px; font-size: .75rem; }
 }
 @media (max-width: 768px) {
     .home-hero:has(.hero-video) { position: relative; }
-    .home-hero:has(.hero-video) .hero-slide { position: absolute; inset: 84px 0 0 0; padding: 0 0 16px; align-items: flex-end; }
-    .home-hero:has(.hero-video) .hero-overlay::before { display: block; background: linear-gradient(180deg, rgba(10,22,40,0) 40%, rgba(10,22,40,.85) 100%); }
-    .home-hero:has(.hero-video) .hero-slide .btn-gold { padding: 10px 18px; font-size: .9rem; }
-    .home-hero:has(.hero-video) .hero-slide h2 { font-size: clamp(1.3rem, 6vw, 1.8rem); margin-bottom: 12px; }
-    .home-hero:has(.hero-video) .hero-slide p { font-size: .85rem; margin-bottom: 14px; }
 }
 
 /* Mobile image banner: same behaviour as the video banner - a full-height block that starts below the fixed header,
